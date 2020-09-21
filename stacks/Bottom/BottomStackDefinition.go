@@ -10,7 +10,7 @@ import (
 	"net/url"
 )
 
-func StackDefinition() (*internal.StackDefinition, error) {
+func StackDefinition(opts ...rxgo.Option) (*internal.StackDefinition, error) {
 
 	return &internal.StackDefinition{
 		Name: goerrors.BottomStackName,
@@ -25,7 +25,8 @@ func StackDefinition() (*internal.StackDefinition, error) {
 						params.ConnectionManager,
 						func(ctx context.Context, rws goprotoextra.ReadWriterSize) (goprotoextra.ReadWriterSize, error) {
 							return rws, nil
-						}), nil
+						},
+						opts...), nil
 				},
 			}
 		},
@@ -40,7 +41,8 @@ func StackDefinition() (*internal.StackDefinition, error) {
 						params.ConnectionManager,
 						func(ctx context.Context, rws goprotoextra.ReadWriterSize) (goprotoextra.ReadWriterSize, error) {
 							return rws, nil
-						}), nil
+						},
+						opts...), nil
 				},
 			}
 		},

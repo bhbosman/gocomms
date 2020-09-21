@@ -57,7 +57,7 @@ func StackDefinition(
 						connectionManager,
 						func(ctx context.Context, rws goprotoextra.ReadWriterSize) {
 							outBoundChannel <- rxgo.Of(rws)
-						})
+						}, opts...)
 					result := rxgo.FromChannel(outBoundChannel, opts...)
 					return result, nil
 				},

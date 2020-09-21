@@ -118,7 +118,7 @@ func StackDefinition(
 								stackCancelFunc("copy data to upgradedConnection", false, err)
 							}
 						}, opts...)
-					nextObs := rxgo.FromChannel(nextOutboundChannel)
+					nextObs := rxgo.FromChannel(nextOutboundChannel, opts...)
 					return nextObs, nil
 				},
 				PipeState: internal.PipeState{

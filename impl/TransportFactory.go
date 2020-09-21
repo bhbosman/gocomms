@@ -10,6 +10,7 @@ import (
 	"github.com/bhbosman/gocomms/stacks/messageBreaker"
 	"github.com/bhbosman/gocomms/stacks/messageCompressor"
 	"github.com/bhbosman/gocomms/stacks/messageNumber"
+	"github.com/bhbosman/gocomms/stacks/pingPong"
 	"github.com/bhbosman/gocomms/stacks/tlsConnection"
 	"github.com/bhbosman/gocomms/stacks/websocket"
 	"github.com/reactivex/rxgo/v2"
@@ -104,6 +105,9 @@ func (self *TransportFactory) CreateCompressed(
 		return Top.StackDefinition()
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+		return pingPong.StackDefinition(opts...)
+	})
+	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
 		return messageCompressor.StackDefinition(stackCancelFunc, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
@@ -131,6 +135,9 @@ func (self *TransportFactory) CreateUnCompressed(
 		return Top.StackDefinition()
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+		return pingPong.StackDefinition(opts...)
+	})
+	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
 		return messageNumber.StackDefinition(userContext, stackCancelFunc, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
@@ -153,6 +160,9 @@ func (self *TransportFactory) CreateCompressedTls(
 	result := internal.NewTwoWayPipeDefinition(nil)
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
 		return Top.StackDefinition()
+	})
+	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+		return pingPong.StackDefinition(opts...)
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
 		return messageCompressor.StackDefinition(stackCancelFunc, opts...)
@@ -184,6 +194,10 @@ func (self *TransportFactory) CreateUnCompressedTls(
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
 		return Top.StackDefinition()
 	})
+	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+		return pingPong.StackDefinition(opts...)
+	})
+
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
 		return messageNumber.StackDefinition(userContext, stackCancelFunc, opts...)
 	})

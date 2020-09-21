@@ -346,8 +346,6 @@ func createTransportLayer(
 			return transportLayer.Close()
 		},
 	})
-	//for _, stackState := range transportLayer.PipeState
-
 	return transportLayer, nil
 }
 
