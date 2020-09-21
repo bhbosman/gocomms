@@ -1,0 +1,28 @@
+syntax = "proto3";
+import "google/protobuf/descriptor.proto";
+package golang.example.policy;
+extend google.protobuf.FieldOptions {
+  bool non_sensitive = 50000;
+}
+
+
+option go_package = "/wsmsg";
+
+
+message WebSocketMessage
+{
+  enum OpCodeEnum {
+      OpContinuation  = 0x0;
+      OpText          = 0x1;
+      OpBinary        = 0x2;
+      OpClose         = 0x8;
+      OpPing          = 0x9;
+      OpPong          = 0xa;
+      OpStartLoop     = 0xe;
+      OpEndLoop       = 0xf;
+  }
+  OpCodeEnum OpCode = 1 [json_name="OpCode"];
+  bytes Message= 2 [json_name="Message"];
+};
+
+
