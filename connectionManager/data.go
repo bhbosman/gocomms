@@ -77,8 +77,8 @@ func (self *data) Clear() {
 
 }
 
-func (self *data) RegisterConnection(id string, function context.CancelFunc) error {
-	self.m[id] = NewConnectionInformation(id, function)
+func (self *data) RegisterConnection(id string, function context.CancelFunc, CancelContext context.Context) error {
+	self.m[id] = NewConnectionInformation(id, function, CancelContext)
 	return nil
 }
 
@@ -95,9 +95,22 @@ func (self *data) Stop(ctx context.Context) error {
 	return nil
 }
 
-func newData(sub *pubsub.PubSub) IConnectionManagerWithData {
-	return &data{
+func (self *data) Cleanup() {
+	var ss []string
+	for k, v := range self.m {
+		if v.CancelContext.Err() != nil {
+			ss = append(ss, k)
+		}
+	}
+	for _, s := range ss {
+		delete(self.m, s)
+	}
+}
+
+func newData(sub *pubsub.PubSub) (*data, IConnectionManagerWithData) {
+	result := &data{
 		sub: sub,
 		m:   make(map[string]*ConnectionInformation),
 	}
+	return result, result
 }

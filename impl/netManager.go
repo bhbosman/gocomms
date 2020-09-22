@@ -199,7 +199,10 @@ func invokeConnectionManager(
 			if params.CancelCtx.Err() != nil {
 				return params.CancelCtx.Err()
 			}
-			return params.ConnectionManager.RegisterConnection(params.ConnectionId, params.CancelFunction)
+			return params.ConnectionManager.RegisterConnection(
+				params.ConnectionId,
+				params.CancelFunction,
+				params.CancelCtx)
 		},
 		OnStop: func(ctx context.Context) error {
 			return params.ConnectionManager.DeregisterConnection(params.ConnectionId)
@@ -225,7 +228,6 @@ func invokeLogger(
 		},
 		OnStop: func(ctx context.Context) error {
 			return nil
-			//return params.Logger.Close()
 		},
 	})
 }

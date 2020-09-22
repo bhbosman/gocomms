@@ -9,7 +9,7 @@ import (
 )
 
 type IRegisterToConnectionManager interface {
-	RegisterConnection(id string, function context.CancelFunc) error
+	RegisterConnection(id string, function context.CancelFunc, CancelContext context.Context) error
 	DeregisterConnection(id string) error
 	NameConnection(id string, name string) error
 	StatusConnection(id string, name string) error
@@ -40,8 +40,8 @@ const (
 	stop
 	register
 	deregister
-	publish
 	name
+	cleanData
 	status
 	get
 	closeConnection
@@ -129,8 +129,8 @@ func (self *Impl) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (self *Impl) RegisterConnection(id string, function context.CancelFunc) error {
-	self.cmdChannel <- command{cmd: register, id: id, function: function}
+func (self *Impl) RegisterConnection(id string, function context.CancelFunc, CancelContext context.Context) error {
+	self.cmdChannel <- command{cmd: register, id: id, function: function, ctx: CancelContext}
 	return nil
 }
 
@@ -140,7 +140,7 @@ func (self *Impl) DeregisterConnection(id string) error {
 }
 
 func (self *Impl) start() {
-	var data IConnectionManagerWithData = newData(self.sub)
+	data, _ := newData(self.sub)
 	timer := time.NewTicker(time.Second * 5)
 	defer timer.Stop()
 loop:
@@ -148,14 +148,17 @@ loop:
 		select {
 		case _, ok := <-timer.C:
 			if ok {
-				//go func() {
-				//	self.cmdChannel <- command{cmd: publish}
-				//}()
+				go func() {
+					self.cmdChannel <- command{cmd: cleanData}
+				}()
 			}
 		case <-self.cancelCtx.Done():
 			break loop
 		case cmd := <-self.cmdChannel:
 			switch cmd.cmd {
+			case cleanData:
+				data.Cleanup()
+				continue loop
 			case stop:
 				_ = data.Stop(cmd.ctx)
 				break loop
@@ -163,7 +166,7 @@ loop:
 				_ = data.Start(cmd.ctx)
 				continue loop
 			case register:
-				_ = data.RegisterConnection(cmd.id, cmd.function)
+				_ = data.RegisterConnection(cmd.id, cmd.function, cmd.ctx)
 				continue loop
 			case deregister:
 				_ = data.DeregisterConnection(cmd.id)
@@ -174,9 +177,9 @@ loop:
 			case status:
 				_ = data.StatusConnection(cmd.id, cmd.s)
 				continue loop
-			case publish:
-				data.Publish()
-				continue loop
+			//case publish:
+			//	data.Publish()
+			//	continue loop
 			case get:
 				connections, err := data.GetConnections(cmd.ctx)
 				if err != nil {

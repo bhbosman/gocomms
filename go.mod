@@ -3,7 +3,7 @@ module github.com/bhbosman/gocomms
 go 1.15
 
 require (
-	github.com/bhbosman/goMessages v0.0.0-00010101000000-000000000000
+	github.com/bhbosman/goMessages v0.0.0-20200922081308-8c8f88094624
 	github.com/bhbosman/gocommon v0.0.0-20200921215456-bfddd9bb050e
 	github.com/bhbosman/goerrors v0.0.0-20200918064252-e47717b09c4f
 	github.com/bhbosman/gologging v0.0.0-20200921180328-d29fc55c00bc
@@ -26,6 +26,4 @@ require (
 	google.golang.org/protobuf v1.25.0
 
 )
-
-replace github.com/reactivex/rxgo/v2 v2.1.0 => github.com/bhbosman/rxgo/v2 v2.1.1-0.20200918045653-8f289de0d2ff
-replace github.com/bhbosman/goMessages => /Users/brendanbosman/src/github.com/bhbosman/goMessages
+replace github.com/reactivex/rxgo/v2 v2.1.0 => github.com/bhbosman/rxgo/v2 v2.1.1-0.20200922152528-6aef42e76e00

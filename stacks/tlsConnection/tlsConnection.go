@@ -29,7 +29,7 @@ func StackDefinition(
 		return nil, goerrors.InvalidParam
 	}
 
-	nextOutBoundPath := func(ctx context.Context, nextOutboundChannel chan rxgo.Item) connectionWrapper.ConnWrapperNext {
+	nextOutBoundPath := func(ctx context.Context, nextOutboundChannel *internal.ChannelManager) connectionWrapper.ConnWrapperNext {
 		return func(b []byte) (n int, err error) {
 			if ctx.Err() != nil {
 				return 0, ctx.Err()
@@ -42,11 +42,10 @@ func StackDefinition(
 			if err != nil {
 				return 0, err
 			}
-			item := rxgo.Of(dataToConnection)
 			if ctx.Err() != nil {
 				return 0, ctx.Err()
 			}
-			item.SendContext(ctx, nextOutboundChannel)
+			nextOutboundChannel.Send(ctx, dataToConnection)
 			return n, nil
 		}
 	}
@@ -55,7 +54,7 @@ func StackDefinition(
 	var connWrapper *connectionWrapper.ConnWrapper
 	var pipeWriteClose io.WriteCloser
 	var upgradedConnection net.Conn
-	var nextInBoundChannel, nextOutboundChannel chan rxgo.Item
+	var nextInBoundChannel, nextOutboundChannel *internal.ChannelManager
 	const stackName = "TLS"
 	var stackIndex int
 	// wg is here to make sure, that the upgradedConnection is properly assigned, before data is read/write to it
@@ -64,7 +63,10 @@ func StackDefinition(
 	return &internal.StackDefinition{
 		Name: stackName,
 		Inbound: func(index int, ctx context.Context) internal.BoundDefinition {
-			nextInBoundChannel = make(chan rxgo.Item)
+			nextInBoundChannel = &internal.ChannelManager{
+				Items: make(chan rxgo.Item),
+				Mutex: &sync.Mutex{},
+			}
 			stackIndex = index
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
@@ -84,7 +86,7 @@ func StackDefinition(
 								return
 							}
 						}, opts...)
-					nextObs := rxgo.FromChannel(nextInBoundChannel)
+					nextObs := rxgo.FromChannel(nextInBoundChannel.Items)
 					return nextObs, nil
 				},
 				PipeState: internal.PipeState{
@@ -92,14 +94,16 @@ func StackDefinition(
 						return ctx.Err()
 					},
 					End: func() error {
-						close(nextInBoundChannel)
-						return nil
+						return nextInBoundChannel.Close()
 					},
 				},
 			}
 		},
 		Outbound: func(index int, ctx context.Context) internal.BoundDefinition {
-			nextOutboundChannel = make(chan rxgo.Item)
+			nextOutboundChannel = &internal.ChannelManager{
+				Items: make(chan rxgo.Item),
+				Mutex: &sync.Mutex{},
+			}
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					if stackCancelFunc == nil {
@@ -118,7 +122,7 @@ func StackDefinition(
 								stackCancelFunc("copy data to upgradedConnection", false, err)
 							}
 						}, opts...)
-					nextObs := rxgo.FromChannel(nextOutboundChannel, opts...)
+					nextObs := rxgo.FromChannel(nextOutboundChannel.Items, opts...)
 					return nextObs, nil
 				},
 				PipeState: internal.PipeState{
@@ -126,8 +130,7 @@ func StackDefinition(
 						return ctx.Err()
 					},
 					End: func() error {
-						close(nextOutboundChannel)
-						return nil
+						return nextOutboundChannel.Close()
 					},
 				},
 			}
@@ -186,8 +189,7 @@ func StackDefinition(
 					stackIndex-1,
 					"Read TLS Connection",
 					func(rws goprotoextra.IReadWriterSize, cancelCtx context.Context, CancelFunc internal.CancelFunc) {
-						item := rxgo.Of(rws)
-						item.SendContext(cancelCtx, nextInBoundChannel)
+						nextInBoundChannel.Send(cancelCtx, rws)
 					})
 
 				return conn, ctx.Err()

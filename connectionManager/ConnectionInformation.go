@@ -30,6 +30,7 @@ func (self StackPropertyValue) ByteCount() string {
 
 type ConnectionInformation struct {
 	Id              string
+	CancelContext   context.Context
 	CancelFunc      context.CancelFunc
 	Name            string
 	Status          string
@@ -38,12 +39,12 @@ type ConnectionInformation struct {
 	mutex           sync.Mutex
 }
 
-func NewConnectionInformation(id string, function context.CancelFunc) *ConnectionInformation {
-
+func NewConnectionInformation(id string, function context.CancelFunc, CancelContext context.Context) *ConnectionInformation {
 	return &ConnectionInformation{
 		Id:              id,
+		CancelContext:   CancelContext,
 		CancelFunc:      function,
-		StackProperties: make(map[StackPropertyKey]StackPropertyValue),
 		ConnectionTime:  time.Now().Truncate(time.Second),
+		StackProperties: make(map[StackPropertyKey]StackPropertyValue),
 	}
 }

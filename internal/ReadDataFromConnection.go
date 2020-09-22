@@ -31,23 +31,24 @@ func ReadDataFromConnection(
 	resetBuffer()
 	var lastUpdate time.Time
 	for {
-		now := time.Now()
-		if now.Sub(lastUpdate) >= time.Second {
-			lastUpdate = now
-			ConnectionManager.PublishStackData(
-				index,
-				ConnectionId,
-				description,
-				rxgo.StreamDirectionInbound,
-				messageCount,
-				byteCount)
+		if CancelCtx.Err() == nil{
+			now := time.Now()
+			if now.Sub(lastUpdate) >= time.Second {
+				lastUpdate = now
+				ConnectionManager.PublishStackData(
+					index,
+					ConnectionId,
+					description,
+					rxgo.StreamDirectionInbound,
+					messageCount,
+					byteCount)
+			}
 		}
 		n, err := Conn.Read(buffer[bufferStart:bufferEnd])
 		if err != nil {
 			switch v := err.(type) {
 			case *net.OpError:
 				CancelFunc(description, true, v.Err)
-
 			default:
 				CancelFunc(description, true, err)
 			}

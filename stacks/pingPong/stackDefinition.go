@@ -124,7 +124,6 @@ func StackDefinition(opts ...rxgo.Option) (*internal.StackDefinition, error) {
 										continue
 									}
 									outboundChannel.Send(ctx, marshall)
-
 								}
 							}
 						}

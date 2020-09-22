@@ -11,7 +11,6 @@ import (
 )
 
 func StackDefinition(opts ...rxgo.Option) (*internal.StackDefinition, error) {
-
 	return &internal.StackDefinition{
 		Name: goerrors.BottomStackName,
 		Inbound: func(index int, ctx context.Context) internal.BoundDefinition {
