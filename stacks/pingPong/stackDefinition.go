@@ -41,31 +41,33 @@ func StackDefinition(opts ...rxgo.Option) (*internal.StackDefinition, error) {
 								if err != nil {
 									return
 								}
-								switch tc {
-								case pingpong.PingTypeCode, pingpong.PongTypeCode:
-									msg, err := stream.UnMarshal(rws, nil, nil, nil, nil)
-									if err != nil {
-										return
-									}
-									switch v := msg.(type) {
-									case *pingpong.PingWrapper:
-										pong := &pingpong.Pong{
-											RequestId:         v.Data.RequestId,
-											RequestTimeStamp:  v.Data.RequestTimeStamp,
-											ResponseTimeStamp: ptypes.TimestampNow(),
-										}
-										marshall, err := stream.Marshall(pong)
+								if started {
+									switch tc {
+									case pingpong.PingTypeCode, pingpong.PongTypeCode:
+										msg, err := stream.UnMarshal(rws, nil, nil, nil, nil)
 										if err != nil {
 											return
 										}
-										item := rxgo.Of(marshall)
-										if ctx.Err() != nil {
-											return
+										switch v := msg.(type) {
+										case *pingpong.PingWrapper:
+											pong := &pingpong.Pong{
+												RequestId:         v.Data.RequestId,
+												RequestTimeStamp:  v.Data.RequestTimeStamp,
+												ResponseTimeStamp: ptypes.TimestampNow(),
+											}
+											marshall, err := stream.Marshall(pong)
+											if err != nil {
+												return
+											}
+											item := rxgo.Of(marshall)
+											if ctx.Err() != nil {
+												return
+											}
+											item.SendContext(ctx, outboundChannel)
+										case *pingpong.PongWrapper:
 										}
-										item.SendContext(ctx, outboundChannel)
-									case *pingpong.PongWrapper:
+										return
 									}
-									return
 								}
 							}
 							item := rxgo.Of(incoming)
