@@ -27,7 +27,10 @@ func NewNetDialApp(
 	userContextFactoryName string,
 	options ...DialAppSettingsApply) AppFunc {
 	return func(params AppFuncInParams) (*fx.App, error) {
+		l := params.LogFactory.Create(fmt.Sprintf("Dialer for %v", connectionName))
 		return fx.New(
+			fx.Logger(l),
+			fx.Supply(l),
 			fx.Supply(options),
 			impl.CommonComponents(
 				url,
@@ -38,13 +41,6 @@ func NewNetDialApp(
 				params.ConnectionManager,
 				userContextFactoryName,
 				params.LogFactory),
-			fx.Provide(
-				func(params struct {
-					fx.In
-					Factory *gologging.Factory
-				}) *gologging.SubSystemLogger {
-					return params.Factory.Create(fmt.Sprintf("Dialer for %v", connectionName))
-				}),
 			fx.Provide(fx.Annotated{Target: newNetDialManager}),
 			fx.Invoke(
 				func(netManager *netDialManager, logger *gologging.SubSystemLogger, cancelFunction context.CancelFunc) {
