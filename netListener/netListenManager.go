@@ -18,12 +18,13 @@ type netListenManager struct {
 	listener interface {
 		Accept() (net.Conn, error)
 	}
+	maxConnections int
 }
 
 func (self *netListenManager) listenForNewConnections() {
 	go func() {
 		n := 0
-		sem := semaphore.NewWeighted(512)
+		sem := semaphore.NewWeighted(int64(self.maxConnections))
 		for {
 			n++
 			self.Logger.LogWithLevel(0, func(logger *log2.Logger) {
@@ -92,7 +93,10 @@ func newNetListenManager(
 		LogFactory                 *gologging.Factory
 		Settings                   []ListenAppSettingsApply
 	}) *netListenManager {
-	netListenSettings := &netListenManagerSettings{}
+	netListenSettings := &netListenManagerSettings{
+		userContext:    nil,
+		maxConnections: 512,
+	}
 	for _, setting := range params.Settings {
 		setting.apply(netListenSettings)
 	}
@@ -108,6 +112,7 @@ func newNetListenManager(
 			params.ConnectionManager,
 			params.LogFactory,
 			netListenSettings.userContext),
-		listener: params.Listener,
+		listener:       params.Listener,
+		maxConnections: netListenSettings.maxConnections,
 	}
 }

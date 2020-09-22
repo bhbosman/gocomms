@@ -11,6 +11,7 @@ import (
 	"github.com/reactivex/rxgo/v2"
 	"net"
 	"net/url"
+	"sync"
 	"time"
 )
 
@@ -18,14 +19,20 @@ func StackDefinition(opts ...rxgo.Option) (*internal.StackDefinition, error) {
 	const StackName = "PingPong"
 	started := false
 	var requestId int64 = 0
-	outboundChannel := make(chan rxgo.Item)
+	outboundChannel := &internal.ChannelManager{
+		Items: make(chan rxgo.Item),
+		Mutex: &sync.Mutex{},
+	}
 	return &internal.StackDefinition{
 		Name: StackName,
 		Inbound: func(index int, ctx context.Context) internal.BoundDefinition {
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
-					var inboundChannel chan rxgo.Item
-					inboundChannel = make(chan rxgo.Item)
+					channelManager := &internal.ChannelManager{
+						Items: make(chan rxgo.Item),
+						Mutex: &sync.Mutex{},
+					}
+
 					disposable := params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 						index,
 						params.ConnectionId,
@@ -59,25 +66,22 @@ func StackDefinition(opts ...rxgo.Option) (*internal.StackDefinition, error) {
 											if err != nil {
 												return
 											}
-											item := rxgo.Of(marshall)
-											if ctx.Err() != nil {
-												return
-											}
-											item.SendContext(ctx, outboundChannel)
-										case *pingpong.PongWrapper:
+											outboundChannel.Send(ctx, marshall)
+											//case *pingpong.PongWrapper:
+											//	d := v.Data.ResponseTimeStamp.AsTime().Sub(v.Data.RequestTimeStamp.AsTime())
+											//	println(d.String())
 										}
 										return
 									}
 								}
 							}
-							item := rxgo.Of(incoming)
-							item.SendContext(ctx, inboundChannel)
+							channelManager.Send(ctx, incoming)
 						}, opts...)
 					go func() {
-						defer close(inboundChannel)
 						<-disposable
+						_ = channelManager.Close()
 					}()
-					obs := rxgo.FromChannel(inboundChannel, opts...)
+					obs := rxgo.FromChannel(channelManager.Items, opts...)
 					return obs, nil
 				},
 			}
@@ -95,8 +99,7 @@ func StackDefinition(opts ...rxgo.Option) (*internal.StackDefinition, error) {
 							if ctx.Err() != nil {
 								return
 							}
-							item := rxgo.Of(size)
-							item.SendContext(ctx, outboundChannel)
+							outboundChannel.Send(ctx, size)
 						})
 					go func() {
 						var ticker *time.Ticker
@@ -120,13 +123,13 @@ func StackDefinition(opts ...rxgo.Option) (*internal.StackDefinition, error) {
 									if err != nil {
 										continue
 									}
-									item := rxgo.Of(marshall)
-									item.SendContext(ctx, outboundChannel)
+									outboundChannel.Send(ctx, marshall)
+
 								}
 							}
 						}
 					}()
-					return rxgo.FromChannel(outboundChannel, opts...), nil
+					return rxgo.FromChannel(outboundChannel.Items, opts...), nil
 				},
 			}
 		},
@@ -136,9 +139,7 @@ func StackDefinition(opts ...rxgo.Option) (*internal.StackDefinition, error) {
 				return conn, ctx.Err()
 			},
 			End: func() error {
-				started = false
-				defer close(outboundChannel)
-				return nil
+				return outboundChannel.Close()
 			},
 		},
 	}, nil

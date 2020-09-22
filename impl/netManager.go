@@ -4,11 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/bhbosman/gocomms/connectionManager"
-	"github.com/bhbosman/gocomms/intf"
 	"github.com/bhbosman/gocomms/internal"
+	"github.com/bhbosman/gocomms/intf"
 	"github.com/bhbosman/gologging"
 	"github.com/bhbosman/goprotoextra"
-	"github.com/bhbosman/gorxextra"
 	"github.com/reactivex/rxgo/v2"
 	"go.uber.org/fx"
 	"io"
@@ -16,6 +15,7 @@ import (
 	"math"
 	"net"
 	"net/url"
+	"sync"
 	"time"
 )
 
@@ -170,14 +170,19 @@ func createStackDefinition(
 		rxgo.WithBackPressureStrategy(rxgo.Block))
 	return function, err
 }
+
 func createChannel(
 	params struct {
 		fx.In
 		CancelCtx context.Context
-	}) (chan rxgo.Item, rxgo.Observable) {
+	}) (rxgo.Observable, *internal.ChannelManager) {
 	result := make(chan rxgo.Item, 1024)
 	obs := rxgo.FromChannel(result, rxgo.WithContext(params.CancelCtx))
-	return result, obs
+	return obs,
+		&internal.ChannelManager{
+			Items: result,
+			Mutex: &sync.Mutex{},
+		}
 }
 
 func invokeConnectionManager(
@@ -228,7 +233,7 @@ func invokeLogger(
 func invokeChannel(
 	params struct {
 		fx.In
-		Channel    chan rxgo.Item
+		Channel    *internal.ChannelManager
 		LifeCycle  fx.Lifecycle
 		CancelFunc context.CancelFunc
 		CancelCtx  context.Context
@@ -239,8 +244,7 @@ func invokeChannel(
 			return params.CancelCtx.Err()
 		},
 		OnStop: func(ctx context.Context) error {
-			close(params.Channel)
-			return nil
+			return params.Channel.Close()
 		},
 	})
 
@@ -250,7 +254,7 @@ func createToReactorFunc(
 	params struct {
 		fx.In
 		CancelCtx context.Context
-		Ch        chan rxgo.Item
+		Ch        *internal.ChannelManager
 	}) goprotoextra.ToReactorFunc {
 	return func(inline bool, any interface{}) error {
 		err := params.CancelCtx.Err()
@@ -259,23 +263,20 @@ func createToReactorFunc(
 		}
 		if !inline {
 			go func(any interface{}) {
-				item := rxgo.Of(rxgo.NewNextExternal(false, any))
-				_ = gorxextra.SendContextWithTimeOutAndRetries(
-					item,
-					params.CancelCtx,
-					time.Millisecond*500,
-					5,
-					params.Ch)
+				params.Ch.Send(params.CancelCtx, rxgo.NewNextExternal(false, any))
 			}(any)
 			return nil
 		}
-		item := rxgo.Of(rxgo.NewNextExternal(false, any))
-		return gorxextra.SendContextWithTimeOutAndRetries(
-			item,
-			params.CancelCtx,
-			time.Millisecond*500,
-			5,
-			params.Ch)
+		if params.Ch.Active() {
+			item := rxgo.Of(rxgo.NewNextExternal(false, any))
+			return params.Ch.SendContextWithTimeOutAndRetries(
+				item,
+				params.CancelCtx,
+				time.Millisecond*500,
+				5,
+				params.Ch.Items)
+		}
+		return params.CancelCtx.Err()
 	}
 }
 func createToConnectionFunc(
@@ -421,7 +422,7 @@ func invokeInboundTransportLayer(
 		fx.In
 		Lifecycle         fx.Lifecycle
 		TransportLayer    *internal.TwoWayPipe
-		Ch                chan rxgo.Item
+		ChannelManager    *internal.ChannelManager
 		CancelFunc        context.CancelFunc
 		CancelCtx         context.Context
 		ConnectionId      string `name:"ConnectionId"`
@@ -442,8 +443,7 @@ func invokeInboundTransportLayer(
 					if context.Err() != nil {
 						return
 					}
-					item := rxgo.Of(rxgo.NewNextExternal(true, i))
-					item.SendContext(context, params.Ch)
+					params.ChannelManager.Send(context, rxgo.NewNextExternal(true, i))
 				})
 			return nil
 		},

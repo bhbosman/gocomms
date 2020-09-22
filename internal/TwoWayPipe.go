@@ -5,18 +5,20 @@ import (
 	"github.com/bhbosman/gologging"
 	"github.com/bhbosman/goprotoextra"
 	"github.com/reactivex/rxgo/v2"
+	"go.uber.org/multierr"
 	"io"
+	"sync"
 )
 
 type TwoWayPipe struct {
-	logger             *gologging.SubSystemLogger
-	InBound            chan rxgo.Item
-	OutBound           chan rxgo.Item
-	InboundObservable  rxgo.Observable
-	OutboundObservable rxgo.Observable
-	cancelCtx          context.Context
-	PipeState          []PipeState
-	StackState         []StackState
+	logger                 *gologging.SubSystemLogger
+	InboundObservable      rxgo.Observable
+	OutboundObservable     rxgo.Observable
+	cancelCtx              context.Context
+	PipeState              []PipeState
+	StackState             []StackState
+	inboundChannelManager  *ChannelManager
+	outboundChannelManager *ChannelManager
 }
 
 func (self *TwoWayPipe) SendOutgoingData(rws goprotoextra.ReadWriterSize) error {
@@ -24,8 +26,7 @@ func (self *TwoWayPipe) SendOutgoingData(rws goprotoextra.ReadWriterSize) error 
 	if err != nil {
 		return err
 	}
-	item := rxgo.Of(rws)
-	item.SendContext(self.cancelCtx, self.OutBound)
+	self.outboundChannelManager.Send(self.cancelCtx, rws)
 	return nil
 }
 
@@ -42,11 +43,8 @@ func (self *TwoWayPipe) ReceiveIncomingData(item io.Reader) error {
 			}
 		}
 	}()
-	self.InBound <- rxgo.Of(item)
-	r := recover()
-	if err, ok := r.(error); ok {
-		return err
-	}
+	self.inboundChannelManager.Send(self.cancelCtx, item)
+
 	return nil
 }
 
@@ -55,14 +53,15 @@ func (self *TwoWayPipe) SendError(item error) error {
 	if err != nil {
 		return err
 	}
-	self.OutBound <- rxgo.Error(item)
+	self.outboundChannelManager.SendError(self.cancelCtx, item)
 	return nil
 }
 
 func (self *TwoWayPipe) Close() error {
-	close(self.OutBound)
-	close(self.InBound)
-	return nil
+	var err error
+	err = multierr.Append(err, self.outboundChannelManager.Close())
+	err = multierr.Append(err, self.inboundChannelManager.Close())
+	return err
 }
 
 func NewTwoWayPipe(
@@ -75,9 +74,15 @@ func NewTwoWayPipe(
 	pipeStarts []PipeState,
 	stackState []StackState) *TwoWayPipe {
 	return &TwoWayPipe{
+		inboundChannelManager: &ChannelManager{
+			Items: InBound,
+			Mutex: &sync.Mutex{},
+		},
+		outboundChannelManager: &ChannelManager{
+			Items: OutBound,
+			Mutex: &sync.Mutex{},
+		},
 		logger:             logger,
-		InBound:            InBound,
-		OutBound:           OutBound,
 		InboundObservable:  InboundObservable,
 		OutboundObservable: OutboundObservable,
 		cancelCtx:          cancelCtx,

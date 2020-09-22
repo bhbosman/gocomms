@@ -3,6 +3,7 @@ package netDial
 type dialAppSettings struct {
 	userContext interface{}
 	canDial     []ICanDial
+	maxConnections int
 }
 
 type DialAppSettingsApply interface {
@@ -35,3 +36,16 @@ func (self canDialSetting) apply(settings *dialAppSettings) {
 	}
 }
 
+
+
+type maxConnectionsSetting struct {
+	maxConnections int
+}
+
+func MaxConnectionsSetting(maxConnections int) *maxConnectionsSetting {
+	return &maxConnectionsSetting{maxConnections: maxConnections}
+}
+
+func (self maxConnectionsSetting) apply(settings *dialAppSettings) {
+	settings.maxConnections = self.maxConnections
+}

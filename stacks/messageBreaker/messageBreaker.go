@@ -12,6 +12,7 @@ import (
 	"github.com/bhbosman/goprotoextra"
 	"github.com/reactivex/rxgo/v2"
 	"reflect"
+	"sync"
 )
 
 func StackDefinition(
@@ -29,7 +30,10 @@ func StackDefinition(
 	return &internal2.StackDefinition{
 		Name: stackName,
 		Inbound: func(index int, ctx context.Context) internal2.BoundDefinition {
-			var nextChannel chan rxgo.Item
+			channelManager := &internal2.ChannelManager{
+				Items: make(chan rxgo.Item),
+				Mutex: &sync.Mutex{},
+			}
 			return internal2.BoundDefinition{
 				PipeDefinition: func(params internal2.PipeDefinitionParams) (rxgo.Observable, error) {
 					if stackCancelFunc == nil {
@@ -110,7 +114,7 @@ func StackDefinition(
 							}
 						}
 					}
-					nextChannel = make(chan rxgo.Item)
+
 					_ = params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 						index,
 						params.ConnectionId,
@@ -130,8 +134,7 @@ func StackDefinition(
 									return
 								}
 								inboundState(func(dataBlock []byte) {
-									item := rxgo.Of(gomessageblock.NewReaderWriterBlock(dataBlock))
-									item.SendContext(ctx, nextChannel)
+									channelManager.Send(ctx, gomessageblock.NewReaderWriterBlock(dataBlock))
 								})
 							default:
 								stackCancelFunc(
@@ -143,15 +146,14 @@ func StackDefinition(
 							}
 						},
 						opts...)
-					return rxgo.FromChannel(nextChannel, opts...), nil
+					return rxgo.FromChannel(channelManager.Items, opts...), nil
 				},
 				PipeState: internal2.PipeState{
 					Start: func(ctx context.Context) error {
 						return ctx.Err()
 					},
 					End: func() error {
-						close(nextChannel)
-						return nil
+						return channelManager.Close()
 					},
 				},
 			}

@@ -21,11 +21,12 @@ type ICanDial interface {
 type netDialManager struct {
 	impl.NetManager
 	CanDial []ICanDial
+	MaxConnection int
 }
 
 func (self *netDialManager) Start(_ context.Context) error {
 	go func() {
-		sem := semaphore.NewWeighted(1)
+		sem := semaphore.NewWeighted(int64(self.MaxConnection))
 	loop:
 		for {
 			if len(self.CanDial) > 0 {
@@ -135,6 +136,7 @@ func newNetDialManager(
 			params.ConnectionManager,
 			params.LogFactory,
 			settings.userContext),
-		CanDial: settings.canDial,
+		CanDial:       settings.canDial,
+		MaxConnection: settings.maxConnections,
 	}
 }
