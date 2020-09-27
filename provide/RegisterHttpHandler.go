@@ -12,35 +12,38 @@ import (
 func RegisterHttpHandler(url string) fx.Option {
 	return fx.Options(
 		fx.Provide(
-			fx.Annotated{Group: "Apps", Target: func(params struct {
-				fx.In
-				RouteDefinition []*RouteDefinition `group:"RouteDefinition"`
-			}) *fx.App {
-				return fx.New(
-					fx.Supply(params.RouteDefinition),
-					fx.Provide(fx.Annotated{Target: internal.CreateUrl(url)}),
-					fx.Provide(fx.Annotated{Target: createHttpHandler}),
-					fx.Provide(fx.Annotated{Target: createHttpServer}),
-					fx.Invoke(func(params struct {
-						fx.In
-						Lifecycle fx.Lifecycle
-						Server    *http.Server
-					}) {
-						params.Lifecycle.Append(fx.Hook{
-							OnStart: func(ctx context.Context) error {
-								go func() {
-									err := params.Server.ListenAndServe()
-									println(err.Error())
-								}()
+			fx.Annotated{
+				Group: "Apps",
+				Target: func(params struct {
+					fx.In
+					RouteDefinition []*RouteDefinition `group:"RouteDefinition"`
+				}) *fx.App {
+					fxApp := fx.New(
+						fx.Supply(params.RouteDefinition),
+						fx.Provide(fx.Annotated{Target: internal.CreateUrl(url)}),
+						fx.Provide(fx.Annotated{Target: createHttpHandler}),
+						fx.Provide(fx.Annotated{Target: createHttpServer}),
+						fx.Invoke(func(params struct {
+							fx.In
+							Lifecycle fx.Lifecycle
+							Server    *http.Server
+						}) {
+							params.Lifecycle.Append(fx.Hook{
+								OnStart: func(ctx context.Context) error {
+									go func() {
+										err := params.Server.ListenAndServe()
+										println(err.Error())
+									}()
 
-								return nil
-							},
-							OnStop: func(ctx context.Context) error {
-								return params.Server.Close()
-							},
-						})
-					}))
-			},
+									return nil
+								},
+								OnStop: func(ctx context.Context) error {
+									return params.Server.Close()
+								},
+							})
+						}))
+					return fxApp
+				},
 			}),
 	)
 }

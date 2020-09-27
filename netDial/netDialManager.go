@@ -15,7 +15,6 @@ import (
 
 type ICanDial interface {
 	CanDial() bool
-	DialSuccess()
 }
 
 type netDialManager struct {

@@ -40,7 +40,6 @@ func (self *NetManager) NewConnectionInstance(connectionType internal.Connection
 		fx.Populate(&ctx),
 		fx.Logger(l),
 		fx.StopTimeout(time.Hour),
-		//fx.LogName(connectionName),
 		fx.Supply(l, self, self.connectionReactorFactories, self.stackFactoryFunction, self.Url, connectionType, self.logFactory),
 		fx.Provide(fx.Annotated{Target: func() connectionManager.IConnectionManager { return self.connectionManager }}),
 		fx.Provide(fx.Annotated{Target: func() connectionManager.IRegisterToConnectionManager { return self.connectionManager }}),
@@ -270,9 +269,8 @@ func createToReactorFunc(
 			return nil
 		}
 		if params.Ch.Active() {
-			item := rxgo.Of(rxgo.NewNextExternal(false, any))
 			return params.Ch.SendContextWithTimeOutAndRetries(
-				item,
+				rxgo.NewNextExternal(false, any),
 				params.CancelCtx,
 				time.Millisecond*500,
 				5,

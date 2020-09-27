@@ -154,54 +154,59 @@ loop:
 			}
 		case <-self.cancelCtx.Done():
 			break loop
-		case cmd := <-self.cmdChannel:
-			switch cmd.cmd {
-			case cleanData:
-				data.Cleanup()
-				continue loop
-			case stop:
-				_ = data.Stop(cmd.ctx)
-				break loop
-			case start:
-				_ = data.Start(cmd.ctx)
-				continue loop
-			case register:
-				_ = data.RegisterConnection(cmd.id, cmd.function, cmd.ctx)
-				continue loop
-			case deregister:
-				_ = data.DeregisterConnection(cmd.id)
-				continue loop
-			case name:
-				_ = data.NameConnection(cmd.id, cmd.s)
-				continue loop
-			case status:
-				_ = data.StatusConnection(cmd.id, cmd.s)
-				continue loop
-			//case publish:
-			//	data.Publish()
-			//	continue loop
-			case get:
-				connections, err := data.GetConnections(cmd.ctx)
-				if err != nil {
+		case cmd, ok := <-self.cmdChannel:
+			if ok {
+				switch cmd.cmd {
+				case cleanData:
+					data.Cleanup()
+					continue loop
+				case stop:
+					_ = data.Stop(cmd.ctx)
+					break loop
+				case start:
+					_ = data.Start(cmd.ctx)
+					continue loop
+				case register:
+					_ = data.RegisterConnection(cmd.id, cmd.function, cmd.ctx)
+					continue loop
+				case deregister:
+					_ = data.DeregisterConnection(cmd.id)
+					continue loop
+				case name:
+					_ = data.NameConnection(cmd.id, cmd.s)
+					continue loop
+				case status:
+					_ = data.StatusConnection(cmd.id, cmd.s)
+					continue loop
+				//case publish:
+				//	data.Publish()
+				//	continue loop
+				case get:
+					connections, err := data.GetConnections(cmd.ctx)
+					if err != nil {
+						cmd.ch <- err
+						continue loop
+					}
+					cmd.ch <- connections
+					continue loop
+				case closeConnection:
+					data.CloseConnection(cmd.s)
+					continue loop
+				case closeAllConnection:
+					err := data.CloseAllConnections(cmd.ctx)
 					cmd.ch <- err
 					continue loop
+				case publishInt:
+					data.PublishStackData(cmd.index, cmd.id, cmd.s, cmd.direction, cmd.i, cmd.i2)
+					continue loop
 				}
-				cmd.ch <- connections
-				continue loop
-			case closeConnection:
-				data.CloseConnection(cmd.s)
-				continue loop
-			case closeAllConnection:
-				err := data.CloseAllConnections(cmd.ctx)
-				cmd.ch <- err
-				continue loop
-			case publishInt:
-				data.PublishStackData(cmd.index, cmd.id, cmd.s, cmd.direction, cmd.i, cmd.i2)
-				continue loop
 			}
 		}
 	}
 	data.Clear()
+	// flushing
+	for range self.cmdChannel {
+	}
 }
 
 func NewConnectionManager(sub *pubsub.PubSub, cancelCtx context.Context) IConnectionManager {
