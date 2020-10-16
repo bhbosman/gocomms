@@ -7,7 +7,6 @@ import (
 	"github.com/reactivex/rxgo/v2"
 	"go.uber.org/multierr"
 	"io"
-	"sync"
 )
 
 type TwoWayPipe struct {
@@ -65,6 +64,7 @@ func (self *TwoWayPipe) Close() error {
 }
 
 func NewTwoWayPipe(
+	connectionId string,
 	logger *gologging.SubSystemLogger,
 	InBound chan rxgo.Item,
 	OutBound chan rxgo.Item,
@@ -74,19 +74,13 @@ func NewTwoWayPipe(
 	pipeStarts []PipeState,
 	stackState []StackState) *TwoWayPipe {
 	return &TwoWayPipe{
-		inboundChannelManager: &ChannelManager{
-			Items: InBound,
-			Mutex: &sync.Mutex{},
-		},
-		outboundChannelManager: &ChannelManager{
-			Items: OutBound,
-			Mutex: &sync.Mutex{},
-		},
-		logger:             logger,
-		InboundObservable:  InboundObservable,
-		OutboundObservable: OutboundObservable,
-		cancelCtx:          cancelCtx,
-		PipeState:          pipeStarts,
-		StackState:         stackState,
+		inboundChannelManager:  NewChannelManager(InBound, "inboundChannelManager", connectionId),
+		outboundChannelManager: NewChannelManager(OutBound, "outboundChannelManager", connectionId),
+		logger:                 logger,
+		InboundObservable:      InboundObservable,
+		OutboundObservable:     OutboundObservable,
+		cancelCtx:              cancelCtx,
+		PipeState:              pipeStarts,
+		StackState:             stackState,
 	}
 }

@@ -63,10 +63,7 @@ func StackDefinition(
 	return &internal.StackDefinition{
 		Name: stackName,
 		Inbound: func(index int, ctx context.Context) internal.BoundDefinition {
-			nextInBoundChannel = &internal.ChannelManager{
-				Items: make(chan rxgo.Item),
-				Mutex: &sync.Mutex{},
-			}
+			nextInBoundChannel = internal.NewChannelManager(make(chan rxgo.Item), "inbound TlsConnection", connectionId)
 			stackIndex = index
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
@@ -100,10 +97,7 @@ func StackDefinition(
 			}
 		},
 		Outbound: func(index int, ctx context.Context) internal.BoundDefinition {
-			nextOutboundChannel = &internal.ChannelManager{
-				Items: make(chan rxgo.Item),
-				Mutex: &sync.Mutex{},
-			}
+			nextOutboundChannel = internal.NewChannelManager(make(chan rxgo.Item), "outbound Tls Connection", connectionId)
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					if stackCancelFunc == nil {

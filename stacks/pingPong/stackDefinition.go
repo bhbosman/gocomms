@@ -11,28 +11,22 @@ import (
 	"github.com/reactivex/rxgo/v2"
 	"net"
 	"net/url"
-	"sync"
 	"time"
 )
 
-func StackDefinition(opts ...rxgo.Option) (*internal.StackDefinition, error) {
+func StackDefinition(
+	connectionId string,
+	opts ...rxgo.Option) (*internal.StackDefinition, error) {
 	const StackName = "PingPong"
 	started := false
 	var requestId int64 = 0
-	outboundChannel := &internal.ChannelManager{
-		Items: make(chan rxgo.Item),
-		Mutex: &sync.Mutex{},
-	}
+	outboundChannel := internal.NewChannelManager(make(chan rxgo.Item), "outbound PingPong", connectionId)
 	return &internal.StackDefinition{
 		Name: StackName,
 		Inbound: func(index int, ctx context.Context) internal.BoundDefinition {
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
-					channelManager := &internal.ChannelManager{
-						Items: make(chan rxgo.Item),
-						Mutex: &sync.Mutex{},
-					}
-
+					channelManager := internal.NewChannelManager(make(chan rxgo.Item), "inbound PingPong", connectionId)
 					disposable := params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 						index,
 						params.ConnectionId,
