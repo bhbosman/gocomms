@@ -15,7 +15,7 @@ import (
 
 type netDialManager struct {
 	impl.NetManager
-	CanDial []ICanDial
+	CanDial       []ICanDial
 	MaxConnection int
 }
 

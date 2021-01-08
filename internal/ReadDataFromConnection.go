@@ -31,7 +31,7 @@ func ReadDataFromConnection(
 	resetBuffer()
 	var lastUpdate time.Time
 	for {
-		if CancelCtx.Err() == nil{
+		if CancelCtx.Err() == nil {
 			now := time.Now()
 			if now.Sub(lastUpdate) >= time.Second {
 				lastUpdate = now

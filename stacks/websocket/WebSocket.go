@@ -16,7 +16,6 @@ import (
 	"go.uber.org/multierr"
 	"io"
 	"net"
-	"net/url"
 	"time"
 )
 
@@ -160,7 +159,7 @@ func StackDefinition(
 	const stackName = "WebSocket"
 	return &internal.StackDefinition{
 		Name: stackName,
-		Inbound: func(index int, ctx context.Context) internal.BoundDefinition {
+		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			nextInBoundChannel = make(chan rxgo.Item)
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
@@ -168,7 +167,7 @@ func StackDefinition(
 						return nil, goerrors.InvalidParam
 					}
 					_ = params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionInbound,
@@ -193,7 +192,7 @@ func StackDefinition(
 				},
 			}
 		},
-		Outbound: func(index int, ctx context.Context) internal.BoundDefinition {
+		Outbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			nextOutboundChannel = make(chan rxgo.Item)
 			tempStep = make(chan rxgo.Item)
 			return internal.BoundDefinition{
@@ -202,7 +201,7 @@ func StackDefinition(
 						return nil, goerrors.InvalidParam
 					}
 					_ = params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
-						index-1,
+						inOutBoundParams.Index-1,
 						params.ConnectionId,
 						stackName+"FromUser",
 						rxgo.StreamDirectionOutbound,
@@ -215,7 +214,7 @@ func StackDefinition(
 
 					tempObs := rxgo.FromChannel(tempStep)
 					_ = tempObs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionOutbound,
@@ -263,24 +262,47 @@ func StackDefinition(
 			}
 		},
 		StackState: internal.StackState{
-			Start: func(conn net.Conn, url *url.URL, ctx context.Context, cancelFunc internal.CancelFunc) (net.Conn, error) {
-				if ctx.Err() != nil {
-					return nil, ctx.Err()
+			Start: func(startParams internal.StackStartStateParams) (net.Conn, error) {
+				if startParams.Ctx.Err() != nil {
+					return nil, startParams.Ctx.Err()
 				}
 				var pipeRead io.Reader
-				pipeRead, pipeWriteClose = internal.Pipe(ctx)
-				if ctx.Err() != nil {
-					return nil, ctx.Err()
+				pipeRead, pipeWriteClose = internal.Pipe(startParams.Ctx)
+				if startParams.Ctx.Err() != nil {
+					return nil, startParams.Ctx.Err()
 				}
 				connWrapper = connectionWrapper.NewConnWrapper(
-					conn,
-					ctx,
+					startParams.Conn,
+					startParams.Ctx,
 					pipeRead,
-					nextOutBoundPath(ctx, nextOutboundChannel))
-				if ctx.Err() != nil {
-					return nil, ctx.Err()
+					nextOutBoundPath(startParams.Ctx, nextOutboundChannel))
+				if startParams.Ctx.Err() != nil {
+					return nil, startParams.Ctx.Err()
 				}
+
+				// create map and fill it in with some values
+				inputValues := make(map[string]interface{})
+				inputValues["url"] = startParams.Url
+				inputValues["localAddr"] = startParams.Conn.LocalAddr()
+				inputValues["remoteAddr"] = startParams.Conn.RemoteAddr()
+				outputValues, err := startParams.ConnectionReactorFactory.Values(inputValues)
+				if err != nil {
+					return nil, err
+				}
+
+				// get header information from outputValues
+				header := make(ws.HandshakeHeaderHTTP)
+				if additionalHeaderInformation, ok := outputValues["connectionHeader"]; ok {
+					if connectionHeader, isMap := additionalHeaderInformation.(map[string][]string); isMap {
+						for k, v := range connectionHeader {
+							header[k] = v
+						}
+					}
+				}
+
+				// build websocket dialer that will be used
 				dialer := ws.Dialer{
+					Header: header,
 					NetDial: func(ctx context.Context, network, addr string) (net.Conn, error) {
 						if ctx.Err() != nil {
 							return nil, ctx.Err()
@@ -288,24 +310,27 @@ func StackDefinition(
 						return connWrapper, nil
 					},
 				}
-				if ctx.Err() != nil {
-					return nil, ctx.Err()
+				// On error exit
+				if startParams.Ctx.Err() != nil {
+					return nil, startParams.Ctx.Err()
 				}
-				var err error
-				upgradedConnection, _, _, err = dialer.Dial(ctx, url.String())
+				upgradedConnection, _, _, err = dialer.Dial(startParams.Ctx, startParams.Url.String())
+
+				// On error exit
 				if err != nil {
 					return nil, err
 				}
 
-				if ctx.Err() != nil {
-					return nil, ctx.Err()
+				// On error exit
+				if startParams.Ctx.Err() != nil {
+					return nil, startParams.Ctx.Err()
 				}
 
-				go connectionLoop(upgradedConnection, ctx, nextInBoundChannel)
-				go triggerPingLoop(ctx, tempStep)
-				return upgradedConnection, ctx.Err()
+				go connectionLoop(upgradedConnection, startParams.Ctx, nextInBoundChannel)
+				go triggerPingLoop(startParams.Ctx, tempStep)
+				return upgradedConnection, startParams.Ctx.Err()
 			},
-			End: func() error {
+			End: func(endParams internal.StackEndStateParams) error {
 				err := pipeWriteClose.Close()
 				err = multierr.Append(err, upgradedConnection.Close())
 				err = multierr.Append(err, connWrapper.Close())

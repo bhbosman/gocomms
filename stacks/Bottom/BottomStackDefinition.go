@@ -7,17 +7,16 @@ import (
 	"github.com/bhbosman/goprotoextra"
 	"github.com/reactivex/rxgo/v2"
 	"net"
-	"net/url"
 )
 
 func StackDefinition(opts ...rxgo.Option) (*internal.StackDefinition, error) {
 	return &internal.StackDefinition{
 		Name: goerrors.BottomStackName,
-		Inbound: func(index int, ctx context.Context) internal.BoundDefinition {
+		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					return params.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						goerrors.BottomStackName,
 						rxgo.StreamDirectionInbound,
@@ -29,11 +28,11 @@ func StackDefinition(opts ...rxgo.Option) (*internal.StackDefinition, error) {
 				},
 			}
 		},
-		Outbound: func(index int, ctx context.Context) internal.BoundDefinition {
+		Outbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					return params.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						goerrors.BottomStackName,
 						rxgo.StreamDirectionOutbound,
@@ -46,8 +45,8 @@ func StackDefinition(opts ...rxgo.Option) (*internal.StackDefinition, error) {
 			}
 		},
 		StackState: internal.StackState{
-			Start: func(conn net.Conn, url *url.URL, ctx context.Context, cancelFunc internal.CancelFunc) (net.Conn, error) {
-				return conn, ctx.Err()
+			Start: func(startParams internal.StackStartStateParams) (net.Conn, error) {
+				return startParams.Conn, startParams.Ctx.Err()
 			},
 		},
 	}, nil

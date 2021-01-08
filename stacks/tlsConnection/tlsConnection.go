@@ -16,7 +16,6 @@ import (
 	"go.uber.org/multierr"
 	"io"
 	"net"
-	"net/url"
 )
 
 func StackDefinition(
@@ -62,16 +61,16 @@ func StackDefinition(
 	upgradedConnectionAssignedWaitGroup.Add(1)
 	return &internal.StackDefinition{
 		Name: stackName,
-		Inbound: func(index int, ctx context.Context) internal.BoundDefinition {
+		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			nextInBoundChannel = internal.NewChannelManager(make(chan rxgo.Item), "inbound TlsConnection", connectionId)
-			stackIndex = index
+			stackIndex = inOutBoundParams.Index
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					if stackCancelFunc == nil {
 						return nil, goerrors.InvalidParam
 					}
 					_ = params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionInbound,
@@ -96,7 +95,7 @@ func StackDefinition(
 				},
 			}
 		},
-		Outbound: func(index int, ctx context.Context) internal.BoundDefinition {
+		Outbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			nextOutboundChannel = internal.NewChannelManager(make(chan rxgo.Item), "outbound Tls Connection", connectionId)
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
@@ -104,7 +103,7 @@ func StackDefinition(
 						return nil, goerrors.InvalidParam
 					}
 					_ = params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionOutbound,
@@ -130,20 +129,20 @@ func StackDefinition(
 			}
 		},
 		StackState: internal.StackState{
-			Start: func(conn net.Conn, url *url.URL, ctx context.Context, cancelFunc internal.CancelFunc) (net.Conn, error) {
-				if ctx.Err() != nil {
-					return nil, ctx.Err()
+			Start: func(startParams internal.StackStartStateParams) (net.Conn, error) {
+				if startParams.Ctx.Err() != nil {
+					return nil, startParams.Ctx.Err()
 				}
 				var pipeRead io.Reader
-				pipeRead, pipeWriteClose = internal.Pipe(ctx)
-				if ctx.Err() != nil {
-					return nil, ctx.Err()
+				pipeRead, pipeWriteClose = internal.Pipe(startParams.Ctx)
+				if startParams.Ctx.Err() != nil {
+					return nil, startParams.Ctx.Err()
 				}
 				connWrapper = connectionWrapper.NewConnWrapper(
-					conn,
-					ctx,
+					startParams.Conn,
+					startParams.Ctx,
 					pipeRead,
-					nextOutBoundPath(ctx, nextOutboundChannel))
+					nextOutBoundPath(startParams.Ctx, nextOutboundChannel))
 
 				var tlsConn *tls.Conn
 				if connectionType == internal.ServerConnection {
@@ -170,14 +169,14 @@ func StackDefinition(
 				}
 				upgradedConnection = tlsConn
 				upgradedConnectionAssignedWaitGroup.Done()
-				if ctx.Err() != nil {
-					return nil, ctx.Err()
+				if startParams.Ctx.Err() != nil {
+					return nil, startParams.Ctx.Err()
 				}
 
 				go internal.ReadDataFromConnection(
 					upgradedConnection,
 					stackCancelFunc,
-					ctx,
+					startParams.Ctx,
 					connectionManager,
 					connectionId,
 					stackIndex-1,
@@ -186,9 +185,9 @@ func StackDefinition(
 						nextInBoundChannel.Send(cancelCtx, rws)
 					})
 
-				return conn, ctx.Err()
+				return startParams.Conn, startParams.Ctx.Err()
 			},
-			End: func() error {
+			End: func(endParams internal.StackEndStateParams) error {
 				err := pipeWriteClose.Close()
 				err = multierr.Append(err, upgradedConnection.Close())
 				err = multierr.Append(err, connWrapper.Close())

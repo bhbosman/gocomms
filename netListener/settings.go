@@ -1,7 +1,7 @@
 package netListener
 
 type netListenManagerSettings struct {
-	userContext interface{}
+	userContext    interface{}
 	maxConnections int
 }
 
@@ -20,6 +20,7 @@ func (self userContextValue) apply(settings *netListenManagerSettings) {
 func UserContextValue(userContext interface{}) *userContextValue {
 	return &userContextValue{userContext: userContext}
 }
+
 type maxConnectionsSetting struct {
 	maxConnections int
 }

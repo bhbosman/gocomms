@@ -11,11 +11,11 @@ import (
 func StackDefinition() (*internal.StackDefinition, error) {
 	return &internal.StackDefinition{
 		Name: goerrors.TopStackName,
-		Inbound: func(index int, ctx context.Context) internal.BoundDefinition {
+		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					return params.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						goerrors.TopStackName,
 						rxgo.StreamDirectionInbound,
@@ -26,11 +26,11 @@ func StackDefinition() (*internal.StackDefinition, error) {
 				},
 			}
 		},
-		Outbound: func(index int, ctx context.Context) internal.BoundDefinition {
+		Outbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					return params.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						goerrors.TopStackName,
 						rxgo.StreamDirectionOutbound,

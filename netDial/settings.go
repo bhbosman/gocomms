@@ -1,8 +1,8 @@
 package netDial
 
 type dialAppSettings struct {
-	userContext interface{}
-	canDial     []ICanDial
+	userContext    interface{}
+	canDial        []ICanDial
 	maxConnections int
 }
 
@@ -31,12 +31,10 @@ func CanDial(canDial ...ICanDial) *canDialSetting {
 }
 
 func (self canDialSetting) apply(settings *dialAppSettings) {
-	for _, cd := range self.canDial{
+	for _, cd := range self.canDial {
 		settings.canDial = append(settings.canDial, cd)
 	}
 }
-
-
 
 type maxConnectionsSetting struct {
 	maxConnections int

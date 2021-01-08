@@ -491,7 +491,6 @@ func invokeOutBoundTransportLayer(
 					if c%50 == 0 {
 						println(c)
 					}
-
 				})
 			return nil
 		},
@@ -504,17 +503,23 @@ func invokeOutBoundTransportLayer(
 func invokeIndividualStacks(
 	params struct {
 		fx.In
-		Url            *url.URL
-		Lifecycle      fx.Lifecycle
-		TransportLayer *internal.TwoWayPipe
-		Conn           net.Conn
-		CancelCtx      context.Context
-		CancelFunc     internal.CancelFunc
-	}) {
+		Url                          *url.URL
+		Lifecycle                    fx.Lifecycle
+		TransportLayer               *internal.TwoWayPipe
+		Conn                         net.Conn
+		CancelCtx                    context.Context
+		CancelFunc                   internal.CancelFunc
+		ConnectionReactorFactories   *ConnectionReactorFactories
+		ConnectionReactorFactoryName string `name:"ConnectionReactorFactoryName"`
+	}) error {
+	connectionReactorFactory, ok := params.ConnectionReactorFactories.m[params.ConnectionReactorFactoryName]
+	if !ok {
+		return fmt.Errorf("could not find ConnectionReactorFactory(%s) while invokeIndividualStacks", params.ConnectionReactorFactoryName)
+	}
 	localConn := params.Conn
 	for _, stackState := range params.TransportLayer.StackState {
 		if params.CancelCtx.Err() != nil {
-			return
+			return params.CancelCtx.Err()
 		}
 		localStackState := stackState
 		params.Lifecycle.Append(fx.Hook{
@@ -527,7 +532,13 @@ func invokeIndividualStacks(
 				}
 				if localStackState.Start != nil {
 					var err error
-					localConn, err = localStackState.Start(localConn, params.Url, params.CancelCtx, params.CancelFunc)
+					localConn, err = localStackState.Start(
+						internal.NewStackStartStateParams(
+							localConn,
+							params.Url,
+							params.CancelCtx,
+							params.CancelFunc,
+							connectionReactorFactory))
 					return err
 				}
 				return params.CancelCtx.Err()
@@ -535,13 +546,14 @@ func invokeIndividualStacks(
 			OnStop: func(ctx context.Context) error {
 				if localStackState.End != nil {
 					var err error
-					err = localStackState.End()
+					err = localStackState.End(internal.NewStackEndStateParams())
 					return err
 				}
 				return nil
 			},
 		})
 	}
+	return nil
 }
 
 func invokeIndividualPipes(

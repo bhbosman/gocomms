@@ -6,7 +6,7 @@ type ICanDial interface {
 	CanDial() bool
 }
 
-type CanDialDefaultImpl struct{
+type CanDialDefaultImpl struct {
 	count int64
 }
 
@@ -25,5 +25,3 @@ func (self *CanDialDefaultImpl) RemoveConsumer() {
 func (self *CanDialDefaultImpl) AddConsumer() {
 	atomic.AddInt64(&self.count, 1)
 }
-
-

@@ -21,7 +21,7 @@ func StackDefinition(
 	const stackName = "KillConnection"
 	return &internal.StackDefinition{
 		Name: stackName,
-		Inbound: func(index int, ctx context.Context) internal.BoundDefinition {
+		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			return internal.BoundDefinition{
 				PipeDefinition: func(
 					params internal.PipeDefinitionParams) (rxgo.Observable, error) {
@@ -29,7 +29,7 @@ func StackDefinition(
 						return nil, goerrors.InvalidParam
 					}
 					return params.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionInbound,
@@ -41,7 +41,7 @@ func StackDefinition(
 				},
 			}
 		},
-		Outbound: func(index int, ctx context.Context) internal.BoundDefinition {
+		Outbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			var outBoundChannel chan rxgo.Item
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
@@ -50,7 +50,7 @@ func StackDefinition(
 					}
 					outBoundChannel = make(chan rxgo.Item)
 					_ = params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionOutbound,

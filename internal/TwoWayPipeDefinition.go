@@ -19,12 +19,12 @@ type TwoWayPipeDefinition struct {
 func (self *TwoWayPipeDefinition) Add(name string, inbound, outbound PipeDefinition) {
 	self.AddStackDefinition(
 		&StackDefinition{
-			Inbound: func(index int, ctx context.Context) BoundDefinition {
+			Inbound: func(params InOutBoundParams) BoundDefinition {
 				return BoundDefinition{
 					PipeDefinition: inbound,
 				}
 			},
-			Outbound: func(index int, ctx context.Context) BoundDefinition {
+			Outbound: func(params InOutBoundParams) BoundDefinition {
 				return BoundDefinition{
 					PipeDefinition: outbound,
 				}
@@ -135,7 +135,11 @@ func (self *TwoWayPipeDefinition) buildOutBound(
 	for i := 0; i < len(self.Stacks); i++ {
 		stack := self.Stacks[i].StackDefinition.Outbound
 		if stack != nil {
-			err := handleStack(stack(self.Stacks[i].Idx, cancelContext))
+			err := handleStack(stack(
+				NewInOutBoundParams(
+					self.Stacks[i].Idx,
+					cancelContext,
+				)))
 			if err != nil {
 				return nil, nil, err
 			}
@@ -168,7 +172,12 @@ func (self *TwoWayPipeDefinition) buildInBound(
 	for i := len(self.Stacks) - 1; i >= 0; i-- {
 		stack := self.Stacks[i].StackDefinition.Inbound
 		if stack != nil {
-			err := handleStack(stack(self.Stacks[i].Idx, cancelContext))
+			err := handleStack(
+				stack(
+					NewInOutBoundParams(
+						self.Stacks[i].Idx,
+						cancelContext,
+					)))
 			if err != nil {
 				return nil, nil, err
 			}

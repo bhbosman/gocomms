@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"github.com/bhbosman/gocomms/intf"
 	"github.com/reactivex/rxgo/v2"
 	"net"
 	"net/url"
@@ -38,8 +39,35 @@ type PipeState struct {
 	End   PipeEnd
 }
 
-type StackStartState func(conn net.Conn, url *url.URL, ctx context.Context, cancelFunc CancelFunc) (net.Conn, error)
-type StackEndState func() error
+type StackStartStateParams struct {
+	Conn                     net.Conn
+	Url                      *url.URL
+	Ctx                      context.Context
+	CancelFunc               CancelFunc
+	ConnectionReactorFactory intf.IConnectionReactorFactoryExtractValues
+}
+
+func NewStackStartStateParams(conn net.Conn, url *url.URL, ctx context.Context, cancelFunc CancelFunc, connectionReactorFactoryExtractValues intf.IConnectionReactorFactoryExtractValues) StackStartStateParams {
+	return StackStartStateParams{
+		Conn:                     conn,
+		Url:                      url,
+		Ctx:                      ctx,
+		CancelFunc:               cancelFunc,
+		ConnectionReactorFactory: connectionReactorFactoryExtractValues,
+	}
+}
+
+type StackStartState func(startParams StackStartStateParams) (net.Conn, error)
+
+type StackEndStateParams struct {
+}
+
+func NewStackEndStateParams() StackEndStateParams {
+	return StackEndStateParams{}
+}
+
+type StackEndState func(endParams StackEndStateParams) error
+
 type StackState struct {
 	Start StackStartState
 	End   StackEndState
@@ -47,13 +75,10 @@ type StackState struct {
 
 type StackDefinition struct {
 	Name       string
-	Inbound    func(index int, ctx context.Context) BoundDefinition
-	Outbound   func(index int, ctx context.Context) BoundDefinition
+	Inbound    func(params InOutBoundParams) BoundDefinition
+	Outbound   func(params InOutBoundParams) BoundDefinition
 	StackState StackState
 }
-
-
-
 
 type ConnectionType uint8
 

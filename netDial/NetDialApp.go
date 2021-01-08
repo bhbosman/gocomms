@@ -57,4 +57,3 @@ func NewNetDialApp(
 		), nil
 	}
 }
-

@@ -3,8 +3,8 @@ package impl
 import (
 	"context"
 	"github.com/bhbosman/gocomms/connectionManager"
-	"github.com/bhbosman/gocomms/intf"
 	"github.com/bhbosman/gocomms/internal"
+	"github.com/bhbosman/gocomms/intf"
 	"github.com/bhbosman/gologging"
 	"github.com/reactivex/rxgo/v2"
 	"go.uber.org/fx"
@@ -13,14 +13,14 @@ import (
 func CommonComponents(
 	url string,
 	stackName string,
-	ClientContextFactories *ConnectionReactorFactories,
+	connectionReactorFactories *ConnectionReactorFactories,
 	ParentContext context.Context,
 	StackFactory *TransportFactory,
 	ConnectionManager connectionManager.IConnectionManager,
 	connectionReactorFactoryName string,
 	logFactory *gologging.Factory) fx.Option {
 	return fx.Options(
-		fx.Supply(ClientContextFactories, StackFactory, logFactory),
+		fx.Supply(connectionReactorFactories, StackFactory, logFactory),
 		fx.Provide(fx.Annotated{Target: internal.CreateUrl(url)}),
 		fx.Provide(fx.Annotated{Name: "StackName", Target: CreateStringContext(stackName)}),
 		fx.Provide(fx.Annotated{Name: intf.ConnectionReactorFactoryName, Target: CreateStringContext(connectionReactorFactoryName)}),

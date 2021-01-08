@@ -29,7 +29,7 @@ func StackDefinition(
 	const stackName = "MessageBreaker"
 	return &internal2.StackDefinition{
 		Name: stackName,
-		Inbound: func(index int, ctx context.Context) internal2.BoundDefinition {
+		Inbound: func(inOutBoundParams internal2.InOutBoundParams) internal2.BoundDefinition {
 			channelManager := internal2.NewChannelManager(make(chan rxgo.Item), "Inbound MessageBreaker", connectionId)
 			return internal2.BoundDefinition{
 				PipeDefinition: func(params internal2.PipeDefinitionParams) (rxgo.Observable, error) {
@@ -113,7 +113,7 @@ func StackDefinition(
 					}
 
 					_ = params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionInbound,
@@ -155,7 +155,7 @@ func StackDefinition(
 				},
 			}
 		},
-		Outbound: func(index int, ctx context.Context) internal2.BoundDefinition {
+		Outbound: func(inOutBoundParams internal2.InOutBoundParams) internal2.BoundDefinition {
 			return internal2.BoundDefinition{
 				PipeDefinition: func(params internal2.PipeDefinitionParams) (rxgo.Observable, error) {
 					if stackCancelFunc == nil {
@@ -163,7 +163,7 @@ func StackDefinition(
 					}
 					errorState := false
 					return params.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionOutbound,

@@ -13,7 +13,6 @@ import (
 
 	"io"
 	"net"
-	"net/url"
 )
 
 func StackDefinition(
@@ -25,7 +24,7 @@ func StackDefinition(
 	const stackName = "Compression"
 	return &internal.StackDefinition{
 		Name: stackName,
-		Inbound: func(index int, ctx context.Context) internal.BoundDefinition {
+		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			decompressorStream := gomessageblock.NewReaderWriter()
 			decompressor := flate.NewReader(decompressorStream)
 			// decompressorMutex is here to safe guard panics when trying to destroy,
@@ -37,7 +36,7 @@ func StackDefinition(
 						return nil, goerrors.InvalidParam
 					}
 					return params.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionInbound,
@@ -81,7 +80,7 @@ func StackDefinition(
 				},
 			}
 		},
-		Outbound: func(index int, ctx context.Context) internal.BoundDefinition {
+		Outbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			compressionStream := gomessageblock.NewReaderWriter()
 			compression, err := flate.NewWriter(compressionStream, flate.DefaultCompression)
 			// compressorMutex is here to safe guard panics when trying to destroy,
@@ -96,7 +95,7 @@ func StackDefinition(
 						return nil, err
 					}
 					return params.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionOutbound,
@@ -161,10 +160,10 @@ func StackDefinition(
 			}
 		},
 		StackState: internal.StackState{
-			Start: func(conn net.Conn, url *url.URL, ctx context.Context, cancelFunc internal.CancelFunc) (net.Conn, error) {
-				return conn, ctx.Err()
+			Start: func(startParams internal.StackStartStateParams) (net.Conn, error) {
+				return startParams.Conn, startParams.Ctx.Err()
 			},
-			End: func() error {
+			End: func(endParams internal.StackEndStateParams) error {
 				return nil
 			},
 		},

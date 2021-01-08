@@ -89,7 +89,7 @@ func newNetListenManager(
 		CancelFunction             context.CancelFunc
 		StackFactoryFunction       impl.TransportFactoryFunction
 		Logger                     *gologging.SubSystemLogger
-		ClientContextFactoryName   string      `name:"ConnectionReactorFactoryName"`
+		ClientContextFactoryName   string `name:"ConnectionReactorFactoryName"`
 		LogFactory                 *gologging.Factory
 		Settings                   []ListenAppSettingsApply
 	}) *netListenManager {

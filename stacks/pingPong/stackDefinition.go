@@ -10,7 +10,6 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/reactivex/rxgo/v2"
 	"net"
-	"net/url"
 	"time"
 )
 
@@ -23,12 +22,12 @@ func StackDefinition(
 	outboundChannel := internal.NewChannelManager(make(chan rxgo.Item), "outbound PingPong", connectionId)
 	return &internal.StackDefinition{
 		Name: StackName,
-		Inbound: func(index int, ctx context.Context) internal.BoundDefinition {
+		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					channelManager := internal.NewChannelManager(make(chan rxgo.Item), "inbound PingPong", connectionId)
 					disposable := params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						StackName,
 						rxgo.StreamDirectionInbound,
@@ -80,11 +79,11 @@ func StackDefinition(
 				},
 			}
 		},
-		Outbound: func(index int, ctx context.Context) internal.BoundDefinition {
+		Outbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			return internal.BoundDefinition{
 				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					disposable := params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
-						index,
+						inOutBoundParams.Index,
 						params.ConnectionId,
 						StackName,
 						rxgo.StreamDirectionOutbound,
@@ -103,7 +102,7 @@ func StackDefinition(
 							select {
 							case <-disposable:
 								return
-							case <-ctx.Done():
+							case <-inOutBoundParams.Context.Done():
 								return
 							case <-ticker.C:
 								if started {
@@ -117,7 +116,7 @@ func StackDefinition(
 									if err != nil {
 										continue
 									}
-									outboundChannel.Send(ctx, marshall)
+									outboundChannel.Send(inOutBoundParams.Context, marshall)
 								}
 							}
 						}
@@ -127,11 +126,11 @@ func StackDefinition(
 			}
 		},
 		StackState: internal.StackState{
-			Start: func(conn net.Conn, url *url.URL, ctx context.Context, cancelFunc internal.CancelFunc) (net.Conn, error) {
+			Start: func(startParams internal.StackStartStateParams) (net.Conn, error) {
 				started = true
-				return conn, ctx.Err()
+				return startParams.Conn, startParams.Ctx.Err()
 			},
-			End: func() error {
+			End: func(endParams internal.StackEndStateParams) error {
 				return outboundChannel.Close()
 			},
 		},

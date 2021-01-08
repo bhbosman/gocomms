@@ -27,7 +27,17 @@ const ConnectionId = "ConnectionId"
 const UserContext = "UserContext"
 const ConnectionReactorFactoryName = "ConnectionReactorFactoryName"
 
-type IConnectionReactorFactory interface {
-	Name() string
+type IConnectionReactorFactoryCreateReactor interface {
 	Create(name string, cancelCtx context.Context, cancelFunc context.CancelFunc, logger *gologging.SubSystemLogger, userContext interface{}) IConnectionReactor
+}
+
+type IConnectionReactorFactoryExtractValues interface {
+	Values(inputValues map[string]interface{}) (map[string]interface{}, error)
+}
+
+type IConnectionReactorFactory interface {
+	IConnectionReactorFactoryCreateReactor
+	IConnectionReactorFactoryExtractValues
+
+	Name() string
 }
