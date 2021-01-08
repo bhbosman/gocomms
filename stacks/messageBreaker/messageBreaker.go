@@ -12,10 +12,10 @@ import (
 	"github.com/bhbosman/goprotoextra"
 	"github.com/reactivex/rxgo/v2"
 	"reflect"
-	"sync"
 )
 
 func StackDefinition(
+	connectionId string,
 	stackCancelFunc internal2.CancelFunc,
 	stateFunc func(stateFrom, stateTo internal.BuildMessageState, length uint32),
 	connectionManager rxgo.IPublishToConnectionManager,
@@ -30,10 +30,7 @@ func StackDefinition(
 	return &internal2.StackDefinition{
 		Name: stackName,
 		Inbound: func(index int, ctx context.Context) internal2.BoundDefinition {
-			channelManager := &internal2.ChannelManager{
-				Items: make(chan rxgo.Item),
-				Mutex: &sync.Mutex{},
-			}
+			channelManager := internal2.NewChannelManager(make(chan rxgo.Item), "Inbound MessageBreaker", connectionId)
 			return internal2.BoundDefinition{
 				PipeDefinition: func(params internal2.PipeDefinitionParams) (rxgo.Observable, error) {
 					if stackCancelFunc == nil {

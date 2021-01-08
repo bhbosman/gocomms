@@ -60,7 +60,7 @@ func (self TwoWayPipeDefinition) Build(
 	cancelCtx context.Context,
 	stackCancelFunc CancelFunc) (*TwoWayPipe, error) {
 	createChannel := func() chan rxgo.Item {
-		return make(chan rxgo.Item)
+		return make(chan rxgo.Item, 1024)
 	}
 	inBoundChannel := createChannel()
 	outBoundChannel := createChannel()
@@ -100,6 +100,7 @@ func (self TwoWayPipeDefinition) Build(
 	}
 
 	return NewTwoWayPipe(
+		connectionId,
 		logger,
 		inBoundChannel,
 		outBoundChannel,

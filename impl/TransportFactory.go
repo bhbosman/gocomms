@@ -105,7 +105,7 @@ func (self *TransportFactory) CreateCompressed(
 		return Top.StackDefinition()
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
-		return pingPong.StackDefinition(opts...)
+		return pingPong.StackDefinition(connectionId, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
 		return messageCompressor.StackDefinition(stackCancelFunc, opts...)
@@ -114,7 +114,7 @@ func (self *TransportFactory) CreateCompressed(
 		return messageNumber.StackDefinition(userContext, stackCancelFunc, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
-		return messageBreaker.StackDefinition(stackCancelFunc, nil, connectionManager, opts...)
+		return messageBreaker.StackDefinition(connectionId, stackCancelFunc, nil, connectionManager, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
 		return Bottom.StackDefinition()
@@ -124,7 +124,7 @@ func (self *TransportFactory) CreateCompressed(
 
 func (self *TransportFactory) CreateUnCompressed(
 	connectionType internal.ConnectionType,
-	_ string,
+	connectionId string,
 	userContext interface{},
 	connectionManager connectionManager.IConnectionManager,
 	_ context.Context,
@@ -135,13 +135,13 @@ func (self *TransportFactory) CreateUnCompressed(
 		return Top.StackDefinition()
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
-		return pingPong.StackDefinition(opts...)
+		return pingPong.StackDefinition(connectionId, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
 		return messageNumber.StackDefinition(userContext, stackCancelFunc, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
-		return messageBreaker.StackDefinition(stackCancelFunc, nil, connectionManager, opts...)
+		return messageBreaker.StackDefinition(connectionId, stackCancelFunc, nil, connectionManager, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
 		return Bottom.StackDefinition()
@@ -162,7 +162,7 @@ func (self *TransportFactory) CreateCompressedTls(
 		return Top.StackDefinition()
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
-		return pingPong.StackDefinition(opts...)
+		return pingPong.StackDefinition(connectionId, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
 		return messageCompressor.StackDefinition(stackCancelFunc, opts...)
@@ -171,7 +171,7 @@ func (self *TransportFactory) CreateCompressedTls(
 		return messageNumber.StackDefinition(userContext, stackCancelFunc, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
-		return messageBreaker.StackDefinition(stackCancelFunc, nil, connectionManager, opts...)
+		return messageBreaker.StackDefinition(connectionId, stackCancelFunc, nil, connectionManager, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
 		return tlsConnection.StackDefinition(connectionType, stackCancelFunc, connectionManager, connectionId)
@@ -195,14 +195,14 @@ func (self *TransportFactory) CreateUnCompressedTls(
 		return Top.StackDefinition()
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
-		return pingPong.StackDefinition(opts...)
+		return pingPong.StackDefinition(connectionId, opts...)
 	})
 
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
 		return messageNumber.StackDefinition(userContext, stackCancelFunc, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
-		return messageBreaker.StackDefinition(stackCancelFunc, nil, connectionManager, opts...)
+		return messageBreaker.StackDefinition(connectionId, stackCancelFunc, nil, connectionManager, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
 		return tlsConnection.StackDefinition(connectionType, stackCancelFunc, connectionManager, connectionId)

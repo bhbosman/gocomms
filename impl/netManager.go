@@ -15,7 +15,7 @@ import (
 	"math"
 	"net"
 	"net/url"
-	"sync"
+
 	"time"
 )
 
@@ -173,15 +173,13 @@ func createStackDefinition(
 func createChannel(
 	params struct {
 		fx.In
-		CancelCtx context.Context
+		CancelCtx    context.Context
+		ConnectionId string `name:"ConnectionId"`
 	}) (rxgo.Observable, *internal.ChannelManager) {
 	result := make(chan rxgo.Item, 1024)
 	obs := rxgo.FromChannel(result, rxgo.WithContext(params.CancelCtx))
-	return obs,
-		&internal.ChannelManager{
-			Items: result,
-			Mutex: &sync.Mutex{},
-		}
+	return obs, internal.NewChannelManager(result, "create channel", params.ConnectionId)
+
 }
 
 func invokeConnectionManager(
@@ -470,6 +468,7 @@ func invokeOutBoundTransportLayer(
 				return params.CancelCtx.Err()
 			}
 			outboundNextClosed := false
+			c := 0
 			_ = params.TransportLayer.OutboundObservable.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 				math.MaxInt16,
 				params.ConnectionId,
@@ -487,6 +486,10 @@ func invokeOutBoundTransportLayer(
 					if err != nil {
 						params.CancelFunc()
 						return
+					}
+					c++
+					if c%50 == 0 {
+						println(c)
 					}
 
 				})
