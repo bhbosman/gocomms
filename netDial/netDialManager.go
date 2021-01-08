@@ -13,10 +13,6 @@ import (
 	"time"
 )
 
-type ICanDial interface {
-	CanDial() bool
-}
-
 type netDialManager struct {
 	impl.NetManager
 	CanDial []ICanDial
