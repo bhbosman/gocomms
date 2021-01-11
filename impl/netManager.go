@@ -468,7 +468,6 @@ func invokeOutBoundTransportLayer(
 				return params.CancelCtx.Err()
 			}
 			outboundNextClosed := false
-			c := 0
 			_ = params.TransportLayer.OutboundObservable.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 				math.MaxInt16,
 				params.ConnectionId,
@@ -486,10 +485,6 @@ func invokeOutBoundTransportLayer(
 					if err != nil {
 						params.CancelFunc()
 						return
-					}
-					c++
-					if c%50 == 0 {
-						println(c)
 					}
 				})
 			return nil
