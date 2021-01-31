@@ -24,18 +24,18 @@ func StackDefinition(
 		Name: stackName,
 		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			return internal.BoundDefinition{
-				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
+				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					if stackCancelFunc == nil {
 						return nil, goerrors.InvalidParam
 					}
 					errorState := false
 					var number uint64 = 0
-					return params.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
+					return pipeParams.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
 						inOutBoundParams.Index,
-						params.ConnectionId,
+						pipeParams.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionInbound,
-						params.ConnectionManager,
+						pipeParams.ConnectionManager,
 						func(ctx context.Context, i goprotoextra.ReadWriterSize) (goprotoextra.ReadWriterSize, error) {
 							if errorState {
 								stackCancelFunc("In error state", true, goerrors.InvalidState)
@@ -66,18 +66,18 @@ func StackDefinition(
 		},
 		Outbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			return internal.BoundDefinition{
-				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
+				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					if stackCancelFunc == nil {
 						return nil, goerrors.InvalidParam
 					}
 					errorState := false
 					var number uint64 = 0
-					return params.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
+					return pipeParams.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
 						inOutBoundParams.Index,
-						params.ConnectionId,
+						pipeParams.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionOutbound,
-						params.ConnectionManager,
+						pipeParams.ConnectionManager,
 						func(ctx context.Context, i goprotoextra.ReadWriterSize) (goprotoextra.ReadWriterSize, error) {
 							if errorState {
 								stackCancelFunc("In error state", true, goerrors.InvalidState)

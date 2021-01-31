@@ -162,13 +162,13 @@ func StackDefinition(
 		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			nextInBoundChannel = make(chan rxgo.Item)
 			return internal.BoundDefinition{
-				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
+				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					if stackCancelFunc == nil {
 						return nil, goerrors.InvalidParam
 					}
-					_ = params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
+					_ = pipeParams.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 						inOutBoundParams.Index,
-						params.ConnectionId,
+						pipeParams.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionInbound,
 						connectionManager,
@@ -196,13 +196,13 @@ func StackDefinition(
 			nextOutboundChannel = make(chan rxgo.Item)
 			tempStep = make(chan rxgo.Item)
 			return internal.BoundDefinition{
-				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
+				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					if stackCancelFunc == nil {
 						return nil, goerrors.InvalidParam
 					}
-					_ = params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
+					_ = pipeParams.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 						inOutBoundParams.Index-1,
-						params.ConnectionId,
+						pipeParams.ConnectionId,
 						stackName+"FromUser",
 						rxgo.StreamDirectionOutbound,
 						connectionManager,
@@ -215,7 +215,7 @@ func StackDefinition(
 					tempObs := rxgo.FromChannel(tempStep)
 					_ = tempObs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 						inOutBoundParams.Index,
-						params.ConnectionId,
+						pipeParams.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionOutbound,
 						connectionManager,

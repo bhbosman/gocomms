@@ -24,14 +24,14 @@ func StackDefinition(
 		Name: StackName,
 		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			return internal.BoundDefinition{
-				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
+				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					channelManager := internal.NewChannelManager(make(chan rxgo.Item), "inbound PingPong", connectionId)
-					disposable := params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
+					disposable := pipeParams.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 						inOutBoundParams.Index,
-						params.ConnectionId,
+						pipeParams.ConnectionId,
 						StackName,
 						rxgo.StreamDirectionInbound,
-						params.ConnectionManager,
+						pipeParams.ConnectionManager,
 						func(ctx context.Context, incoming goprotoextra.ReadWriterSize) {
 							if ctx.Err() != nil {
 								return
@@ -81,13 +81,13 @@ func StackDefinition(
 		},
 		Outbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			return internal.BoundDefinition{
-				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
-					disposable := params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
+				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
+					disposable := pipeParams.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 						inOutBoundParams.Index,
-						params.ConnectionId,
+						pipeParams.ConnectionId,
 						StackName,
 						rxgo.StreamDirectionOutbound,
-						params.ConnectionManager,
+						pipeParams.ConnectionManager,
 						func(ctx context.Context, size goprotoextra.ReadWriterSize) {
 							if ctx.Err() != nil {
 								return
