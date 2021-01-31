@@ -31,16 +31,16 @@ func StackDefinition(
 			//and while still busy processing data
 			decompressorMutex := sync.Mutex{}
 			return internal.BoundDefinition{
-				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
+				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					if stackCancelFunc == nil {
 						return nil, goerrors.InvalidParam
 					}
-					return params.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
+					return pipeParams.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
 						inOutBoundParams.Index,
-						params.ConnectionId,
+						pipeParams.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionInbound,
-						params.ConnectionManager,
+						pipeParams.ConnectionManager,
 						func(ctx context.Context, incomingBlock goprotoextra.ReadWriterSize) (goprotoextra.ReadWriterSize, error) {
 							decompressorMutex.Lock()
 							defer decompressorMutex.Unlock()
@@ -87,19 +87,19 @@ func StackDefinition(
 			//and while still busy processing data
 			compressionMutex := sync.Mutex{}
 			return internal.BoundDefinition{
-				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
+				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					if stackCancelFunc == nil {
 						return nil, goerrors.InvalidParam
 					}
 					if err != nil {
 						return nil, err
 					}
-					return params.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
+					return pipeParams.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
 						inOutBoundParams.Index,
-						params.ConnectionId,
+						pipeParams.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionOutbound,
-						params.ConnectionManager,
+						pipeParams.ConnectionManager,
 						func(ctx context.Context, size goprotoextra.ReadWriterSize) (goprotoextra.ReadWriterSize, error) {
 							compressionMutex.Lock()
 							defer compressionMutex.Unlock()

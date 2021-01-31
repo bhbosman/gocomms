@@ -65,13 +65,13 @@ func StackDefinition(
 			nextInBoundChannel = internal.NewChannelManager(make(chan rxgo.Item), "inbound TlsConnection", connectionId)
 			stackIndex = inOutBoundParams.Index
 			return internal.BoundDefinition{
-				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
+				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					if stackCancelFunc == nil {
 						return nil, goerrors.InvalidParam
 					}
-					_ = params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
+					_ = pipeParams.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 						inOutBoundParams.Index,
-						params.ConnectionId,
+						pipeParams.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionInbound,
 						connectionManager,
@@ -98,13 +98,13 @@ func StackDefinition(
 		Outbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			nextOutboundChannel = internal.NewChannelManager(make(chan rxgo.Item), "outbound Tls Connection", connectionId)
 			return internal.BoundDefinition{
-				PipeDefinition: func(params internal.PipeDefinitionParams) (rxgo.Observable, error) {
+				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
 					if stackCancelFunc == nil {
 						return nil, goerrors.InvalidParam
 					}
-					_ = params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
+					_ = pipeParams.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 						inOutBoundParams.Index,
-						params.ConnectionId,
+						pipeParams.ConnectionId,
 						stackName,
 						rxgo.StreamDirectionOutbound,
 						connectionManager,
