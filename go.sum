@@ -4,6 +4,7 @@ github.com/bhbosman/goMessages v0.0.0-20200922081308-8c8f88094624 h1:0Iz4oHdkL/H
 github.com/bhbosman/goMessages v0.0.0-20200922081308-8c8f88094624/go.mod h1:iBUstMHvgPQ3Aa06jh/jmC9fxYpJk8fPjM89qEorO/A=
 github.com/bhbosman/gocommon v0.0.0-20200921215456-bfddd9bb050e h1:4o6OzhytoIFiDaOv1+c+I6+xGXWtr6AYWU8wzD/twA8=
 github.com/bhbosman/gocommon v0.0.0-20200921215456-bfddd9bb050e/go.mod h1:bl0WcS0qhk3nzfVrnXxZj1c+JwHwpjw2iTIOU5CQZ+8=
+github.com/bhbosman/gocomms v0.0.0-20210108094235-212b4e8c628c/go.mod h1:Xj2clJ6T+zbkmbFC0+Zwm/FBfJ8DvKlsQrbvNcmNyKk=
 github.com/bhbosman/goerrors v0.0.0-20200918064252-e47717b09c4f h1:tn+HxggOxuewICKQ+p4mLoRyfE503xgIhWDo+2Z3dWk=
 github.com/bhbosman/goerrors v0.0.0-20200918064252-e47717b09c4f/go.mod h1:Otn1qS556wnQOL+lAkheIV/UxgKITTmY3KDYAXkQbfQ=
 github.com/bhbosman/gologging v0.0.0-20200921180328-d29fc55c00bc h1:W2SGlAixV5+dBq5da/dVJDYcUxEItIA5IdqdLTjnaLQ=
@@ -14,6 +15,7 @@ github.com/bhbosman/goprotoextra v0.0.1 h1:CoIa6MSq9A3CMqrpStgpgh/Q731HSDyGoa0bz
 github.com/bhbosman/goprotoextra v0.0.1/go.mod h1:8KtYuUDuRrZU4VOpB9r2YKWJtuThaB2ep3OtJdsF+zU=
 github.com/bhbosman/gorxextra v0.0.0-20200918070301-48dbd8b934dc h1:NMbD4FomqA6P9U2AM2+2hU7J4abIadK5mGgD3I5sijI=
 github.com/bhbosman/gorxextra v0.0.0-20200918070301-48dbd8b934dc/go.mod h1:tEwpbgFFydqczSq55t29rLrK9dz4+9ShWsBdKk3WTnU=
+github.com/bhbosman/govalr v0.0.0-20210111144927-560a53368b93/go.mod h1:5xeMr4L3RNvn8saVh7DQa7qyvr18YecfxNH49gFOcEo=
 github.com/bhbosman/rxgo/v2 v2.1.1-0.20200922152528-6aef42e76e00 h1:QJDRQLoBtUCe+NUKX5UT3H88tBMNXnnVT6J8L0JjjIg=
 github.com/bhbosman/rxgo/v2 v2.1.1-0.20200922152528-6aef42e76e00/go.mod h1:jzCqxCtjqmZLvMdKneicaw4aKB+1iRtvd9etRY4gDNI=
 github.com/cenkalti/backoff/v4 v4.0.2 h1:JIufpQLbh4DkbQoii76ItQIUFzevQSqOLZca4eamEDs=

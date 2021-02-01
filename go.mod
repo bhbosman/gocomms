@@ -3,8 +3,8 @@ module github.com/bhbosman/gocomms
 go 1.15
 
 require (
-	github.com/bhbosman/goMessages v0.0.0-20200922081308-8c8f88094624
-	github.com/bhbosman/gocommon v0.0.0-20200921215456-bfddd9bb050e
+	github.com/bhbosman/goMessages v0.0.0-20201004192822-66d168b4b744
+	github.com/bhbosman/gocommon v0.0.0-20201004145117-eae02ab42c9a
 	github.com/bhbosman/goerrors v0.0.0-20200918064252-e47717b09c4f
 	github.com/bhbosman/gologging v0.0.0-20200921180328-d29fc55c00bc
 	github.com/bhbosman/gomessageblock v0.0.0-20200921180725-7cd29a998aa3
@@ -26,16 +26,16 @@ require (
 	google.golang.org/protobuf v1.25.0
 
 )
+
 replace github.com/reactivex/rxgo/v2 v2.1.0 => github.com/bhbosman/rxgo/v2 v2.1.1-0.20200922152528-6aef42e76e00
 
-
 replace (
-		github.com/bhbosman/goMessages => ../goMessages
-    	github.com/bhbosman/gocommon => ../gocommon
-    	github.com/bhbosman/goerrors => ../goerrors
-    	github.com/bhbosman/gologging => ../gologging
-    	github.com/bhbosman/gomessageblock => ../gomessageblock
-    	github.com/bhbosman/goprotoextra => ../goprotoextra
-    	github.com/bhbosman/gorxextra => ../gorxextra
+	github.com/bhbosman/goMessages => ../goMessages
+	github.com/bhbosman/gocommon => ../gocommon
+	github.com/bhbosman/goerrors => ../goerrors
+	github.com/bhbosman/gologging => ../gologging
+	github.com/bhbosman/gomessageblock => ../gomessageblock
+	github.com/bhbosman/goprotoextra => ../goprotoextra
+	github.com/bhbosman/gorxextra => ../gorxextra
 
 )
