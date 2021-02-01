@@ -30,12 +30,12 @@ replace github.com/reactivex/rxgo/v2 v2.1.0 => github.com/bhbosman/rxgo/v2 v2.1.
 
 
 replace (
-		github.com/bhbosman/goMessages => ..\goMessages
-    	github.com/bhbosman/gocommon => ..\gocommon
-    	github.com/bhbosman/goerrors => ..\goerrors
-    	github.com/bhbosman/gologging => ..\gologging
-    	github.com/bhbosman/gomessageblock => ..\gomessageblock
-    	github.com/bhbosman/goprotoextra => ..\goprotoextra
-    	github.com/bhbosman/gorxextra => ..\gorxextra
+		github.com/bhbosman/goMessages => ../goMessages
+    	github.com/bhbosman/gocommon => ../gocommon
+    	github.com/bhbosman/goerrors => ../goerrors
+    	github.com/bhbosman/gologging => ../gologging
+    	github.com/bhbosman/gomessageblock => ../gomessageblock
+    	github.com/bhbosman/goprotoextra => ../goprotoextra
+    	github.com/bhbosman/gorxextra => ../gorxextra
 
 )
