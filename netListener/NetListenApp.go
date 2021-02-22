@@ -17,7 +17,6 @@ type NetListenAppFuncInParams struct {
 	ClientContextFactories *impl.ConnectionReactorFactories
 	ParentContext          context.Context `name:"Application"`
 	Lifecycle              fx.Lifecycle
-	StackFactory           *impl.TransportFactory
 	ConnectionManager      connectionManager.IConnectionManager
 	LogFactory             *gologging.Factory
 }
@@ -25,7 +24,6 @@ type NetListenAppFuncInParams struct {
 func NewNetListenApp(
 	connectionName string,
 	url string,
-	stackName string,
 	stackCreateFunction impl.TransportFactoryFunction,
 	userContextFactoryName string, settings ...ListenAppSettingsApply) NewNetListenAppFunc {
 	return func(params NetListenAppFuncInParams) (*fx.App, error) {
@@ -33,11 +31,9 @@ func NewNetListenApp(
 			fx.Supply(settings),
 			impl.CommonComponents(
 				url,
-				stackName,
 				stackCreateFunction,
 				params.ClientContextFactories,
 				params.ParentContext,
-				params.StackFactory,
 				params.ConnectionManager,
 				userContextFactoryName,
 				params.LogFactory),

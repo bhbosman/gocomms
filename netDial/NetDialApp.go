@@ -14,7 +14,6 @@ type AppFuncInParams struct {
 	ClientContextFactories *impl.ConnectionReactorFactories
 	ParentContext          context.Context `name:"Application"`
 	Lifecycle              fx.Lifecycle
-	StackFactory           *impl.TransportFactory
 	ConnectionManager      connectionManager.IConnectionManager
 	LogFactory             *gologging.Factory
 }
@@ -23,7 +22,6 @@ type AppFunc func(params AppFuncInParams) (*fx.App, error)
 func NewNetDialApp(
 	connectionName string,
 	url string,
-	stackName string,
 	stackCreateFunction impl.TransportFactoryFunction,
 	userContextFactoryName string,
 	options ...DialAppSettingsApply) AppFunc {
@@ -35,11 +33,9 @@ func NewNetDialApp(
 			fx.Supply(options),
 			impl.CommonComponents(
 				url,
-				stackName,
 				stackCreateFunction,
 				params.ClientContextFactories,
 				params.ParentContext,
-				params.StackFactory,
 				params.ConnectionManager,
 				userContextFactoryName,
 				params.LogFactory),

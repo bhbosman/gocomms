@@ -25,9 +25,6 @@ type TransportFactoryFunction func(
 	cancelFunc internal.CancelFunc,
 	opts ...rxgo.Option) (*internal.TwoWayPipeDefinition, error)
 
-type TransportFactory struct {
-}
-
 func CreateEmptyStack(
 	connectionType internal.ConnectionType,
 	_ string,
@@ -47,7 +44,7 @@ func CreateEmptyStack(
 	return result, nil
 }
 
-func (self *TransportFactory) CreateWebSocket(
+func CreateWebSocketStack(
 	connectionType internal.ConnectionType,
 	connectionId string,
 	userContext interface{},
@@ -69,7 +66,7 @@ func (self *TransportFactory) CreateWebSocket(
 	return result, nil
 }
 
-func (self *TransportFactory) CreateDefault(
+func CreateDefaultStack(
 	connectionType internal.ConnectionType,
 	_ string,
 	userContext interface{},
@@ -149,7 +146,7 @@ func CreateUnCompressedStack(
 	return result, nil
 }
 
-func (self *TransportFactory) CreateCompressedTls(
+func CreateCompressedTlsStack(
 	connectionType internal.ConnectionType,
 	connectionId string,
 	userContext interface{},
@@ -182,7 +179,7 @@ func (self *TransportFactory) CreateCompressedTls(
 	return result, nil
 }
 
-func (self *TransportFactory) CreateUnCompressedTls(
+func CreateUnCompressedTlsStack(
 	connectionType internal.ConnectionType,
 	connectionId string,
 	userContext interface{},
@@ -220,12 +217,12 @@ const TransportFactoryUnCompressedName = "Uncompressed"
 const TransportFactoryEmptyName = "Empty"
 const WebSocketName = "WebSocket"
 
-func (self *TransportFactory) Get(name string) (TransportFactoryFunction, error) {
+func GetNamedStack(name string) (TransportFactoryFunction, error) {
 	switch name {
 	case TransportFactoryCompressedTlsName:
-		return self.CreateCompressedTls, nil
+		return CreateCompressedTlsStack, nil
 	case TransportFactoryUnCompressedTlsName:
-		return self.CreateUnCompressedTls, nil
+		return CreateUnCompressedTlsStack, nil
 	case TransportFactoryCompressedName:
 		return CreateCompressedStack, nil
 	case TransportFactoryUnCompressedName:
@@ -233,13 +230,8 @@ func (self *TransportFactory) Get(name string) (TransportFactoryFunction, error)
 	case TransportFactoryEmptyName:
 		return CreateEmptyStack, nil
 	case WebSocketName:
-		return self.CreateWebSocket, nil
+		return CreateWebSocketStack, nil
 	default:
-		return self.CreateDefault, nil
+		return CreateDefaultStack, nil
 	}
-}
-
-func NewTransportFactory() *TransportFactory {
-	result := &TransportFactory{}
-	return result
 }
