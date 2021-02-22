@@ -26,6 +26,7 @@ func NewNetListenApp(
 	connectionName string,
 	url string,
 	stackName string,
+	stackCreateFunction impl.TransportFactoryFunction,
 	userContextFactoryName string, settings ...ListenAppSettingsApply) NewNetListenAppFunc {
 	return func(params NetListenAppFuncInParams) (*fx.App, error) {
 		return fx.New(
@@ -33,6 +34,7 @@ func NewNetListenApp(
 			impl.CommonComponents(
 				url,
 				stackName,
+				stackCreateFunction,
 				params.ClientContextFactories,
 				params.ParentContext,
 				params.StackFactory,

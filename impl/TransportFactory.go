@@ -28,7 +28,7 @@ type TransportFactoryFunction func(
 type TransportFactory struct {
 }
 
-func (self *TransportFactory) CreateEmpty(
+func CreateEmptyStack(
 	connectionType internal.ConnectionType,
 	_ string,
 	_ interface{},
@@ -92,7 +92,7 @@ func (self *TransportFactory) CreateDefault(
 	return result, nil
 }
 
-func (self *TransportFactory) CreateCompressed(
+func CreateCompressedStack(
 	connectionType internal.ConnectionType,
 	connectionId string,
 	userContext interface{},
@@ -122,7 +122,7 @@ func (self *TransportFactory) CreateCompressed(
 	return result, nil
 }
 
-func (self *TransportFactory) CreateUnCompressed(
+func CreateUnCompressedStack(
 	connectionType internal.ConnectionType,
 	connectionId string,
 	userContext interface{},
@@ -227,11 +227,11 @@ func (self *TransportFactory) Get(name string) (TransportFactoryFunction, error)
 	case TransportFactoryUnCompressedTlsName:
 		return self.CreateUnCompressedTls, nil
 	case TransportFactoryCompressedName:
-		return self.CreateCompressed, nil
+		return CreateCompressedStack, nil
 	case TransportFactoryUnCompressedName:
-		return self.CreateUnCompressed, nil
+		return CreateUnCompressedStack, nil
 	case TransportFactoryEmptyName:
-		return self.CreateEmpty, nil
+		return CreateEmptyStack, nil
 	case WebSocketName:
 		return self.CreateWebSocket, nil
 	default:

@@ -24,6 +24,7 @@ func NewNetDialApp(
 	connectionName string,
 	url string,
 	stackName string,
+	stackCreateFunction impl.TransportFactoryFunction,
 	userContextFactoryName string,
 	options ...DialAppSettingsApply) AppFunc {
 	return func(params AppFuncInParams) (*fx.App, error) {
@@ -35,6 +36,7 @@ func NewNetDialApp(
 			impl.CommonComponents(
 				url,
 				stackName,
+				stackCreateFunction,
 				params.ClientContextFactories,
 				params.ParentContext,
 				params.StackFactory,
