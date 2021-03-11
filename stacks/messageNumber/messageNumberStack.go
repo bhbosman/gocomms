@@ -12,6 +12,7 @@ import (
 )
 
 func StackDefinition(
+	connectionType internal.ConnectionType,
 	userContext interface{},
 	stackCancelFunc internal.CancelFunc,
 	opts ...rxgo.Option) (*internal.StackDefinition, error) {

@@ -20,17 +20,15 @@ import (
 )
 
 type NetManager struct {
-	connectionReactorFactories   *ConnectionReactorFactories
-	CancelCtx                    context.Context
-	cancelFunction               context.CancelFunc
-	Logger                       *gologging.SubSystemLogger
-	stackFactoryFunction         TransportFactoryFunction
-	ConnectionReactorFactoryName string
-	connectionManager            connectionManager.IConnectionManager
-	Url                          *url.URL
-	UserContext                  interface{}
-	logFactory                   *gologging.Factory
-	cfr                          intf.IConnectionReactorFactory
+	CancelCtx            context.Context
+	cancelFunction       context.CancelFunc
+	Logger               *gologging.SubSystemLogger
+	stackFactoryFunction TransportFactoryFunction
+	connectionManager    connectionManager.IConnectionManager
+	Url                  *url.URL
+	UserContext          interface{}
+	logFactory           *gologging.Factory
+	cfr                  intf.IConnectionReactorFactory
 }
 
 func (self *NetManager) NewConnectionInstance(connectionType internal.ConnectionType, conn net.Conn) (*fx.App, context.Context) {
@@ -41,7 +39,7 @@ func (self *NetManager) NewConnectionInstance(connectionType internal.Connection
 		fx.Populate(&ctx),
 		fx.Logger(l),
 		fx.StopTimeout(time.Hour),
-		fx.Supply(l, self, self.connectionReactorFactories, self.stackFactoryFunction, self.Url, connectionType, self.logFactory),
+		fx.Supply(l, self, self.stackFactoryFunction, self.Url, connectionType, self.logFactory),
 		fx.Provide(fx.Annotated{Target: func() intf.IConnectionReactorFactory { return self.cfr }}),
 		fx.Provide(fx.Annotated{Target: func() connectionManager.IConnectionManager { return self.connectionManager }}),
 		fx.Provide(fx.Annotated{Target: func() connectionManager.IRegisterToConnectionManager { return self.connectionManager }}),
@@ -51,7 +49,6 @@ func (self *NetManager) NewConnectionInstance(connectionType internal.Connection
 		fx.Provide(fx.Annotated{Target: provideNetConnection(conn)}),
 		fx.Provide(fx.Annotated{Name: intf.ConnectionName, Target: CreateStringContext(connectionName)}),
 		fx.Provide(fx.Annotated{Name: intf.UserContext, Target: func() interface{} { return self.UserContext }}),
-		fx.Provide(fx.Annotated{Name: intf.ConnectionReactorFactoryName, Target: CreateStringContext(self.ConnectionReactorFactoryName)}),
 		fx.Provide(fx.Annotated{Name: intf.ConnectionId, Target: CreateConnectionId()}),
 		fx.Provide(func(netConnectionManager *NetManager) (context.Context, context.CancelFunc) {
 			return context.WithCancel(netConnectionManager.CancelCtx)
@@ -82,49 +79,43 @@ func (self *NetManager) NewConnectionInstance(connectionType internal.Connection
 
 func NewNetManager(
 	url *url.URL,
-	connectionReactorFactories *ConnectionReactorFactories,
 	cancelCtx context.Context,
 	cancelFunction context.CancelFunc,
 	logger *gologging.SubSystemLogger,
 	stackFactoryFunction TransportFactoryFunction,
-	ConnectionReactorFactoryName string,
 	cfr intf.IConnectionReactorFactory,
 	connectionManager connectionManager.IConnectionManager,
 	logFactory *gologging.Factory,
 	userContext interface{}) NetManager {
 	return NetManager{
-		connectionReactorFactories:   connectionReactorFactories,
-		CancelCtx:                    cancelCtx,
-		cancelFunction:               cancelFunction,
-		Logger:                       logger,
-		stackFactoryFunction:         stackFactoryFunction,
-		ConnectionReactorFactoryName: ConnectionReactorFactoryName,
-		connectionManager:            connectionManager,
-		Url:                          url,
-		UserContext:                  userContext,
-		logFactory:                   logFactory,
-		cfr:                          cfr,
+		CancelCtx:            cancelCtx,
+		cancelFunction:       cancelFunction,
+		Logger:               logger,
+		stackFactoryFunction: stackFactoryFunction,
+		connectionManager:    connectionManager,
+		Url:                  url,
+		UserContext:          userContext,
+		logFactory:           logFactory,
+		cfr:                  cfr,
 	}
 }
 
 func createClientContext(
 	params struct {
 		fx.In
-		Lifecycle                    fx.Lifecycle
-		CancelCtx                    context.Context
-		CancelFunc                   context.CancelFunc
-		ConnectionManager            *ConnectionReactorFactories
-		ConnectionName               string `name:"ConnectionName"`
-		ConnectionReactorFactoryName string `name:"ConnectionReactorFactoryName"`
-		Logger                       *gologging.SubSystemLogger
-		Cfr                          intf.IConnectionReactorFactory
-		ClientContext                interface{} `name:"UserContext"`
+		Lifecycle      fx.Lifecycle
+		CancelCtx      context.Context
+		CancelFunc     context.CancelFunc
+		ConnectionName string `name:"ConnectionName"`
+		Logger         *gologging.SubSystemLogger
+		Cfr            intf.IConnectionReactorFactory
+		ClientContext  interface{} `name:"UserContext"`
 	}) (intf.IConnectionReactor, error) {
 	params.Logger.LogWithLevel(0, func(logger *log2.Logger) {
 		logger.Printf(fmt.Sprintf("createTransportLayer..."))
 	})
 	clientContext := params.Cfr.Create(
-		params.ConnectionReactorFactoryName,
+		params.Cfr.Name(),
 		params.CancelCtx,
 		params.CancelFunc,
 		params.Logger,
@@ -503,15 +494,13 @@ func invokeOutBoundTransportLayer(
 func invokeIndividualStacks(
 	params struct {
 		fx.In
-		Url                          *url.URL
-		Lifecycle                    fx.Lifecycle
-		TransportLayer               *internal.TwoWayPipe
-		Conn                         net.Conn
-		CancelCtx                    context.Context
-		CancelFunc                   internal.CancelFunc
-		ConnectionReactorFactories   *ConnectionReactorFactories
-		ConnectionReactorFactoryName string `name:"ConnectionReactorFactoryName"`
-		Cfr                          intf.IConnectionReactorFactory
+		Url            *url.URL
+		Lifecycle      fx.Lifecycle
+		TransportLayer *internal.TwoWayPipe
+		Conn           net.Conn
+		CancelCtx      context.Context
+		CancelFunc     internal.CancelFunc
+		Cfr            intf.IConnectionReactorFactory
 	}) error {
 	connectionReactorFactory := params.Cfr
 	//connectionReactorFactory, ok := params.ConnectionReactorFactories.m[params.ConnectionReactorFactoryName]

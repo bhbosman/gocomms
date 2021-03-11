@@ -8,7 +8,9 @@ import (
 	"github.com/reactivex/rxgo/v2"
 )
 
-func StackDefinition() (*internal.StackDefinition, error) {
+func StackDefinition(
+	connectionType internal.ConnectionType,
+	opts ...rxgo.Option) (*internal.StackDefinition, error) {
 	return &internal.StackDefinition{
 		Name: goerrors.TopStackName,
 		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {

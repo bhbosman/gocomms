@@ -82,18 +82,16 @@ func (self *netListenManager) Accept() (net.Conn, error) {
 func newNetListenManager(
 	params struct {
 		fx.In
-		Url                        *url.URL
-		Listener                   net.Listener
-		ConnectionReactorFactories *impl.ConnectionReactorFactories
-		ConnectionManager          connectionManager.IConnectionManager
-		CancelCtx                  context.Context
-		CancelFunction             context.CancelFunc
-		StackFactoryFunction       impl.TransportFactoryFunction
-		Logger                     *gologging.SubSystemLogger
-		ClientContextFactoryName   string `name:"ConnectionReactorFactoryName"`
-		LogFactory                 *gologging.Factory
-		Cfr                        intf.IConnectionReactorFactory
-		Settings                   []ListenAppSettingsApply
+		Url                  *url.URL
+		Listener             net.Listener
+		ConnectionManager    connectionManager.IConnectionManager
+		CancelCtx            context.Context
+		CancelFunction       context.CancelFunc
+		StackFactoryFunction impl.TransportFactoryFunction
+		Logger               *gologging.SubSystemLogger
+		LogFactory           *gologging.Factory
+		Cfr                  intf.IConnectionReactorFactory
+		Settings             []ListenAppSettingsApply
 	}) *netListenManager {
 	netListenSettings := &netListenManagerSettings{
 		userContext:    nil,
@@ -105,12 +103,10 @@ func newNetListenManager(
 	return &netListenManager{
 		NetManager: impl.NewNetManager(
 			params.Url,
-			params.ConnectionReactorFactories,
 			params.CancelCtx,
 			params.CancelFunction,
 			params.Logger,
 			params.StackFactoryFunction,
-			params.ClientContextFactoryName,
 			params.Cfr,
 			params.ConnectionManager,
 			params.LogFactory,

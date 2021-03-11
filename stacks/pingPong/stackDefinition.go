@@ -14,6 +14,7 @@ import (
 )
 
 func StackDefinition(
+	connectionType internal.ConnectionType,
 	connectionId string,
 	opts ...rxgo.Option) (*internal.StackDefinition, error) {
 	const StackName = "PingPong"
@@ -25,7 +26,7 @@ func StackDefinition(
 		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
 			return internal.BoundDefinition{
 				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
-					channelManager := internal.NewChannelManager(make(chan rxgo.Item), "inbound PingPong", connectionId)
+					inBoundChannel := internal.NewChannelManager(make(chan rxgo.Item), "inbound PingPong", connectionId)
 					disposable := pipeParams.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 						inOutBoundParams.Index,
 						pipeParams.ConnectionId,
@@ -60,21 +61,18 @@ func StackDefinition(
 												return
 											}
 											outboundChannel.Send(ctx, marshall)
-											//case *pingpong.PongWrapper:
-											//	d := v.Data.ResponseTimeStamp.AsTime().Sub(v.Data.RequestTimeStamp.AsTime())
-											//	println(d.String())
 										}
 										return
 									}
 								}
 							}
-							channelManager.Send(ctx, incoming)
+							inBoundChannel.Send(ctx, incoming)
 						}, opts...)
 					go func() {
 						<-disposable
-						_ = channelManager.Close()
+						_ = inBoundChannel.Close()
 					}()
-					obs := rxgo.FromChannel(channelManager.Items, opts...)
+					obs := rxgo.FromChannel(inBoundChannel.Items, opts...)
 					return obs, nil
 				},
 			}

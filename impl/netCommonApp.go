@@ -13,16 +13,13 @@ import (
 func CommonComponents(
 	url string,
 	stackCreateFunction TransportFactoryFunction,
-	connectionReactorFactories *ConnectionReactorFactories,
 	ParentContext context.Context,
 	ConnectionManager connectionManager.IConnectionManager,
-	connectionReactorFactoryName string,
 	cfr intf.IConnectionReactorFactory,
 	logFactory *gologging.Factory) fx.Option {
 	return fx.Options(
-		fx.Supply(connectionReactorFactories, logFactory, stackCreateFunction),
+		fx.Supply(logFactory, stackCreateFunction),
 		fx.Provide(fx.Annotated{Target: internal.CreateUrl(url)}),
-		fx.Provide(fx.Annotated{Name: intf.ConnectionReactorFactoryName, Target: CreateStringContext(connectionReactorFactoryName)}),
 		fx.Provide(fx.Annotated{Target: func() intf.IConnectionReactorFactory { return cfr }}),
 		fx.Provide(fx.Annotated{Target: func() connectionManager.IConnectionManager { return ConnectionManager }}),
 		fx.Provide(fx.Annotated{Target: func() connectionManager.IRegisterToConnectionManager { return ConnectionManager }}),

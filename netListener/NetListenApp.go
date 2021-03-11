@@ -15,18 +15,16 @@ import (
 
 type NetListenAppFuncInParams struct {
 	fx.In
-	ClientContextFactories *impl.ConnectionReactorFactories
-	ParentContext          context.Context `name:"Application"`
-	Lifecycle              fx.Lifecycle
-	ConnectionManager      connectionManager.IConnectionManager
-	LogFactory             *gologging.Factory
+	ParentContext     context.Context `name:"Application"`
+	Lifecycle         fx.Lifecycle
+	ConnectionManager connectionManager.IConnectionManager
+	LogFactory        *gologging.Factory
 }
 
 func NewNetListenApp(
 	connectionName string,
 	url string,
 	stackCreateFunction impl.TransportFactoryFunction,
-	userContextFactoryName string,
 	cfr intf.IConnectionReactorFactory,
 	settings ...ListenAppSettingsApply) NewNetListenAppFunc {
 	return func(params NetListenAppFuncInParams) (*fx.App, error) {
@@ -35,10 +33,8 @@ func NewNetListenApp(
 			impl.CommonComponents(
 				url,
 				stackCreateFunction,
-				params.ClientContextFactories,
 				params.ParentContext,
 				params.ConnectionManager,
-				userContextFactoryName,
 				cfr,
 				params.LogFactory),
 

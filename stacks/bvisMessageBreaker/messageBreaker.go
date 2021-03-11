@@ -1,4 +1,4 @@
-package messageBreaker
+package bvisMessageBreaker
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	internal2 "github.com/bhbosman/gocomms/internal"
-	"github.com/bhbosman/gocomms/stacks/messageBreaker/internal"
+	"github.com/bhbosman/gocomms/stacks/bvisMessageBreaker/internal"
 	"github.com/bhbosman/goerrors"
 	"github.com/bhbosman/gomessageblock"
 	"github.com/bhbosman/goprotoextra"
@@ -15,6 +15,7 @@ import (
 )
 
 func StackDefinition(
+	connectionType internal2.ConnectionType,
 	connectionId string,
 	stackCancelFunc internal2.CancelFunc,
 	stateFunc func(stateFrom, stateTo internal.BuildMessageState, length uint32),

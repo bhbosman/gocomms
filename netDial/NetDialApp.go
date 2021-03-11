@@ -12,11 +12,10 @@ import (
 
 type AppFuncInParams struct {
 	fx.In
-	ClientContextFactories *impl.ConnectionReactorFactories
-	ParentContext          context.Context `name:"Application"`
-	Lifecycle              fx.Lifecycle
-	ConnectionManager      connectionManager.IConnectionManager
-	LogFactory             *gologging.Factory
+	ParentContext     context.Context `name:"Application"`
+	Lifecycle         fx.Lifecycle
+	ConnectionManager connectionManager.IConnectionManager
+	LogFactory        *gologging.Factory
 }
 type AppFunc func(params AppFuncInParams) (*fx.App, error)
 
@@ -24,7 +23,6 @@ func NewNetDialApp(
 	connectionName string,
 	url string,
 	stackCreateFunction impl.TransportFactoryFunction,
-	userContextFactoryName string,
 	cfr intf.IConnectionReactorFactory,
 	options ...DialAppSettingsApply) AppFunc {
 	return func(params AppFuncInParams) (*fx.App, error) {
@@ -36,10 +34,8 @@ func NewNetDialApp(
 			impl.CommonComponents(
 				url,
 				stackCreateFunction,
-				params.ClientContextFactories,
 				params.ParentContext,
 				params.ConnectionManager,
-				userContextFactoryName,
 				cfr,
 				params.LogFactory),
 			fx.Provide(fx.Annotated{Target: newNetDialManager}),

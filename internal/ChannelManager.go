@@ -25,9 +25,12 @@ func NewChannelManager(items chan rxgo.Item, name, name2 string) *ChannelManager
 
 func (self *ChannelManager) Close() error {
 	self.lock()
-	defer self.unlock()
-	close(self.Items)
+	local := self.Items
 	self.Items = nil
+	self.unlock()
+	if local != nil {
+		close(local)
+	}
 	return nil
 }
 
@@ -48,14 +51,14 @@ func (self *ChannelManager) Send(ctx context.Context, i interface{}) {
 		item := rxgo.Of(i)
 		self.lock()
 		defer self.unlock()
-
-		n := len(self.Items)
-
-		if n > 1000 {
-			println(self.Name, n)
-		}
 		if self.Active() {
-			item.SendContext(ctx, self.Items)
+			n := len(self.Items)
+			if n > 1000 {
+				println("-->ChannelManager<--", self.Name, n)
+			}
+			if self.Active() {
+				item.SendContext(ctx, self.Items)
+			}
 		}
 	}
 }

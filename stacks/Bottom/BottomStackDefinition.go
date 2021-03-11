@@ -9,7 +9,9 @@ import (
 	"net"
 )
 
-func StackDefinition(opts ...rxgo.Option) (*internal.StackDefinition, error) {
+func StackDefinition(
+	connectionType internal.ConnectionType,
+	opts ...rxgo.Option) (*internal.StackDefinition, error) {
 	return &internal.StackDefinition{
 		Name: goerrors.BottomStackName,
 		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {

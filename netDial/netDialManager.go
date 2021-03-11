@@ -97,17 +97,15 @@ func (self *netDialManager) Stop(_ context.Context) error {
 func newNetDialManager(
 	params struct {
 		fx.In
-		Url                        *url.URL
-		ConnectionReactorFactories *impl.ConnectionReactorFactories
-		ConnectionManager          connectionManager.IConnectionManager
-		CancelCtx                  context.Context
-		CancelFunction             context.CancelFunc
-		StackFactoryFunction       impl.TransportFactoryFunction
-		Logger                     *gologging.SubSystemLogger
-		ClientContextFactoryName   string `name:"ConnectionReactorFactoryName"`
-		LogFactory                 *gologging.Factory
-		Options                    []DialAppSettingsApply
-		Cfr                        intf.IConnectionReactorFactory
+		Url                  *url.URL
+		ConnectionManager    connectionManager.IConnectionManager
+		CancelCtx            context.Context
+		CancelFunction       context.CancelFunc
+		StackFactoryFunction impl.TransportFactoryFunction
+		Logger               *gologging.SubSystemLogger
+		LogFactory           *gologging.Factory
+		Options              []DialAppSettingsApply
+		Cfr                  intf.IConnectionReactorFactory
 	}) *netDialManager {
 
 	settings := &dialAppSettings{
@@ -124,12 +122,10 @@ func newNetDialManager(
 	return &netDialManager{
 		NetManager: impl.NewNetManager(
 			params.Url,
-			params.ConnectionReactorFactories,
 			params.CancelCtx,
 			params.CancelFunction,
 			params.Logger,
 			params.StackFactoryFunction,
-			params.ClientContextFactoryName,
 			params.Cfr,
 			params.ConnectionManager,
 			params.LogFactory,

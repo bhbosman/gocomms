@@ -1,11 +1,12 @@
-package messageBreaker
+package bvisMessageBreaker_test
 
 import (
 	"context"
 	"crypto/sha1"
 	"encoding/binary"
 	internal2 "github.com/bhbosman/gocomms/internal"
-	"github.com/bhbosman/gocomms/stacks/messageBreaker/internal"
+	"github.com/bhbosman/gocomms/stacks/bvisMessageBreaker"
+	"github.com/bhbosman/gocomms/stacks/bvisMessageBreaker/internal"
 	"github.com/bhbosman/goerrors"
 	"github.com/bhbosman/gomessageblock"
 	"github.com/reactivex/rxgo/v2"
@@ -29,7 +30,7 @@ func TestBuildBlocksInbound(t *testing.T) {
 		return result
 	}
 	t.Run("Inbound: Check error function ", func(t *testing.T) {
-		_, err := StackDefinition(nil, nil, nil)
+		_, err := bvisMessageBreaker.StackDefinition(internal2.ServerConnection, "", nil, nil, nil)
 		assert.Error(t, err)
 		assert.EqualError(t, err, "invalid param")
 	})
@@ -37,7 +38,9 @@ func TestBuildBlocksInbound(t *testing.T) {
 		t.Run("Inbound: Invalid signature", func(t *testing.T) {
 			wg := sync.WaitGroup{}
 			var blockError error
-			blocks, err := StackDefinition(
+			blocks, err := bvisMessageBreaker.StackDefinition(
+				internal2.ServerConnection,
+				"",
 				func(s string, inbound bool, err error) {
 					blockError = err
 					wg.Done()
@@ -49,7 +52,7 @@ func TestBuildBlocksInbound(t *testing.T) {
 			ch := make(chan rxgo.Item)
 			defer close(ch)
 			obs := rxgo.FromChannel(ch)
-			inbound, err := blocks.Inbound(0, context.TODO()).PipeDefinition(
+			inbound, err := blocks.Inbound(internal2.NewInOutBoundParams(0, context.TODO())).PipeDefinition(
 				internal2.PipeDefinitionParams{
 					ConnectionId:      "",
 					ConnectionManager: nil,
@@ -70,7 +73,9 @@ func TestBuildBlocksInbound(t *testing.T) {
 			wg := sync.WaitGroup{}
 			var blockError error
 			var buildState internal.BuildMessageState
-			blocks, err := StackDefinition(
+			blocks, err := bvisMessageBreaker.StackDefinition(
+				internal2.ServerConnection,
+				"",
 				func(s string, inbound bool, err error) {
 					blockError = err
 				},
@@ -85,7 +90,7 @@ func TestBuildBlocksInbound(t *testing.T) {
 			defer close(ch)
 			obs := rxgo.FromChannel(ch)
 
-			inbound, err := blocks.Inbound(0, context.TODO()).PipeDefinition(
+			inbound, err := blocks.Inbound(internal2.NewInOutBoundParams(0, context.TODO())).PipeDefinition(
 				internal2.PipeDefinitionParams{
 					CancelContext:   context.Background(),
 					StackCancelFunc: func(context string, inbound bool, err error) {},
@@ -110,7 +115,9 @@ func TestBuildBlocksInbound(t *testing.T) {
 			var blockError error
 			var buildState internal.BuildMessageState
 			var buildLength uint32
-			blocks, err := StackDefinition(
+			blocks, err := bvisMessageBreaker.StackDefinition(
+				internal2.ServerConnection,
+				"",
 				func(s string, inbound bool, err error) {
 					blockError = err
 				},
@@ -126,7 +133,7 @@ func TestBuildBlocksInbound(t *testing.T) {
 			defer close(ch)
 			obs := rxgo.FromChannel(ch)
 
-			inbound, err := blocks.Inbound(0, context.TODO()).PipeDefinition(
+			inbound, err := blocks.Inbound(internal2.NewInOutBoundParams(0, context.TODO())).PipeDefinition(
 				internal2.PipeDefinitionParams{
 					CancelContext:   context.Background(),
 					StackCancelFunc: func(context string, inbound bool, err error) {},
@@ -160,8 +167,9 @@ func TestBuildBlocksInbound(t *testing.T) {
 			wg := sync.WaitGroup{}
 			var blockError error
 			var buildState internal.BuildMessageState
-			blocks, err := StackDefinition(
-
+			blocks, err := bvisMessageBreaker.StackDefinition(
+				internal2.ServerConnection,
+				"",
 				func(s string, inbound bool, err error) {
 					blockError = err
 				},
@@ -174,7 +182,7 @@ func TestBuildBlocksInbound(t *testing.T) {
 			ch := make(chan rxgo.Item)
 			defer close(ch)
 			obs := rxgo.FromChannel(ch)
-			inbound, err := blocks.Inbound(0, context.TODO()).PipeDefinition(
+			inbound, err := blocks.Inbound(internal2.NewInOutBoundParams(0, context.TODO())).PipeDefinition(
 				internal2.PipeDefinitionParams{
 					CancelContext:   context.Background(),
 					StackCancelFunc: func(context string, inbound bool, err error) {},
@@ -194,8 +202,9 @@ func TestBuildBlocksInbound(t *testing.T) {
 			assert.Equal(t, internal.BuildMessageStateReadMessageSignature, buildState)
 		})
 		t.Run("Inbound: Blocks of data", func(t *testing.T) {
-			blocks, err := StackDefinition(
-
+			blocks, err := bvisMessageBreaker.StackDefinition(
+				internal2.ServerConnection,
+				"",
 				func(s string, inbound bool, err error) {
 				},
 				func(from, to internal.BuildMessageState, length uint32) {
@@ -205,7 +214,7 @@ func TestBuildBlocksInbound(t *testing.T) {
 			ch := make(chan rxgo.Item)
 			defer close(ch)
 			obs := rxgo.FromChannel(ch)
-			inbound, err := blocks.Inbound(0, context.TODO()).PipeDefinition(
+			inbound, err := blocks.Inbound(internal2.NewInOutBoundParams(0, context.TODO())).PipeDefinition(
 				internal2.PipeDefinitionParams{
 					CancelContext:   context.Background(),
 					StackCancelFunc: func(context string, inbound bool, err error) {},
@@ -242,7 +251,7 @@ func TestBuildBlocksInbound(t *testing.T) {
 
 				block01 := gomessageblock.NewReaderWriterBlock(data01)
 				block02 := gomessageblock.NewReaderWriterBlock(data02)
-				block01.SetNext(block02)
+				_ = block01.SetNext(block02)
 				wg.Add(2)
 
 				ch <- rxgo.Of(block01)
@@ -300,7 +309,9 @@ func TestBuildBlocksInbound(t *testing.T) {
 		})
 	})
 	t.Run("Outbound", func(t *testing.T) {
-		blocks, err := StackDefinition(
+		blocks, err := bvisMessageBreaker.StackDefinition(
+			internal2.ServerConnection,
+			"",
 			func(s string, inbound bool, err error) {
 			},
 			func(stateFrom, stateTo internal.BuildMessageState, length uint32) {
@@ -312,7 +323,7 @@ func TestBuildBlocksInbound(t *testing.T) {
 		ch := make(chan rxgo.Item)
 		defer close(ch)
 		obs := rxgo.FromChannel(ch)
-		outbound, err := blocks.Outbound(0, context.TODO()).PipeDefinition(
+		outbound, err := blocks.Outbound(internal2.NewInOutBoundParams(0, context.TODO())).PipeDefinition(
 			internal2.PipeDefinitionParams{
 				CancelContext:   context.Background(),
 				StackCancelFunc: func(context string, inbound bool, err error) {},

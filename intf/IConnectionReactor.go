@@ -25,7 +25,6 @@ type IConnectionReactor interface {
 const ConnectionName = "ConnectionName"
 const ConnectionId = "ConnectionId"
 const UserContext = "UserContext"
-const ConnectionReactorFactoryName = "ConnectionReactorFactoryName"
 
 type IConnectionReactorFactoryCreateReactor interface {
 	Create(name string, cancelCtx context.Context, cancelFunc context.CancelFunc, logger *gologging.SubSystemLogger, userContext interface{}) IConnectionReactor

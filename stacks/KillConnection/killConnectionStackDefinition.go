@@ -11,6 +11,7 @@ import (
 )
 
 func StackDefinition(
+	connectionType internal.ConnectionType,
 	cancelContext context.Context,
 	stackCancelFunc internal.CancelFunc,
 	connectionManager rxgo.IPublishToConnectionManager,
