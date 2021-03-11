@@ -3,6 +3,7 @@ package netListener
 import (
 	"context"
 	"fmt"
+	"github.com/bhbosman/gocomms/intf"
 
 	"github.com/bhbosman/gocomms/connectionManager"
 	"github.com/bhbosman/gocomms/impl"
@@ -25,7 +26,9 @@ func NewNetListenApp(
 	connectionName string,
 	url string,
 	stackCreateFunction impl.TransportFactoryFunction,
-	userContextFactoryName string, settings ...ListenAppSettingsApply) NewNetListenAppFunc {
+	userContextFactoryName string,
+	cfr intf.IConnectionReactorFactory,
+	settings ...ListenAppSettingsApply) NewNetListenAppFunc {
 	return func(params NetListenAppFuncInParams) (*fx.App, error) {
 		return fx.New(
 			fx.Supply(settings),
@@ -36,6 +39,7 @@ func NewNetListenApp(
 				params.ParentContext,
 				params.ConnectionManager,
 				userContextFactoryName,
+				cfr,
 				params.LogFactory),
 
 			fx.Provide(fx.Annotated{Target: newNetListenManager}),

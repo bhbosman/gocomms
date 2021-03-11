@@ -5,6 +5,7 @@ import (
 	"github.com/bhbosman/gocomms/connectionManager"
 	"github.com/bhbosman/gocomms/impl"
 	"github.com/bhbosman/gocomms/internal"
+	"github.com/bhbosman/gocomms/intf"
 	"github.com/bhbosman/gologging"
 	"go.uber.org/fx"
 	"golang.org/x/sync/semaphore"
@@ -91,6 +92,7 @@ func newNetListenManager(
 		Logger                     *gologging.SubSystemLogger
 		ClientContextFactoryName   string `name:"ConnectionReactorFactoryName"`
 		LogFactory                 *gologging.Factory
+		Cfr                        intf.IConnectionReactorFactory
 		Settings                   []ListenAppSettingsApply
 	}) *netListenManager {
 	netListenSettings := &netListenManagerSettings{
@@ -109,6 +111,7 @@ func newNetListenManager(
 			params.Logger,
 			params.StackFactoryFunction,
 			params.ClientContextFactoryName,
+			params.Cfr,
 			params.ConnectionManager,
 			params.LogFactory,
 			netListenSettings.userContext),

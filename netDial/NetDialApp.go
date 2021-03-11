@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/bhbosman/gocomms/connectionManager"
 	"github.com/bhbosman/gocomms/impl"
+	"github.com/bhbosman/gocomms/intf"
 	"github.com/bhbosman/gologging"
 	"go.uber.org/fx"
 )
@@ -24,6 +25,7 @@ func NewNetDialApp(
 	url string,
 	stackCreateFunction impl.TransportFactoryFunction,
 	userContextFactoryName string,
+	cfr intf.IConnectionReactorFactory,
 	options ...DialAppSettingsApply) AppFunc {
 	return func(params AppFuncInParams) (*fx.App, error) {
 		l := params.LogFactory.Create(fmt.Sprintf("Dialer for %v", connectionName))
@@ -38,6 +40,7 @@ func NewNetDialApp(
 				params.ParentContext,
 				params.ConnectionManager,
 				userContextFactoryName,
+				cfr,
 				params.LogFactory),
 			fx.Provide(fx.Annotated{Target: newNetDialManager}),
 			fx.Invoke(

@@ -5,6 +5,7 @@ import (
 	"github.com/bhbosman/gocomms/connectionManager"
 	"github.com/bhbosman/gocomms/impl"
 	"github.com/bhbosman/gocomms/internal"
+	"github.com/bhbosman/gocomms/intf"
 	"github.com/bhbosman/gologging"
 	"go.uber.org/fx"
 	"golang.org/x/sync/semaphore"
@@ -106,6 +107,7 @@ func newNetDialManager(
 		ClientContextFactoryName   string `name:"ConnectionReactorFactoryName"`
 		LogFactory                 *gologging.Factory
 		Options                    []DialAppSettingsApply
+		Cfr                        intf.IConnectionReactorFactory
 	}) *netDialManager {
 
 	settings := &dialAppSettings{
@@ -128,6 +130,7 @@ func newNetDialManager(
 			params.Logger,
 			params.StackFactoryFunction,
 			params.ClientContextFactoryName,
+			params.Cfr,
 			params.ConnectionManager,
 			params.LogFactory,
 			settings.userContext),

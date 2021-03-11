@@ -1,10 +1,8 @@
 package impl
 
 import (
-	"context"
 	"github.com/bhbosman/gocomms/intf"
 	"github.com/bhbosman/goerrors"
-	"github.com/bhbosman/gologging"
 	"go.uber.org/fx"
 )
 
@@ -12,18 +10,18 @@ type ConnectionReactorFactories struct {
 	m map[string]intf.IConnectionReactorFactory
 }
 
-func (self *ConnectionReactorFactories) CreateClientContext(
-	logger *gologging.SubSystemLogger,
-	ConnectionName string,
-	cancelCtx context.Context,
-	cancelFunc context.CancelFunc,
-	name string,
-	userContext interface{}) (intf.IConnectionReactor, error) {
-	if factory, ok := self.m[name]; ok {
-		return factory.Create(ConnectionName, cancelCtx, cancelFunc, logger, userContext), nil
-	}
-	return nil, goerrors.InvalidParam
-}
+//func (self *ConnectionReactorFactories) CreateClientContext(
+//	logger *gologging.SubSystemLogger,
+//	ConnectionName string,
+//	cancelCtx context.Context,
+//	cancelFunc context.CancelFunc,
+//	name string,
+//	userContext interface{}) (intf.IConnectionReactor, error) {
+//	if factory, ok := self.m[name]; ok {
+//		return factory.Create(ConnectionName, cancelCtx, cancelFunc, logger, userContext), nil
+//	}
+//	return nil, goerrors.InvalidParam
+//}
 
 const ConnectionReactorFactoryConst = "ConnectionReactorFactory"
 

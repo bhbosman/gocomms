@@ -30,6 +30,7 @@ type NetManager struct {
 	Url                          *url.URL
 	UserContext                  interface{}
 	logFactory                   *gologging.Factory
+	cfr                          intf.IConnectionReactorFactory
 }
 
 func (self *NetManager) NewConnectionInstance(connectionType internal.ConnectionType, conn net.Conn) (*fx.App, context.Context) {
@@ -41,6 +42,7 @@ func (self *NetManager) NewConnectionInstance(connectionType internal.Connection
 		fx.Logger(l),
 		fx.StopTimeout(time.Hour),
 		fx.Supply(l, self, self.connectionReactorFactories, self.stackFactoryFunction, self.Url, connectionType, self.logFactory),
+		fx.Provide(fx.Annotated{Target: func() intf.IConnectionReactorFactory { return self.cfr }}),
 		fx.Provide(fx.Annotated{Target: func() connectionManager.IConnectionManager { return self.connectionManager }}),
 		fx.Provide(fx.Annotated{Target: func() connectionManager.IRegisterToConnectionManager { return self.connectionManager }}),
 		fx.Provide(fx.Annotated{Target: func() connectionManager.IObtainConnectionManagerInformation { return self.connectionManager }}),
@@ -86,6 +88,7 @@ func NewNetManager(
 	logger *gologging.SubSystemLogger,
 	stackFactoryFunction TransportFactoryFunction,
 	ConnectionReactorFactoryName string,
+	cfr intf.IConnectionReactorFactory,
 	connectionManager connectionManager.IConnectionManager,
 	logFactory *gologging.Factory,
 	userContext interface{}) NetManager {
@@ -100,6 +103,7 @@ func NewNetManager(
 		Url:                          url,
 		UserContext:                  userContext,
 		logFactory:                   logFactory,
+		cfr:                          cfr,
 	}
 }
 
@@ -113,18 +117,19 @@ func createClientContext(
 		ConnectionName               string `name:"ConnectionName"`
 		ConnectionReactorFactoryName string `name:"ConnectionReactorFactoryName"`
 		Logger                       *gologging.SubSystemLogger
+		Cfr                          intf.IConnectionReactorFactory
 		ClientContext                interface{} `name:"UserContext"`
 	}) (intf.IConnectionReactor, error) {
 	params.Logger.LogWithLevel(0, func(logger *log2.Logger) {
 		logger.Printf(fmt.Sprintf("createTransportLayer..."))
 	})
-	clientContext, err := params.ConnectionManager.CreateClientContext(
-		params.Logger,
-		params.ConnectionName,
+	clientContext := params.Cfr.Create(
+		params.ConnectionReactorFactoryName,
 		params.CancelCtx,
 		params.CancelFunc,
-		params.ConnectionReactorFactoryName,
+		params.Logger,
 		params.ClientContext)
+	var err error = nil
 	if err != nil {
 		params.Logger.LogWithLevel(0, func(logger *log2.Logger) {
 			logger.Printf(fmt.Sprintf("createTransportLayer..."))
@@ -506,11 +511,13 @@ func invokeIndividualStacks(
 		CancelFunc                   internal.CancelFunc
 		ConnectionReactorFactories   *ConnectionReactorFactories
 		ConnectionReactorFactoryName string `name:"ConnectionReactorFactoryName"`
+		Cfr                          intf.IConnectionReactorFactory
 	}) error {
-	connectionReactorFactory, ok := params.ConnectionReactorFactories.m[params.ConnectionReactorFactoryName]
-	if !ok {
-		return fmt.Errorf("could not find ConnectionReactorFactory(%s) while invokeIndividualStacks", params.ConnectionReactorFactoryName)
-	}
+	connectionReactorFactory := params.Cfr
+	//connectionReactorFactory, ok := params.ConnectionReactorFactories.m[params.ConnectionReactorFactoryName]
+	//if !ok {
+	//	return fmt.Errorf("could not find ConnectionReactorFactory(%s) while invokeIndividualStacks", params.ConnectionReactorFactoryName)
+	//}
 	localConn := params.Conn
 	for _, stackState := range params.TransportLayer.StackState {
 		if params.CancelCtx.Err() != nil {
