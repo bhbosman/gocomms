@@ -29,7 +29,7 @@ require (
 
 replace (
 	//github.com/bhbosman/goMessages => ../goMessages
-	github.com/bhbosman/gocommon => ../gocommon
+	//github.com/bhbosman/gocommon => ../gocommon
 	//github.com/bhbosman/goerrors => ../goerrors
 	//github.com/bhbosman/gologging => ../gologging
 	//github.com/bhbosman/gomessageblock => ../gomessageblock
