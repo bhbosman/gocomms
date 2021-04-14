@@ -9,7 +9,7 @@ require (
 	github.com/bhbosman/gologging v0.0.0-20200921180328-d29fc55c00bc
 	github.com/bhbosman/gomessageblock v0.0.0-20210414135653-cd754835d03b
 	github.com/bhbosman/goprotoextra v0.0.2-0.20210414124526-a342e2a9e82f
-	github.com/bhbosman/gorxextra v0.0.0-20200918070301-48dbd8b934dc
+	github.com/bhbosman/gorxextra v0.0.0-20210414134625-43435ac5bf2d
 	github.com/cskr/pubsub v1.0.2
 	github.com/gobwas/httphead v0.0.0-20200921212729-da3d93bc3c58 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
@@ -28,12 +28,12 @@ require (
 )
 
 replace (
-	github.com/bhbosman/goMessages => ../goMessages
+	//github.com/bhbosman/goMessages => ../goMessages
 	github.com/bhbosman/gocommon => ../gocommon
-	github.com/bhbosman/goerrors => ../goerrors
-	github.com/bhbosman/gologging => ../gologging
-	github.com/bhbosman/gomessageblock => ../gomessageblock
-	github.com/bhbosman/gorxextra => ../gorxextra
+	//github.com/bhbosman/goerrors => ../goerrors
+	//github.com/bhbosman/gologging => ../gologging
+	//github.com/bhbosman/gomessageblock => ../gomessageblock
+	//github.com/bhbosman/gorxextra => ../gorxextra
 	github.com/reactivex/rxgo/v2 => ../../reactivex/rxgo
 
 )
