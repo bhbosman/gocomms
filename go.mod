@@ -27,7 +27,6 @@ require (
 
 )
 
-//replace github.com/reactivex/rxgo/v2 v2.1.0 => github.com/bhbosman/rxgo/v2 v2.1.1-0.20200922152528-6aef42e76e00
 
 replace (
 	github.com/reactivex/rxgo/v2  => ../../reactivex/rxgo
