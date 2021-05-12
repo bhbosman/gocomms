@@ -52,7 +52,13 @@ func TestBuildBlocksInbound(t *testing.T) {
 			ch := make(chan rxgo.Item)
 			defer close(ch)
 			obs := rxgo.FromChannel(ch)
-			inbound, err := blocks.Inbound(internal2.NewInOutBoundParams(0, context.TODO())).PipeDefinition(
+			cb := blocks.Inbound.GetBoundResult()
+			assert.NotNil(t, cb)
+			r := cb(nil, nil, internal2.NewInOutBoundParams(0, context.TODO()))
+			assert.NotNil(t, r)
+			pipeDefCallback := r.GetPipeDefinition()
+			assert.NotNil(t, pipeDefCallback)
+			_, inbound, err := pipeDefCallback(
 				internal2.PipeDefinitionParams{
 					ConnectionId:      "",
 					ConnectionManager: nil,
@@ -89,8 +95,13 @@ func TestBuildBlocksInbound(t *testing.T) {
 			ch := make(chan rxgo.Item)
 			defer close(ch)
 			obs := rxgo.FromChannel(ch)
-
-			inbound, err := blocks.Inbound(internal2.NewInOutBoundParams(0, context.TODO())).PipeDefinition(
+			cb := blocks.Inbound.GetBoundResult()
+			assert.NotNil(t, cb)
+			r := cb(nil, nil, internal2.NewInOutBoundParams(0, context.TODO()))
+			assert.NotNil(t, r)
+			pipeDefCallback := r.GetPipeDefinition()
+			assert.NotNil(t, pipeDefCallback)
+			_, inbound, err := pipeDefCallback(
 				internal2.PipeDefinitionParams{
 					CancelContext:   context.Background(),
 					StackCancelFunc: func(context string, inbound bool, err error) {},
@@ -132,8 +143,13 @@ func TestBuildBlocksInbound(t *testing.T) {
 			ch := make(chan rxgo.Item)
 			defer close(ch)
 			obs := rxgo.FromChannel(ch)
-
-			inbound, err := blocks.Inbound(internal2.NewInOutBoundParams(0, context.TODO())).PipeDefinition(
+			cb := blocks.Inbound.GetBoundResult()
+			assert.NotNil(t, cb)
+			r := cb(nil, nil, internal2.NewInOutBoundParams(0, context.TODO()))
+			assert.NotNil(t, r)
+			pipeDefCallback := r.GetPipeDefinition()
+			assert.NotNil(t, pipeDefCallback)
+			_, inbound, err := pipeDefCallback(
 				internal2.PipeDefinitionParams{
 					CancelContext:   context.Background(),
 					StackCancelFunc: func(context string, inbound bool, err error) {},
@@ -182,7 +198,13 @@ func TestBuildBlocksInbound(t *testing.T) {
 			ch := make(chan rxgo.Item)
 			defer close(ch)
 			obs := rxgo.FromChannel(ch)
-			inbound, err := blocks.Inbound(internal2.NewInOutBoundParams(0, context.TODO())).PipeDefinition(
+			cb := blocks.Inbound.GetBoundResult()
+			assert.NotNil(t, cb)
+			r := cb(nil, nil, internal2.NewInOutBoundParams(0, context.TODO()))
+			assert.NotNil(t, r)
+			pipeDefCallback := r.GetPipeDefinition()
+			assert.NotNil(t, pipeDefCallback)
+			_, inbound, err := pipeDefCallback(
 				internal2.PipeDefinitionParams{
 					CancelContext:   context.Background(),
 					StackCancelFunc: func(context string, inbound bool, err error) {},
@@ -214,7 +236,13 @@ func TestBuildBlocksInbound(t *testing.T) {
 			ch := make(chan rxgo.Item)
 			defer close(ch)
 			obs := rxgo.FromChannel(ch)
-			inbound, err := blocks.Inbound(internal2.NewInOutBoundParams(0, context.TODO())).PipeDefinition(
+			cb := blocks.Inbound.GetBoundResult()
+			assert.NotNil(t, cb)
+			r := cb(nil, nil, internal2.NewInOutBoundParams(0, context.TODO()))
+			assert.NotNil(t, r)
+			pipeDefCallback := r.GetPipeDefinition()
+			assert.NotNil(t, pipeDefCallback)
+			_, inbound, err := pipeDefCallback(
 				internal2.PipeDefinitionParams{
 					CancelContext:   context.Background(),
 					StackCancelFunc: func(context string, inbound bool, err error) {},
@@ -323,7 +351,13 @@ func TestBuildBlocksInbound(t *testing.T) {
 		ch := make(chan rxgo.Item)
 		defer close(ch)
 		obs := rxgo.FromChannel(ch)
-		outbound, err := blocks.Outbound(internal2.NewInOutBoundParams(0, context.TODO())).PipeDefinition(
+		cb := blocks.Outbound.GetBoundResult()
+		assert.NotNil(t, cb)
+		r := cb(nil, nil, internal2.NewInOutBoundParams(0, context.TODO()))
+		assert.NotNil(t, r)
+		pipeDefCallback := r.GetPipeDefinition()
+		assert.NotNil(t, pipeDefCallback)
+		_, outbound, err := pipeDefCallback(
 			internal2.PipeDefinitionParams{
 				CancelContext:   context.Background(),
 				StackCancelFunc: func(context string, inbound bool, err error) {},

@@ -14,6 +14,7 @@ require (
 	github.com/gobwas/httphead v0.0.0-20200921212729-da3d93bc3c58 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
 	github.com/gobwas/ws v1.0.4
+	github.com/golang/mock v1.4.4 // indirect
 	github.com/golang/protobuf v1.4.2
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.8.0
@@ -27,7 +28,4 @@ require (
 
 )
 
-replace (
-	github.com/reactivex/rxgo/v2 => ../../reactivex/rxgo
-
-)
+replace github.com/reactivex/rxgo/v2 => ../../reactivex/rxgo

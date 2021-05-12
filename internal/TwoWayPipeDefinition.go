@@ -3,37 +3,39 @@ package internal
 import (
 	"context"
 	"github.com/bhbosman/gocomms/connectionManager"
-	"github.com/bhbosman/gologging"
+	"github.com/bhbosman/goerrors"
+	"github.com/google/uuid"
 	"github.com/reactivex/rxgo/v2"
+	"net"
 )
 
 type StackDefinitionIndex struct {
 	Idx             int
-	StackDefinition *StackDefinition
+	StackDefinition IStackDefinition
 }
 
 type TwoWayPipeDefinition struct {
 	Stacks []*StackDefinitionIndex
 }
 
-func (self *TwoWayPipeDefinition) Add(name string, inbound, outbound PipeDefinition) {
+func (self *TwoWayPipeDefinition) Add(id uuid.UUID, name string, inbound, outbound PipeDefinition) {
 	self.AddStackDefinition(
 		&StackDefinition{
-			Inbound: func(params InOutBoundParams) BoundDefinition {
-				return BoundDefinition{
-					PipeDefinition: inbound,
-				}
-			},
-			Outbound: func(params InOutBoundParams) BoundDefinition {
-				return BoundDefinition{
-					PipeDefinition: outbound,
-				}
-			},
+			Inbound: NewBoundResultImpl(
+				func(stackData, pipeData interface{}, params InOutBoundParams) IStackBoundDefinition {
+					return NewBoundDefinition(inbound, nil)
+				}),
+			Outbound: NewBoundResultImpl(
+				func(stackData, pipeData interface{}, params InOutBoundParams) IStackBoundDefinition {
+					return NewBoundDefinition(outbound, nil)
+
+				}),
 			Name: name,
+			Id:   id,
 		})
 }
 
-func (self *TwoWayPipeDefinition) AddStackDefinition(stack *StackDefinition) {
+func (self *TwoWayPipeDefinition) AddStackDefinition(stack IStackDefinition) {
 	index := len(self.Stacks) * 1024
 	self.Stacks = append(
 		self.Stacks,
@@ -42,7 +44,7 @@ func (self *TwoWayPipeDefinition) AddStackDefinition(stack *StackDefinition) {
 			StackDefinition: stack,
 		})
 }
-func (self *TwoWayPipeDefinition) AddStackDefinitionFunc(fn func() (*StackDefinition, error)) {
+func (self *TwoWayPipeDefinition) AddStackDefinitionFunc(fn func() (IStackDefinition, error)) {
 	if fn == nil {
 		return
 	}
@@ -56,7 +58,7 @@ func (self *TwoWayPipeDefinition) AddStackDefinitionFunc(fn func() (*StackDefini
 func (self TwoWayPipeDefinition) Build(
 	connectionId string,
 	connectionManager connectionManager.IConnectionManager,
-	logger *gologging.SubSystemLogger,
+	conn net.Conn,
 	cancelCtx context.Context,
 	stackCancelFunc CancelFunc) (*TwoWayPipe, error) {
 	createChannel := func() chan rxgo.Item {
@@ -65,7 +67,7 @@ func (self TwoWayPipeDefinition) Build(
 	inBoundChannel := createChannel()
 	outBoundChannel := createChannel()
 
-	var allIndividualState, pipeState []PipeState
+	var allIndividualState, pipeState []*PipeState
 	var allStackState []StackState
 	var err error
 
@@ -96,12 +98,12 @@ func (self TwoWayPipeDefinition) Build(
 
 	for i := len(self.Stacks) - 1; i >= 0; i-- {
 		stack := self.Stacks[i]
-		allStackState = append(allStackState, stack.StackDefinition.StackState)
+		allStackState = append(allStackState, stack.StackDefinition.GetStackState())
 	}
 
 	return NewTwoWayPipe(
 		connectionId,
-		logger,
+		//logger,
 		inBoundChannel,
 		outBoundChannel,
 		obsIn,
@@ -117,25 +119,32 @@ func (self *TwoWayPipeDefinition) buildOutBound(
 	cancelContext context.Context,
 	stackCancelFunc CancelFunc,
 	outbound chan rxgo.Item,
-	opts ...rxgo.Option) (rxgo.Observable, []PipeState, error) {
+	opts ...rxgo.Option) (rxgo.Observable, []*PipeState, error) {
 	obs := rxgo.FromChannel(outbound, opts...)
-	var pipeStarts []PipeState
-	handleStack := func(currentStack BoundDefinition) error {
-		if currentStack.PipeDefinition != nil {
+	var pipeStarts []*PipeState
+	handleStack := func(currentStack IStackBoundDefinition) error {
+		cb := currentStack.GetPipeDefinition()
+		if cb != nil {
 			var err error
-			obs, err = currentStack.PipeDefinition(NewPipeDefinitionParams(connectionId, connectionManager, cancelContext, stackCancelFunc, obs))
+			_, obs, err = cb(NewPipeDefinitionParams(connectionId, connectionManager, cancelContext, stackCancelFunc, obs))
 			if err != nil {
 				return err
 			}
 		}
-		pipeStarts = append(pipeStarts, currentStack.PipeState)
+		pipeStarts = append(pipeStarts, currentStack.GetPipeState())
 
 		return nil
 	}
 	for i := 0; i < len(self.Stacks); i++ {
-		stack := self.Stacks[i].StackDefinition.Outbound
+		stack := self.Stacks[i].StackDefinition.GetOutbound()
 		if stack != nil {
-			err := handleStack(stack(
+			cb := stack.GetBoundResult()
+			if cb == nil {
+				return nil, nil, goerrors.InvalidParam
+			}
+			err := handleStack(cb(
+				nil,
+				nil,
 				NewInOutBoundParams(
 					self.Stacks[i].Idx,
 					cancelContext,
@@ -154,26 +163,33 @@ func (self *TwoWayPipeDefinition) buildInBound(
 	cancelContext context.Context,
 	stackCancelFunc CancelFunc,
 	inbound chan rxgo.Item,
-	opts ...rxgo.Option) (rxgo.Observable, []PipeState, error) {
+	opts ...rxgo.Option) (rxgo.Observable, []*PipeState, error) {
 	obs := rxgo.FromChannel(inbound, opts...)
-	var pipeStarts []PipeState
+	var pipeStarts []*PipeState
 
-	handleStack := func(currentStack BoundDefinition) error {
-		if currentStack.PipeDefinition != nil {
+	handleStack := func(currentStack IStackBoundDefinition) error {
+		cb := currentStack.GetPipeDefinition()
+		if cb != nil {
 			var err error
-			obs, err = currentStack.PipeDefinition(NewPipeDefinitionParams(connectionId, connectionManager, cancelContext, stackCancelFunc, obs))
+			_, obs, err = cb(NewPipeDefinitionParams(connectionId, connectionManager, cancelContext, stackCancelFunc, obs))
 			if err != nil {
 				return err
 			}
 		}
-		pipeStarts = append(pipeStarts, currentStack.PipeState)
+		pipeStarts = append(pipeStarts, currentStack.GetPipeState())
 		return nil
 	}
 	for i := len(self.Stacks) - 1; i >= 0; i-- {
-		stack := self.Stacks[i].StackDefinition.Inbound
+		stack := self.Stacks[i].StackDefinition.GetInbound()
 		if stack != nil {
+			cb := stack.GetBoundResult()
+			if cb == nil {
+				return nil, nil, goerrors.InvalidParam
+			}
 			err := handleStack(
-				stack(
+				cb(
+					nil,
+					nil,
 					NewInOutBoundParams(
 						self.Stacks[i].Idx,
 						cancelContext,
@@ -186,8 +202,6 @@ func (self *TwoWayPipeDefinition) buildInBound(
 	return obs, pipeStarts, nil
 }
 
-func NewTwoWayPipeDefinition(Stacks []*StackDefinitionIndex) *TwoWayPipeDefinition {
-	return &TwoWayPipeDefinition{
-		Stacks: Stacks,
-	}
+func NewTwoWayPipeDefinition() *TwoWayPipeDefinition {
+	return &TwoWayPipeDefinition{}
 }

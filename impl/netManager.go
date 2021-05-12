@@ -70,7 +70,6 @@ func (self *NetManager) NewConnectionInstance(connectionType internal.Connection
 		fx.Invoke(invokeInboundTransportLayer),
 		fx.Invoke(invokeOutBoundTransportLayer),
 		fx.Invoke(invoke0007),
-		fx.Invoke(invokeIndividualPipes),
 		fx.Invoke(invokeIndividualStacks),
 		fx.Invoke(invoke0008),
 	)
@@ -298,6 +297,7 @@ func createTransportLayer(
 		CancelCtx         context.Context
 		StackCancelFunc   internal.CancelFunc
 		Def               *internal.TwoWayPipeDefinition
+		Conn              net.Conn
 	}) (*internal.TwoWayPipe, error) {
 	params.Logger.LogWithLevel(0, func(logger *log2.Logger) {
 		logger.Printf(fmt.Sprintf("createTransportLayer..."))
@@ -305,7 +305,8 @@ func createTransportLayer(
 	transportLayer, err := params.Def.Build(
 		params.ConnectionId,
 		params.ConnectionManager,
-		params.Logger,
+		params.Conn,
+		//params.Logger,
 		params.CancelCtx,
 		params.StackCancelFunc)
 	if err != nil {
@@ -314,23 +315,27 @@ func createTransportLayer(
 
 	for _, pipeStart := range transportLayer.PipeState {
 		localPipeStart := pipeStart
-		params.Lifecycle.Append(fx.Hook{
-			OnStart: func(ctx context.Context) error {
-				if params.CancelCtx.Err() != nil {
-					return params.CancelCtx.Err()
-				}
-				if localPipeStart.Start != nil {
-					return localPipeStart.Start(params.CancelCtx)
-				}
-				return nil
-			},
-			OnStop: func(ctx context.Context) error {
-				if localPipeStart.End != nil {
-					return localPipeStart.End()
-				}
-				return nil
-			},
-		})
+		if localPipeStart != nil {
+			if localPipeStart.Start != nil {
+				params.Lifecycle.Append(fx.Hook{
+					OnStart: func(ctx context.Context) error {
+						if params.CancelCtx.Err() != nil {
+							return params.CancelCtx.Err()
+						}
+						return localPipeStart.Start(params.CancelCtx)
+					},
+					OnStop: nil,
+				})
+			}
+			if localPipeStart.End != nil {
+				params.Lifecycle.Append(fx.Hook{
+					OnStart: nil,
+					OnStop: func(ctx context.Context) error {
+						return localPipeStart.End()
+					},
+				})
+			}
+		}
 	}
 
 	params.Lifecycle.Append(fx.Hook{
@@ -503,10 +508,6 @@ func invokeIndividualStacks(
 		Cfr            intf.IConnectionReactorFactory
 	}) error {
 	connectionReactorFactory := params.Cfr
-	//connectionReactorFactory, ok := params.ConnectionReactorFactories.m[params.ConnectionReactorFactoryName]
-	//if !ok {
-	//	return fmt.Errorf("could not find ConnectionReactorFactory(%s) while invokeIndividualStacks", params.ConnectionReactorFactoryName)
-	//}
 	localConn := params.Conn
 	for _, stackState := range params.TransportLayer.StackState {
 		if params.CancelCtx.Err() != nil {
@@ -547,15 +548,6 @@ func invokeIndividualStacks(
 	return nil
 }
 
-func invokeIndividualPipes(
-	params struct {
-		fx.In
-		Lifecycle      fx.Lifecycle
-		TransportLayer *internal.TwoWayPipe
-		CancelFunc     context.CancelFunc
-		CancelCtx      context.Context
-	}) {
-}
 func invoke0007(
 	params struct {
 		fx.In

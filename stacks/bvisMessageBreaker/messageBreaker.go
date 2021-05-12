@@ -10,6 +10,7 @@ import (
 	"github.com/bhbosman/goerrors"
 	"github.com/bhbosman/gomessageblock"
 	"github.com/bhbosman/goprotoextra"
+	"github.com/google/uuid"
 	"github.com/reactivex/rxgo/v2"
 	"reflect"
 )
@@ -27,15 +28,16 @@ func StackDefinition(
 
 	marker := [4]byte{'B', 'V', 'I', 'S'}
 	markerAsUInt32 := binary.LittleEndian.Uint32(marker[:])
-	const stackName = "MessageBreaker"
+	id := uuid.New()
 	return &internal2.StackDefinition{
-		Name: stackName,
-		Inbound: func(inOutBoundParams internal2.InOutBoundParams) internal2.BoundDefinition {
+		Id:   id,
+		Name: StackName,
+		Inbound: internal2.NewBoundResultImpl(func(stackData, pipeData interface{}, inOutBoundParams internal2.InOutBoundParams) internal2.IStackBoundDefinition {
 			channelManager := internal2.NewChannelManager(make(chan rxgo.Item), "Inbound MessageBreaker", connectionId)
-			return internal2.BoundDefinition{
-				PipeDefinition: func(params internal2.PipeDefinitionParams) (rxgo.Observable, error) {
+			return &internal2.StackBoundDefinition{
+				PipeDefinition: func(params internal2.PipeDefinitionParams) (uuid.UUID, rxgo.Observable, error) {
 					if stackCancelFunc == nil {
-						return nil, goerrors.InvalidParam
+						return uuid.Nil, nil, goerrors.InvalidParam
 					}
 					rw := gomessageblock.NewReaderWriter()
 					state := internal.BuildMessageStateReadMessageSignature
@@ -116,7 +118,7 @@ func StackDefinition(
 					_ = params.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 						inOutBoundParams.Index,
 						params.ConnectionId,
-						stackName,
+						StackName,
 						rxgo.StreamDirectionInbound,
 						connectionManager,
 						func(ctx context.Context, i goprotoextra.ReadWriterSize) {
@@ -144,9 +146,10 @@ func StackDefinition(
 							}
 						},
 						opts...)
-					return rxgo.FromChannel(channelManager.Items, opts...), nil
+					return id,
+						rxgo.FromChannel(channelManager.Items, opts...), nil
 				},
-				PipeState: internal2.PipeState{
+				PipeState: &internal2.PipeState{
 					Start: func(ctx context.Context) error {
 						return ctx.Err()
 					},
@@ -155,39 +158,42 @@ func StackDefinition(
 					},
 				},
 			}
-		},
-		Outbound: func(inOutBoundParams internal2.InOutBoundParams) internal2.BoundDefinition {
-			return internal2.BoundDefinition{
-				PipeDefinition: func(params internal2.PipeDefinitionParams) (rxgo.Observable, error) {
-					if stackCancelFunc == nil {
-						return nil, goerrors.InvalidParam
-					}
-					errorState := false
-					return params.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
-						inOutBoundParams.Index,
-						params.ConnectionId,
-						stackName,
-						rxgo.StreamDirectionOutbound,
-						params.ConnectionManager,
-						func(ctx context.Context, i goprotoextra.ReadWriterSize) (goprotoextra.ReadWriterSize, error) {
-							if errorState {
-								stackCancelFunc("In error state", false, goerrors.InvalidState)
-								return nil, goerrors.InvalidState
-							}
-							block := make([]byte, 8)
-							binary.LittleEndian.PutUint32(block[0:4], markerAsUInt32)
-							binary.LittleEndian.PutUint32(block[4:8], uint32(i.Size()))
-							result := gomessageblock.NewReaderWriterBlock(block)
-							err := result.SetNext(i)
-							if err != nil {
-								params.StackCancelFunc("rw.SetNext()", false, err)
-								return nil, err
-							}
-							return result, nil
-						},
-						opts...), nil
-				},
-			}
-		},
+		}),
+		Outbound: internal2.NewBoundResultImpl(
+			func(stackData, pipeData interface{}, inOutBoundParams internal2.InOutBoundParams) internal2.IStackBoundDefinition {
+				return &internal2.StackBoundDefinition{
+					PipeDefinition: func(params internal2.PipeDefinitionParams) (uuid.UUID, rxgo.Observable, error) {
+						if stackCancelFunc == nil {
+							return uuid.Nil, nil, goerrors.InvalidParam
+						}
+						errorState := false
+						return id,
+							params.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
+								inOutBoundParams.Index,
+								params.ConnectionId,
+								StackName,
+								rxgo.StreamDirectionOutbound,
+								params.ConnectionManager,
+								func(ctx context.Context, i goprotoextra.ReadWriterSize) (goprotoextra.ReadWriterSize, error) {
+									if errorState {
+										stackCancelFunc("In error state", false, goerrors.InvalidState)
+										return nil, goerrors.InvalidState
+									}
+									block := make([]byte, 8)
+									binary.LittleEndian.PutUint32(block[0:4], markerAsUInt32)
+									binary.LittleEndian.PutUint32(block[4:8], uint32(i.Size()))
+									result := gomessageblock.NewReaderWriterBlock(block)
+									err := result.SetNext(i)
+									if err != nil {
+										params.StackCancelFunc("rw.SetNext()", false, err)
+										return nil, err
+									}
+									return result, nil
+								},
+								opts...),
+							nil
+					},
+				}
+			}),
 	}, nil
 }

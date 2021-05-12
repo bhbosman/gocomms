@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"github.com/bhbosman/gocomms/intf"
+	"github.com/google/uuid"
 	"github.com/reactivex/rxgo/v2"
 	"net"
 	"net/url"
@@ -31,7 +32,7 @@ func NewPipeDefinitionParams(
 		Obs:               obs}
 }
 
-type PipeDefinition func(params PipeDefinitionParams) (rxgo.Observable, error)
+type PipeDefinition func(params PipeDefinitionParams) (uuid.UUID, rxgo.Observable, error)
 type PipeStart func(ctx context.Context) error
 type PipeEnd func() error
 type PipeState struct {
@@ -71,13 +72,6 @@ type StackEndState func(endParams StackEndStateParams) error
 type StackState struct {
 	Start StackStartState
 	End   StackEndState
-}
-
-type StackDefinition struct {
-	Name       string
-	Inbound    func(params InOutBoundParams) BoundDefinition
-	Outbound   func(params InOutBoundParams) BoundDefinition
-	StackState StackState
 }
 
 type ConnectionType uint8

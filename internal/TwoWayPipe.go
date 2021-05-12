@@ -2,7 +2,6 @@ package internal
 
 import (
 	"context"
-	"github.com/bhbosman/gologging"
 	"github.com/bhbosman/goprotoextra"
 	"github.com/reactivex/rxgo/v2"
 	"go.uber.org/multierr"
@@ -10,11 +9,10 @@ import (
 )
 
 type TwoWayPipe struct {
-	logger                 *gologging.SubSystemLogger
 	InboundObservable      rxgo.Observable
 	OutboundObservable     rxgo.Observable
 	cancelCtx              context.Context
-	PipeState              []PipeState
+	PipeState              []*PipeState
 	StackState             []StackState
 	inboundChannelManager  *ChannelManager
 	outboundChannelManager *ChannelManager
@@ -34,16 +32,7 @@ func (self *TwoWayPipe) ReceiveIncomingData(item io.Reader) error {
 	if err != nil {
 		return err
 	}
-	defer func() {
-		r := recover()
-		if r != nil {
-			if err, ok := r.(error); ok {
-				_ = self.logger.ErrorWithDescription("ReceiveIncomingData", err)
-			}
-		}
-	}()
 	self.inboundChannelManager.Send(self.cancelCtx, item)
-
 	return nil
 }
 
@@ -65,18 +54,16 @@ func (self *TwoWayPipe) Close() error {
 
 func NewTwoWayPipe(
 	connectionId string,
-	logger *gologging.SubSystemLogger,
 	InBound chan rxgo.Item,
 	OutBound chan rxgo.Item,
 	InboundObservable rxgo.Observable,
 	OutboundObservable rxgo.Observable,
 	cancelCtx context.Context,
-	pipeStarts []PipeState,
+	pipeStarts []*PipeState,
 	stackState []StackState) *TwoWayPipe {
 	return &TwoWayPipe{
 		inboundChannelManager:  NewChannelManager(InBound, "inboundChannelManager", connectionId),
 		outboundChannelManager: NewChannelManager(OutBound, "outboundChannelManager", connectionId),
-		logger:                 logger,
 		InboundObservable:      InboundObservable,
 		OutboundObservable:     OutboundObservable,
 		cancelCtx:              cancelCtx,

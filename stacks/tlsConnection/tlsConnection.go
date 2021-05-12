@@ -8,6 +8,7 @@ import (
 	"github.com/bhbosman/goerrors"
 	"github.com/bhbosman/gomessageblock"
 	"github.com/bhbosman/goprotoextra"
+	"github.com/google/uuid"
 	"sync"
 
 	"github.com/bhbosman/gocomms/stacks/internal/connectionWrapper"
@@ -59,75 +60,79 @@ func StackDefinition(
 	// wg is here to make sure, that the upgradedConnection is properly assigned, before data is read/write to it
 	upgradedConnectionAssignedWaitGroup := sync.WaitGroup{}
 	upgradedConnectionAssignedWaitGroup.Add(1)
+	id := uuid.New()
 	return &internal.StackDefinition{
+		Id:   id,
 		Name: stackName,
-		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
-			nextInBoundChannel = internal.NewChannelManager(make(chan rxgo.Item), "inbound TlsConnection", connectionId)
-			stackIndex = inOutBoundParams.Index
-			return internal.BoundDefinition{
-				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
-					if stackCancelFunc == nil {
-						return nil, goerrors.InvalidParam
-					}
-					_ = pipeParams.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
-						inOutBoundParams.Index,
-						pipeParams.ConnectionId,
-						stackName,
-						rxgo.StreamDirectionInbound,
-						connectionManager,
-						func(ctx context.Context, rws goprotoextra.ReadWriterSize) {
-							upgradedConnectionAssignedWaitGroup.Wait()
-							_, err := io.Copy(pipeWriteClose, rws)
-							if err != nil {
-								return
-							}
-						}, opts...)
-					nextObs := rxgo.FromChannel(nextInBoundChannel.Items)
-					return nextObs, nil
-				},
-				PipeState: internal.PipeState{
-					Start: func(ctx context.Context) error {
-						return ctx.Err()
+		Inbound: internal.NewBoundResultImpl(
+			func(stackData, pipeData interface{}, inOutBoundParams internal.InOutBoundParams) internal.IStackBoundDefinition {
+				nextInBoundChannel = internal.NewChannelManager(make(chan rxgo.Item), "inbound TlsConnection", connectionId)
+				stackIndex = inOutBoundParams.Index
+				return &internal.StackBoundDefinition{
+					PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (uuid.UUID, rxgo.Observable, error) {
+						if stackCancelFunc == nil {
+							return uuid.Nil, nil, goerrors.InvalidParam
+						}
+						_ = pipeParams.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
+							inOutBoundParams.Index,
+							pipeParams.ConnectionId,
+							stackName,
+							rxgo.StreamDirectionInbound,
+							connectionManager,
+							func(ctx context.Context, rws goprotoextra.ReadWriterSize) {
+								upgradedConnectionAssignedWaitGroup.Wait()
+								_, err := io.Copy(pipeWriteClose, rws)
+								if err != nil {
+									return
+								}
+							}, opts...)
+						nextObs := rxgo.FromChannel(nextInBoundChannel.Items)
+						return id, nextObs, nil
 					},
-					End: func() error {
-						return nextInBoundChannel.Close()
+					PipeState: &internal.PipeState{
+						Start: func(ctx context.Context) error {
+							return ctx.Err()
+						},
+						End: func() error {
+							return nextInBoundChannel.Close()
+						},
 					},
-				},
-			}
-		},
-		Outbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
-			nextOutboundChannel = internal.NewChannelManager(make(chan rxgo.Item), "outbound Tls Connection", connectionId)
-			return internal.BoundDefinition{
-				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
-					if stackCancelFunc == nil {
-						return nil, goerrors.InvalidParam
-					}
-					_ = pipeParams.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
-						inOutBoundParams.Index,
-						pipeParams.ConnectionId,
-						stackName,
-						rxgo.StreamDirectionOutbound,
-						connectionManager,
-						func(ctx context.Context, size goprotoextra.ReadWriterSize) {
-							upgradedConnectionAssignedWaitGroup.Wait()
-							_, err := io.Copy(upgradedConnection, size)
-							if err != nil {
-								stackCancelFunc("copy data to upgradedConnection", false, err)
-							}
-						}, opts...)
-					nextObs := rxgo.FromChannel(nextOutboundChannel.Items, opts...)
-					return nextObs, nil
-				},
-				PipeState: internal.PipeState{
-					Start: func(ctx context.Context) error {
-						return ctx.Err()
+				}
+			}),
+		Outbound: internal.NewBoundResultImpl(
+			func(stackData, pipeData interface{}, inOutBoundParams internal.InOutBoundParams) internal.IStackBoundDefinition {
+				nextOutboundChannel = internal.NewChannelManager(make(chan rxgo.Item), "outbound Tls Connection", connectionId)
+				return &internal.StackBoundDefinition{
+					PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (uuid.UUID, rxgo.Observable, error) {
+						if stackCancelFunc == nil {
+							return uuid.Nil, nil, goerrors.InvalidParam
+						}
+						_ = pipeParams.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
+							inOutBoundParams.Index,
+							pipeParams.ConnectionId,
+							stackName,
+							rxgo.StreamDirectionOutbound,
+							connectionManager,
+							func(ctx context.Context, size goprotoextra.ReadWriterSize) {
+								upgradedConnectionAssignedWaitGroup.Wait()
+								_, err := io.Copy(upgradedConnection, size)
+								if err != nil {
+									stackCancelFunc("copy data to upgradedConnection", false, err)
+								}
+							}, opts...)
+						nextObs := rxgo.FromChannel(nextOutboundChannel.Items, opts...)
+						return id, nextObs, nil
 					},
-					End: func() error {
-						return nextOutboundChannel.Close()
+					PipeState: &internal.PipeState{
+						Start: func(ctx context.Context) error {
+							return ctx.Err()
+						},
+						End: func() error {
+							return nextOutboundChannel.Close()
+						},
 					},
-				},
-			}
-		},
+				}
+			}),
 		StackState: internal.StackState{
 			Start: func(startParams internal.StackStartStateParams) (net.Conn, error) {
 				if startParams.Ctx.Err() != nil {
