@@ -11,7 +11,6 @@ import (
 	"github.com/bhbosman/gomessageblock"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
-	"github.com/reactivex/rxgo/v2"
 	"go.uber.org/multierr"
 	"io"
 	"net"
@@ -30,7 +29,8 @@ type Data struct {
 }
 
 func (self *Data) OnEnd(endParams internal.StackEndStateParams) error {
-	err := multierr.Append(nil, self.Close())
+	var err error = nil
+	err = multierr.Append(err, self.Close())
 	return err
 }
 
@@ -104,8 +104,8 @@ func (self *Data) OnStart(startParams internal.StackStartStateParams) (net.Conn,
 }
 
 func (self *Data) Close() error {
-
-	err := multierr.Append(nil, self.nextInBoundChannelManager.Close())
+	var err error = nil
+	err = multierr.Append(err, self.nextInBoundChannelManager.Close())
 	err = multierr.Append(err, self.nextOutboundChannelManager.Close())
 	err = multierr.Append(err, self.tempStep.Close())
 	//
@@ -127,18 +127,18 @@ func (self *Data) nextOutBoundPath(
 		if ctx.Err() != nil {
 			return 0, ctx.Err()
 		}
-		dataToConnection := gomessageblock.NewReaderWriterSize(len(b))
+		rws := gomessageblock.NewReaderWriterSize(len(b))
 		if ctx.Err() != nil {
 			return 0, ctx.Err()
 		}
-		n, err = dataToConnection.Write(b)
+		n, err = rws.Write(b)
 		if err != nil {
 			return 0, err
 		}
 		if ctx.Err() != nil {
 			return 0, ctx.Err()
 		}
-		self.nextOutboundChannelManager.Send(ctx, dataToConnection)
+		self.nextOutboundChannelManager.Send(ctx, rws)
 		return n, nil
 	}
 }
@@ -243,9 +243,9 @@ func (self *Data) connectionLoop(ctx context.Context) {
 }
 
 func NewData(stackCancelFunc internal.CancelFunc) *Data {
-	nextInBoundChannelManager := internal.NewChannelManager(make(chan rxgo.Item), "", "")
-	nextOutboundChannelManager := internal.NewChannelManager(make(chan rxgo.Item), "", "")
-	tempStep := internal.NewChannelManager(make(chan rxgo.Item), "", "")
+	nextInBoundChannelManager := internal.NewChannelManager("", "")
+	nextOutboundChannelManager := internal.NewChannelManager("", "")
+	tempStep := internal.NewChannelManager("", "")
 
 	return &Data{
 		LastPongReceived:           time.Now(),

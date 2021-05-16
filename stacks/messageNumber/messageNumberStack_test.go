@@ -28,13 +28,17 @@ func TestMessageNumberStackDefinition(t *testing.T) {
 		assert.NoError(t, err)
 		ch := make(chan rxgo.Item)
 		obs := rxgo.FromChannel(ch)
-		cb := stack.Inbound.GetBoundResult()
+		cb, err := stack.Inbound.GetBoundResult()
+		assert.NoError(t, err)
 		assert.NotNil(t, cb)
-		r := cb(nil, nil, internal.NewInOutBoundParams(1, context.Background()))
+		r, err := cb(internal.NewInOutBoundParams(1))
+		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		pipeDefCallback := r.GetPipeDefinition()
 		assert.NotNil(t, pipeDefCallback)
 		_, obs2, err := pipeDefCallback(
+			nil,
+			nil,
 			internal.PipeDefinitionParams{
 				CancelContext:   context.Background(),
 				StackCancelFunc: func(context string, inbound bool, err error) {},
@@ -75,13 +79,17 @@ func TestMessageNumberStackDefinition(t *testing.T) {
 		assert.NoError(t, err)
 		ch := make(chan rxgo.Item)
 		obs := rxgo.FromChannel(ch)
-		cb := stack.Inbound.GetBoundResult()
+		cb, err := stack.Inbound.GetBoundResult()
+		assert.NoError(t, err)
 		assert.NotNil(t, cb)
-		r := cb(nil, nil, internal.NewInOutBoundParams(2, context.Background()))
+		r, err := cb(internal.NewInOutBoundParams(2))
+		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		pipeDefCallback := r.GetPipeDefinition()
 		assert.NotNil(t, pipeDefCallback)
 		_, obs2, err := pipeDefCallback(
+			nil,
+			nil,
 			internal.PipeDefinitionParams{
 
 				CancelContext:   context.Background(),
@@ -128,13 +136,17 @@ func TestMessageNumberStackDefinition(t *testing.T) {
 		assert.NoError(t, err)
 		ch := make(chan rxgo.Item)
 		obs := rxgo.FromChannel(ch)
-		cb := stack.Outbound.GetBoundResult()
+		cb, err := stack.Outbound.GetBoundResult()
+		assert.NoError(t, err)
 		assert.NotNil(t, cb)
-		r := cb(nil, nil, internal.NewInOutBoundParams(9, context.Background()))
+		r, err := cb(internal.NewInOutBoundParams(9))
+		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		pipeDefCallback := r.GetPipeDefinition()
 		assert.NotNil(t, pipeDefCallback)
 		_, obs2, err := pipeDefCallback(
+			nil,
+			nil,
 			internal.PipeDefinitionParams{
 				CancelContext:   context.Background(),
 				StackCancelFunc: func(context string, inbound bool, err error) {},

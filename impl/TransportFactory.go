@@ -102,10 +102,10 @@ func CreateCompressedStack(
 		return Top.StackDefinition(connectionType, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
-		return pingPong.StackDefinition(connectionType, connectionId, opts...)
+		return pingPong.StackDefinition(connectionType, connectionId, stackCancelFunc, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
-		return messageCompressor.StackDefinition(stackCancelFunc, opts...)
+		return messageCompressor.StackDefinition(connectionType, stackCancelFunc, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return messageNumber.StackDefinition(connectionType, userContext, stackCancelFunc, opts...)
@@ -132,7 +132,7 @@ func CreateUnCompressedStack(
 		return Top.StackDefinition(connectionType, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
-		return pingPong.StackDefinition(connectionType, connectionId, opts...)
+		return pingPong.StackDefinition(connectionType, connectionId, stackCancelFunc, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return messageNumber.StackDefinition(connectionType, userContext, stackCancelFunc, opts...)
@@ -159,10 +159,10 @@ func CreateCompressedTlsStack(
 		return Top.StackDefinition(connectionType, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
-		return pingPong.StackDefinition(connectionType, connectionId, opts...)
+		return pingPong.StackDefinition(connectionType, connectionId, stackCancelFunc, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
-		return messageCompressor.StackDefinition(stackCancelFunc, opts...)
+		return messageCompressor.StackDefinition(connectionType, stackCancelFunc, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return messageNumber.StackDefinition(connectionType, userContext, stackCancelFunc, opts...)
@@ -192,7 +192,7 @@ func CreateUnCompressedTlsStack(
 		return Top.StackDefinition(connectionType, opts...)
 	})
 	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
-		return pingPong.StackDefinition(connectionType, connectionId, opts...)
+		return pingPong.StackDefinition(connectionType, connectionId, stackCancelFunc, opts...)
 	})
 
 	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {

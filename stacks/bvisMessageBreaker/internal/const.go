@@ -1,3 +1,3 @@
-package bvisMessageBreaker
+package internal
 
 const StackName = "MessageBreaker"

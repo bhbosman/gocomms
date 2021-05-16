@@ -2,18 +2,18 @@ package internal
 
 import "github.com/google/uuid"
 
-type BoundResult func(stackData, pipeData interface{}, params InOutBoundParams) IStackBoundDefinition
+type BoundResult func(params InOutBoundParams) (IStackBoundDefinition, error)
 
 type IBoundResult interface {
-	GetBoundResult() BoundResult
+	GetBoundResult() (BoundResult, error)
 }
 
 type boundResultImpl struct {
 	boundResult BoundResult
 }
 
-func (self *boundResultImpl) GetBoundResult() BoundResult {
-	return self.boundResult
+func (self *boundResultImpl) GetBoundResult() (BoundResult, error) {
+	return self.boundResult, nil
 }
 
 func NewBoundResultImpl(boundResult BoundResult) *boundResultImpl {
@@ -25,19 +25,19 @@ type IStackDefinition interface {
 	GetName() string
 	GetInbound() IBoundResult
 	GetOutbound() IBoundResult
-	GetStackState() StackState
+	GetStackState() *StackState
 }
 
 type StackDefinition struct {
-	Id         uuid.UUID
+	IId        uuid.UUID
 	Name       string
 	Inbound    IBoundResult
 	Outbound   IBoundResult
-	StackState StackState
+	StackState *StackState
 }
 
 func (self *StackDefinition) GetId() uuid.UUID {
-	return self.Id
+	return self.IId
 }
 
 func (self *StackDefinition) GetName() string {
@@ -52,6 +52,6 @@ func (self *StackDefinition) GetOutbound() IBoundResult {
 	return self.Outbound
 }
 
-func (self *StackDefinition) GetStackState() StackState {
+func (self *StackDefinition) GetStackState() *StackState {
 	return self.StackState
 }

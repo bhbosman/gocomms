@@ -15,9 +15,9 @@ func inbound(
 	data *Data,
 	stackCancelFunc internal.CancelFunc,
 	connectionManager rxgo.IPublishToConnectionManager, opts ...rxgo.Option) internal.BoundResult {
-	return func(stackData, pipeData interface{}, inOutBoundParams internal.InOutBoundParams) internal.IStackBoundDefinition {
+	return func(inOutBoundParams internal.InOutBoundParams) (internal.IStackBoundDefinition, error) {
 		return &internal.StackBoundDefinition{
-			PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (uuid.UUID, rxgo.Observable, error) {
+			PipeDefinition: func(stackData, pipeData interface{}, pipeParams internal.PipeDefinitionParams) (uuid.UUID, rxgo.Observable, error) {
 				if stackCancelFunc == nil {
 					return uuid.Nil, nil, goerrors.InvalidParam
 				}
@@ -36,14 +36,28 @@ func inbound(
 					opts...)
 				return id, rxgo.FromChannel(data.nextInBoundChannelManager.Items), nil
 			},
-			PipeState: &internal.PipeState{
-				Start: func(ctx context.Context) error {
-					return ctx.Err()
-				},
-				End: func() error {
-					return nil
-				},
-			},
-		}
+			//PipeState: &internal.PipeState{
+			//	Destroy: func(stackData interface{}) interface{} {
+			//		if closer, ok := stackData.(io.Closer); ok {
+			//			return closer.Close()
+			//		}
+			//		return nil
+			//	},
+			//	Start: func(stackData, pipeData interface{}, ctx context.Context) error {
+			//		return ctx.Err()
+			//	},
+			//	ID: id,
+			//	Create: func(stackData interface{}, ctx context.Context) (interface{}, error) {
+			//		return internal.NewNoCloser(), nil
+			//	},
+			//	End: func(stackData, pipeData interface{}) error {
+			//		var err error = nil
+			//		if closer, ok := pipeData.(io.Closer); ok {
+			//			err = multierr.Append(err, closer.Close())
+			//		}
+			//		return err
+			//	},
+			//},
+		}, nil
 	}
 }

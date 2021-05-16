@@ -11,14 +11,14 @@ import (
 
 type ChannelManager struct {
 	Items chan rxgo.Item
-	mutex *sync.Mutex
+	mutex sync.Mutex
 	Name  string
 }
 
-func NewChannelManager(items chan rxgo.Item, name, name2 string) *ChannelManager {
+func NewChannelManager(name, name2 string) *ChannelManager {
 	return &ChannelManager{
-		Items: items,
-		mutex: &sync.Mutex{},
+		Items: make(chan rxgo.Item, 32),
+		mutex: sync.Mutex{},
 		Name:  fmt.Sprintf("%v %v", name, name2),
 	}
 }
@@ -34,11 +34,11 @@ func (self *ChannelManager) Close() error {
 	return nil
 }
 
-func (self ChannelManager) lock() {
+func (self *ChannelManager) lock() {
 	self.mutex.Lock()
 }
 
-func (self ChannelManager) unlock() {
+func (self *ChannelManager) unlock() {
 	self.mutex.Unlock()
 }
 

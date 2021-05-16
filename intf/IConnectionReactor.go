@@ -6,11 +6,13 @@ import (
 	"github.com/bhbosman/gologging"
 	"github.com/bhbosman/goprotoextra"
 	"github.com/reactivex/rxgo/v2"
+	"io"
 	"net"
 	"net/url"
 )
 
 type IConnectionReactor interface {
+	io.Closer
 	Init(
 		conn net.Conn,
 		url *url.URL,
@@ -18,7 +20,6 @@ type IConnectionReactor interface {
 		connectionManager connectionManager.IConnectionManager,
 		onSend goprotoextra.ToConnectionFunc,
 		toConnectionReactor goprotoextra.ToReactorFunc) (rxgo.NextExternalFunc, error)
-	Close() error
 	Open() error
 }
 

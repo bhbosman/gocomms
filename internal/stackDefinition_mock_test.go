@@ -92,10 +92,10 @@ func (mr *MockIStackDefinitionMockRecorder) GetOutbound() *gomock.Call {
 }
 
 // GetStackState mocks base method.
-func (m *MockIStackDefinition) GetStackState() internal.StackState {
+func (m *MockIStackDefinition) GetStackState() *internal.StackState {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetStackState")
-	ret0, _ := ret[0].(internal.StackState)
+	ret0, _ := ret[0].(*internal.StackState)
 	return ret0
 }
 
@@ -129,11 +129,12 @@ func (m *MockIBoundResult) EXPECT() *MockIBoundResultMockRecorder {
 }
 
 // GetBoundResult mocks base method.
-func (m *MockIBoundResult) GetBoundResult() internal.BoundResult {
+func (m *MockIBoundResult) GetBoundResult() (internal.BoundResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetBoundResult")
 	ret0, _ := ret[0].(internal.BoundResult)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetBoundResult indicates an expected call of GetBoundResult.

@@ -1,5 +1,21 @@
 package internal
 
+import (
+	"fmt"
+	"reflect"
+)
+
+type NoCloser struct {
+}
+
+func NewNoCloser() *NoCloser {
+	return &NoCloser{}
+}
+
+func (n NoCloser) Close() error {
+	return nil
+}
+
 type IStackBoundDefinition interface {
 	GetPipeDefinition() PipeDefinition
 	GetPipeState() *PipeState
@@ -23,4 +39,19 @@ func NewBoundDefinition(pipeDefinition PipeDefinition, pipeState *PipeState) ISt
 		PipeDefinition: pipeDefinition,
 		PipeState:      pipeState,
 	}
+}
+
+type WrongStackDataType struct {
+	StackName      string
+	ConnectionType ConnectionType
+	WantedType     reflect.Type
+	ReceivedType   reflect.Type
+}
+
+func NewWrongStackDataType(stackName string, connectionType ConnectionType, wantedType reflect.Type, receivedType reflect.Type) *WrongStackDataType {
+	return &WrongStackDataType{StackName: stackName, ConnectionType: connectionType, WantedType: wantedType, ReceivedType: receivedType}
+}
+
+func (w WrongStackDataType) Error() string {
+	return fmt.Sprintf("Wrong data type")
 }

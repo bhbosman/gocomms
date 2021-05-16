@@ -67,7 +67,10 @@ func (self *netListenManager) acceptNewClientConnection(conn net.Conn) {
 
 		go func(app *fx.App, ctx context.Context) {
 			<-ctx.Done()
-			app.Stop(context.Background())
+			err := app.Stop(context.Background())
+			if err != nil {
+				return
+			}
 
 		}(connectionApp, ctx)
 	}(conn)

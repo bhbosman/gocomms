@@ -12,6 +12,11 @@ import (
 	"github.com/reactivex/rxgo/v2"
 )
 
+const StackName = "MessageNumber"
+
+type StackData struct {
+}
+
 func StackDefinition(
 	connectionType internal.ConnectionType,
 	userContext interface{},
@@ -20,25 +25,20 @@ func StackDefinition(
 	if stackCancelFunc == nil {
 		return nil, goerrors.InvalidParam
 	}
-	const stackName = "MessageNumber"
 	id := uuid.New()
 	return &internal.StackDefinition{
-			Id:   id,
-			Name: stackName,
-			Inbound: internal.NewBoundResultImpl(
-				func(stackData, pipeData interface{}, inOutBoundParams internal.InOutBoundParams) internal.IStackBoundDefinition {
-					return &internal.StackBoundDefinition{
-						PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (uuid.UUID, rxgo.Observable, error) {
-							if stackCancelFunc == nil {
-								return uuid.Nil, nil, goerrors.InvalidParam
-							}
+			IId:  id,
+			Name: StackName,
+			Inbound: internal.NewBoundResultImpl(func(inOutBoundParams internal.InOutBoundParams) (internal.IStackBoundDefinition, error) {
+				return &internal.StackBoundDefinition{
+						PipeDefinition: func(stackData, pipeData interface{}, pipeParams internal.PipeDefinitionParams) (uuid.UUID, rxgo.Observable, error) {
 							errorState := false
 							var number uint64 = 0
 							return id,
 								pipeParams.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
 									inOutBoundParams.Index,
 									pipeParams.ConnectionId,
-									stackName,
+									StackName,
 									rxgo.StreamDirectionInbound,
 									pipeParams.ConnectionManager,
 									func(ctx context.Context, i goprotoextra.ReadWriterSize) (goprotoextra.ReadWriterSize, error) {
@@ -67,22 +67,19 @@ func StackDefinition(
 									},
 									opts...), nil
 						},
-					}
-				}),
-			Outbound: internal.NewBoundResultImpl(
-				func(stackData, pipeData interface{}, inOutBoundParams internal.InOutBoundParams) internal.IStackBoundDefinition {
-					return &internal.StackBoundDefinition{
-						PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (uuid.UUID, rxgo.Observable, error) {
-							if stackCancelFunc == nil {
-								return uuid.Nil, nil, goerrors.InvalidParam
-							}
+					},
+					nil
+			}),
+			Outbound: internal.NewBoundResultImpl(func(inOutBoundParams internal.InOutBoundParams) (internal.IStackBoundDefinition, error) {
+				return &internal.StackBoundDefinition{
+						PipeDefinition: func(stackData, pipeData interface{}, pipeParams internal.PipeDefinitionParams) (uuid.UUID, rxgo.Observable, error) {
 							errorState := false
 							var number uint64 = 0
 							return id,
 								pipeParams.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
 									inOutBoundParams.Index,
 									pipeParams.ConnectionId,
-									stackName,
+									StackName,
 									rxgo.StreamDirectionOutbound,
 									pipeParams.ConnectionManager,
 									func(ctx context.Context, i goprotoextra.ReadWriterSize) (goprotoextra.ReadWriterSize, error) {
@@ -99,8 +96,9 @@ func StackDefinition(
 									},
 									opts...), nil
 						},
-					}
-				}),
+					},
+					nil
+			}),
 		},
 		nil
 }

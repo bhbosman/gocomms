@@ -1,12 +1,9 @@
 package internal
 
-import "context"
-
 type InOutBoundParams struct {
-	Index   int
-	Context context.Context
+	Index int
 }
 
-func NewInOutBoundParams(index int, context context.Context) InOutBoundParams {
-	return InOutBoundParams{Index: index, Context: context}
+func NewInOutBoundParams(index int) InOutBoundParams {
+	return InOutBoundParams{Index: index}
 }

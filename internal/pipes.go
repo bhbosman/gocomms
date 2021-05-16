@@ -32,12 +32,17 @@ func NewPipeDefinitionParams(
 		Obs:               obs}
 }
 
-type PipeDefinition func(params PipeDefinitionParams) (uuid.UUID, rxgo.Observable, error)
-type PipeStart func(ctx context.Context) error
-type PipeEnd func() error
+type PipeDefinition func(stackData, pipeData interface{}, params PipeDefinitionParams) (uuid.UUID, rxgo.Observable, error)
+type PipeCreate func(stackData interface{}, ctx context.Context) (interface{}, error)
+type PipeDestroy func(stackData, pipeData interface{}) error
+type PipeStart func(stackData, pipeData interface{}, ctx context.Context) error
+type PipeEnd func(stackData, pipeData interface{}) error
 type PipeState struct {
-	Start PipeStart
-	End   PipeEnd
+	ID      uuid.UUID
+	Create  PipeCreate
+	Destroy PipeDestroy
+	Start   PipeStart
+	End     PipeEnd
 }
 
 type StackStartStateParams struct {
@@ -58,7 +63,11 @@ func NewStackStartStateParams(conn net.Conn, url *url.URL, ctx context.Context, 
 	}
 }
 
-type StackStartState func(startParams StackStartStateParams) (net.Conn, error)
+type StackCreate func(Conn net.Conn, Url *url.URL, Ctx context.Context, CancelFunc CancelFunc) (interface{}, error)
+type StackDestroy func(stackData interface{}) error
+
+type StackStartState func(data interface{}, startParams StackStartStateParams) (net.Conn, error)
+type StackStopState func(stackData interface{}, endParams StackEndStateParams) error
 
 type StackEndStateParams struct {
 }
@@ -67,11 +76,12 @@ func NewStackEndStateParams() StackEndStateParams {
 	return StackEndStateParams{}
 }
 
-type StackEndState func(endParams StackEndStateParams) error
-
 type StackState struct {
-	Start StackStartState
-	End   StackEndState
+	Id      uuid.UUID
+	Create  StackCreate
+	Destroy StackDestroy
+	Start   StackStartState
+	Stop    StackStopState
 }
 
 type ConnectionType uint8

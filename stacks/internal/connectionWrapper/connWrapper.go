@@ -31,8 +31,7 @@ func (self *ConnWrapper) Write(b []byte) (n int, err error) {
 }
 
 func (self ConnWrapper) Close() error {
-	var err error = nil
-	return err
+	return nil
 }
 
 func NewConnWrapper(

@@ -2,11 +2,12 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"github.com/bhbosman/gocomms/connectionManager"
 	"github.com/bhbosman/goerrors"
 	"github.com/google/uuid"
 	"github.com/reactivex/rxgo/v2"
-	"net"
+	"strings"
 )
 
 type StackDefinitionIndex struct {
@@ -16,23 +17,6 @@ type StackDefinitionIndex struct {
 
 type TwoWayPipeDefinition struct {
 	Stacks []*StackDefinitionIndex
-}
-
-func (self *TwoWayPipeDefinition) Add(id uuid.UUID, name string, inbound, outbound PipeDefinition) {
-	self.AddStackDefinition(
-		&StackDefinition{
-			Inbound: NewBoundResultImpl(
-				func(stackData, pipeData interface{}, params InOutBoundParams) IStackBoundDefinition {
-					return NewBoundDefinition(inbound, nil)
-				}),
-			Outbound: NewBoundResultImpl(
-				func(stackData, pipeData interface{}, params InOutBoundParams) IStackBoundDefinition {
-					return NewBoundDefinition(outbound, nil)
-
-				}),
-			Name: name,
-			Id:   id,
-		})
 }
 
 func (self *TwoWayPipeDefinition) AddStackDefinition(stack IStackDefinition) {
@@ -55,151 +39,267 @@ func (self *TwoWayPipeDefinition) AddStackDefinitionFunc(fn func() (IStackDefini
 	self.AddStackDefinition(definition)
 }
 
-func (self TwoWayPipeDefinition) Build(
+func (self TwoWayPipeDefinition) BuildStackState() ([]*StackState, error) {
+	var allStackState []*StackState
+	for _, item := range self.Stacks {
+		stackState := item.StackDefinition.GetStackState()
+		if stackState == nil {
+			continue
+		}
+		b := true
+		b = b && (0 != strings.Compare(uuid.Nil.String(), stackState.Id.String()))
+		b = b && (stackState.Create != nil)
+		b = b && (stackState.Destroy != nil)
+		b = b && (stackState.Start != nil)
+		b = b && (stackState.Stop != nil)
+		if !b {
+			return nil, fmt.Errorf("stackstate must be complete in full")
+		}
+		allStackState = append(allStackState, stackState)
+
+	}
+	return allStackState, nil
+}
+
+func (self TwoWayPipeDefinition) BuildIncomingObs(
+	stackDataMap map[uuid.UUID]interface{},
 	connectionId string,
 	connectionManager connectionManager.IConnectionManager,
-	conn net.Conn,
 	cancelCtx context.Context,
-	stackCancelFunc CancelFunc) (*TwoWayPipe, error) {
-	createChannel := func() chan rxgo.Item {
-		return make(chan rxgo.Item, 1024)
-	}
-	inBoundChannel := createChannel()
-	outBoundChannel := createChannel()
-
-	var allIndividualState, pipeState []*PipeState
-	var allStackState []StackState
-	var err error
-
-	var obsOut rxgo.Observable
-	obsOut, pipeState, err = self.buildOutBound(
-		connectionId,
-		connectionManager,
-		cancelCtx,
-		stackCancelFunc,
-		outBoundChannel, rxgo.WithContext(cancelCtx))
-	if err != nil {
-		return nil, err
-	}
-	allIndividualState = append(allIndividualState, pipeState...)
-
+	stackCancelFunc CancelFunc) (*IncomingObs, error) {
+	inBoundChannel := NewChannelManager("inboundChannelManager", connectionId)
 	var obsIn rxgo.Observable
-	obsIn, pipeState, err = self.buildInBound(
+	var err error
+	obsIn, err = self.buildInBoundPipesObservables(
+		stackDataMap,
 		connectionId,
 		connectionManager,
 		cancelCtx,
 		stackCancelFunc,
-		inBoundChannel,
+		inBoundChannel.Items,
 		rxgo.WithContext(cancelCtx))
 	if err != nil {
 		return nil, err
 	}
-	allIndividualState = append(allIndividualState, pipeState...)
-
-	for i := len(self.Stacks) - 1; i >= 0; i-- {
-		stack := self.Stacks[i]
-		allStackState = append(allStackState, stack.StackDefinition.GetStackState())
-	}
-
-	return NewTwoWayPipe(
-		connectionId,
-		//logger,
-		inBoundChannel,
-		outBoundChannel,
-		obsIn,
-		obsOut,
-		cancelCtx,
-		allIndividualState,
-		allStackState), nil
+	return &IncomingObs{
+		InboundChannelManager: inBoundChannel,
+		InboundObservable:     obsIn,
+		CancelCtx:             cancelCtx,
+	}, nil
 }
 
-func (self *TwoWayPipeDefinition) buildOutBound(
+func (self TwoWayPipeDefinition) BuildOutgoingObs(
+	stackDataMap map[uuid.UUID]interface{},
+	connectionId string,
+	connectionManager connectionManager.IConnectionManager,
+	cancelCtx context.Context,
+	stackCancelFunc CancelFunc) (*OutgoingObs, error) {
+	outBoundChannel := NewChannelManager("outboundChannelManager", connectionId)
+	var err error
+	var obsOut rxgo.Observable
+	obsOut, err = self.buildOutBoundObservables(
+		stackDataMap,
+		connectionId,
+		connectionManager,
+		cancelCtx,
+		stackCancelFunc,
+		outBoundChannel,
+		rxgo.WithContext(cancelCtx))
+	if err != nil {
+		return nil, err
+	}
+
+	return &OutgoingObs{
+		OutboundChannelManager: outBoundChannel,
+		OutboundObservable:     obsOut,
+		CancelCtx:              cancelCtx,
+	}, nil
+}
+
+func (self *TwoWayPipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, error) {
+	var pipeStarts []*PipeState
+
+	for _, currentStack := range self.Stacks {
+		if currentStack == nil {
+			continue
+		}
+		stack := currentStack.StackDefinition.GetOutbound()
+		if stack == nil {
+			continue
+		}
+		boundResult, err := stack.GetBoundResult()
+		if err != nil {
+			return nil, err
+		}
+		if boundResult == nil {
+			continue
+		}
+		var stackBoundDefinition IStackBoundDefinition
+		stackBoundDefinition, err = boundResult(NewInOutBoundParams(currentStack.Idx))
+		if err != nil {
+			return nil, err
+		}
+		if stackBoundDefinition == nil {
+			continue
+		}
+		pipeState := stackBoundDefinition.GetPipeState()
+		if pipeState == nil {
+			continue
+		}
+		b := true
+		b = b && (0 != strings.Compare(uuid.Nil.String(), pipeState.ID.String()))
+		b = b && (pipeState.Create != nil)
+		b = b && (pipeState.Destroy != nil)
+		b = b && (pipeState.Start != nil)
+		b = b && (pipeState.End != nil)
+		if !b {
+			return nil, fmt.Errorf("stackstate must be complete in full")
+		}
+		pipeStarts = append(pipeStarts, pipeState)
+	}
+
+	return pipeStarts, nil
+}
+
+func (self *TwoWayPipeDefinition) buildOutBoundObservables(
+	stackDataMap map[uuid.UUID]interface{},
 	connectionId string,
 	connectionManager connectionManager.IConnectionManager,
 	cancelContext context.Context,
 	stackCancelFunc CancelFunc,
-	outbound chan rxgo.Item,
-	opts ...rxgo.Option) (rxgo.Observable, []*PipeState, error) {
-	obs := rxgo.FromChannel(outbound, opts...)
-	var pipeStarts []*PipeState
-	handleStack := func(currentStack IStackBoundDefinition) error {
+	outbound *ChannelManager,
+	opts ...rxgo.Option) (rxgo.Observable, error) {
+	obs := rxgo.FromChannel(outbound.Items, opts...)
+
+	handleStack := func(id uuid.UUID, currentStack IStackBoundDefinition) error {
 		cb := currentStack.GetPipeDefinition()
 		if cb != nil {
 			var err error
-			_, obs, err = cb(NewPipeDefinitionParams(connectionId, connectionManager, cancelContext, stackCancelFunc, obs))
+			stackData, _ := stackDataMap[id]
+			_, obs, err = cb(stackData, nil, NewPipeDefinitionParams(connectionId, connectionManager, cancelContext, stackCancelFunc, obs))
 			if err != nil {
 				return err
 			}
 		}
-		pipeStarts = append(pipeStarts, currentStack.GetPipeState())
-
 		return nil
 	}
 	for i := 0; i < len(self.Stacks); i++ {
 		stack := self.Stacks[i].StackDefinition.GetOutbound()
 		if stack != nil {
-			cb := stack.GetBoundResult()
-			if cb == nil {
-				return nil, nil, goerrors.InvalidParam
+			var err error
+			var boundResult BoundResult
+			boundResult, err = stack.GetBoundResult()
+			if boundResult == nil {
+				return nil, goerrors.InvalidParam
 			}
-			err := handleStack(cb(
-				nil,
-				nil,
-				NewInOutBoundParams(
-					self.Stacks[i].Idx,
-					cancelContext,
-				)))
+
+			var stackBoundDefinition IStackBoundDefinition
+			stackBoundDefinition, err = boundResult(
+				NewInOutBoundParams(self.Stacks[i].Idx))
 			if err != nil {
-				return nil, nil, err
+				return nil, err
+			}
+			err = handleStack(self.Stacks[i].StackDefinition.GetId(), stackBoundDefinition)
+			if err != nil {
+				return nil, err
 			}
 		}
 	}
 
-	return obs, pipeStarts, nil
+	return obs, nil
 }
-func (self *TwoWayPipeDefinition) buildInBound(
+
+func (self *TwoWayPipeDefinition) BuildInBoundPipeStates() ([]*PipeState, error) {
+	var pipeStarts []*PipeState
+
+	for _, currentStack := range self.Stacks {
+		if currentStack == nil {
+			continue
+		}
+		stack := currentStack.StackDefinition.GetInbound()
+		if stack == nil {
+			continue
+		}
+		boundResult, err := stack.GetBoundResult()
+		if err != nil {
+			return nil, err
+		}
+		if boundResult == nil {
+			continue
+		}
+		var stackBoundDefinition IStackBoundDefinition
+		stackBoundDefinition, err = boundResult(NewInOutBoundParams(currentStack.Idx))
+		if err != nil {
+			return nil, err
+		}
+		if stackBoundDefinition == nil {
+			continue
+		}
+		pipeState := stackBoundDefinition.GetPipeState()
+		if pipeState == nil {
+			continue
+		}
+		b := true
+		b = b && (0 != strings.Compare(uuid.Nil.String(), pipeState.ID.String()))
+		b = b && (pipeState.Create != nil)
+		b = b && (pipeState.Destroy != nil)
+		b = b && (pipeState.Start != nil)
+		b = b && (pipeState.End != nil)
+		if !b {
+			return nil, fmt.Errorf("stackstate must be complete in full")
+		}
+
+		pipeStarts = append(pipeStarts, pipeState)
+	}
+	return pipeStarts, nil
+}
+
+func (self *TwoWayPipeDefinition) buildInBoundPipesObservables(
+	stackDataMap map[uuid.UUID]interface{},
 	connectionId string,
 	connectionManager connectionManager.IConnectionManager,
 	cancelContext context.Context,
 	stackCancelFunc CancelFunc,
 	inbound chan rxgo.Item,
-	opts ...rxgo.Option) (rxgo.Observable, []*PipeState, error) {
+	opts ...rxgo.Option) (rxgo.Observable, error) {
 	obs := rxgo.FromChannel(inbound, opts...)
-	var pipeStarts []*PipeState
 
-	handleStack := func(currentStack IStackBoundDefinition) error {
+	handleStack := func(id uuid.UUID, currentStack IStackBoundDefinition) error {
 		cb := currentStack.GetPipeDefinition()
 		if cb != nil {
+			stackData, _ := stackDataMap[id]
+
 			var err error
-			_, obs, err = cb(NewPipeDefinitionParams(connectionId, connectionManager, cancelContext, stackCancelFunc, obs))
+			_, obs, err = cb(stackData, nil, NewPipeDefinitionParams(connectionId, connectionManager, cancelContext, stackCancelFunc, obs))
 			if err != nil {
 				return err
 			}
 		}
-		pipeStarts = append(pipeStarts, currentStack.GetPipeState())
 		return nil
 	}
 	for i := len(self.Stacks) - 1; i >= 0; i-- {
 		stack := self.Stacks[i].StackDefinition.GetInbound()
 		if stack != nil {
-			cb := stack.GetBoundResult()
-			if cb == nil {
-				return nil, nil, goerrors.InvalidParam
+			var err error
+			var boundResult BoundResult
+			boundResult, err = stack.GetBoundResult()
+			if boundResult == nil {
+				return nil, goerrors.InvalidParam
 			}
-			err := handleStack(
-				cb(
-					nil,
-					nil,
-					NewInOutBoundParams(
-						self.Stacks[i].Idx,
-						cancelContext,
-					)))
+
+			var stackBoundDefinition IStackBoundDefinition
+			stackBoundDefinition, err = boundResult(
+				NewInOutBoundParams(self.Stacks[i].Idx))
 			if err != nil {
-				return nil, nil, err
+				return nil, err
+			}
+			err = handleStack(self.Stacks[i].StackDefinition.GetId(), stackBoundDefinition)
+			if err != nil {
+				return nil, err
 			}
 		}
 	}
-	return obs, pipeStarts, nil
+	return obs, nil
 }
 
 func NewTwoWayPipeDefinition() *TwoWayPipeDefinition {
