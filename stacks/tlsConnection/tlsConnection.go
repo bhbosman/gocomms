@@ -5,18 +5,97 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"github.com/bhbosman/gocomms/internal"
+	"github.com/bhbosman/gocomms/intf"
+	"github.com/bhbosman/gocomms/stacks/internal/connectionWrapper"
 	"github.com/bhbosman/goerrors"
 	"github.com/bhbosman/gomessageblock"
 	"github.com/bhbosman/goprotoextra"
-	"sync"
-
-	"github.com/bhbosman/gocomms/stacks/internal/connectionWrapper"
+	"github.com/google/uuid"
 	"github.com/reactivex/rxgo/v2"
+	"net/url"
+	"reflect"
 
 	"go.uber.org/multierr"
 	"io"
 	"net"
 )
+
+const StackName = "TLS"
+
+type StackData struct {
+	connectionType      internal.ConnectionType
+	Conn                io.ReadWriter
+	connWrapper         *connectionWrapper.ConnWrapper
+	pipeWriteClose      io.WriteCloser
+	nextOutboundChannel *internal.ChannelManager
+	nextInBoundChannel  *internal.ChannelManager
+	upgradedConnection  net.Conn
+	stackIndex          int
+}
+
+func NewStackData(connectionType internal.ConnectionType, Conn net.Conn, connectionId string, ctx context.Context) (*StackData, error) {
+	nextOutboundChannel := internal.NewChannelManager("outbound Tls Connection", connectionId)
+	nextInBoundChannel := internal.NewChannelManager("inbound TlsConnection", connectionId)
+
+	var tempPipeRead io.Reader
+	var tempPipeWriteClose io.WriteCloser
+	tempPipeRead, tempPipeWriteClose = internal.Pipe(ctx)
+	pipeWriteClose := tempPipeWriteClose
+	connWrapper := connectionWrapper.NewConnWrapper(
+		Conn,
+		ctx,
+		tempPipeRead,
+		nextOutBoundPath(ctx, nextOutboundChannel))
+
+	return &StackData{
+		connectionType:      connectionType,
+		Conn:                Conn,
+		connWrapper:         connWrapper,
+		pipeWriteClose:      pipeWriteClose,
+		nextOutboundChannel: nextOutboundChannel,
+		nextInBoundChannel:  nextInBoundChannel,
+		upgradedConnection:  nil,
+	}, nil
+}
+
+func (self *StackData) Close() error {
+	var err error = nil
+	err = multierr.Append(err, self.connWrapper.Close())
+	err = multierr.Append(err, self.pipeWriteClose.Close())
+	err = multierr.Append(err, self.nextOutboundChannel.Close())
+	err = multierr.Append(err, self.nextInBoundChannel.Close())
+	err = multierr.Append(err, self.upgradedConnection.Close())
+	return nil
+}
+
+func nextOutBoundPath(ctx context.Context, nextOutboundChannel *internal.ChannelManager) connectionWrapper.ConnWrapperNext {
+	return func(b []byte) (n int, err error) {
+		if ctx.Err() != nil {
+			return 0, ctx.Err()
+		}
+		dataToConnection := gomessageblock.NewReaderWriterSize(len(b))
+		if ctx.Err() != nil {
+			return 0, ctx.Err()
+		}
+		n, err = dataToConnection.Write(b)
+		if err != nil {
+			return 0, err
+		}
+		if ctx.Err() != nil {
+			return 0, ctx.Err()
+		}
+		nextOutboundChannel.Send(ctx, dataToConnection)
+		return n, nil
+	}
+}
+
+func WrongStackDataError(connectionType internal.ConnectionType, stackData interface{}) error {
+	return internal.NewWrongStackDataType(
+		StackName,
+		connectionType,
+		reflect.TypeOf((*StackData)(nil)),
+		reflect.TypeOf(stackData))
+}
 
 func StackDefinition(
 	connectionType internal.ConnectionType,
@@ -24,125 +103,91 @@ func StackDefinition(
 	connectionManager rxgo.IPublishToConnectionManager,
 	connectionId string,
 	opts ...rxgo.Option) (*internal.StackDefinition, error) {
+
 	if stackCancelFunc == nil {
 		return nil, goerrors.InvalidParam
 	}
-
-	nextOutBoundPath := func(ctx context.Context, nextOutboundChannel *internal.ChannelManager) connectionWrapper.ConnWrapperNext {
-		return func(b []byte) (n int, err error) {
-			if ctx.Err() != nil {
-				return 0, ctx.Err()
-			}
-			dataToConnection := gomessageblock.NewReaderWriterSize(len(b))
-			if ctx.Err() != nil {
-				return 0, ctx.Err()
-			}
-			n, err = dataToConnection.Write(b)
-			if err != nil {
-				return 0, err
-			}
-			if ctx.Err() != nil {
-				return 0, ctx.Err()
-			}
-			nextOutboundChannel.Send(ctx, dataToConnection)
-			return n, nil
-		}
-	}
-
-	// globals
-	var connWrapper *connectionWrapper.ConnWrapper
-	var pipeWriteClose io.WriteCloser
-	var upgradedConnection net.Conn
-	var nextInBoundChannel, nextOutboundChannel *internal.ChannelManager
-	const stackName = "TLS"
-	var stackIndex int
-	// wg is here to make sure, that the upgradedConnection is properly assigned, before data is read/write to it
-	upgradedConnectionAssignedWaitGroup := sync.WaitGroup{}
-	upgradedConnectionAssignedWaitGroup.Add(1)
+	id := uuid.New()
 	return &internal.StackDefinition{
-		Name: stackName,
-		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
-			nextInBoundChannel = internal.NewChannelManager(make(chan rxgo.Item), "inbound TlsConnection", connectionId)
-			stackIndex = inOutBoundParams.Index
-			return internal.BoundDefinition{
-				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
+		IId:  id,
+		Name: StackName,
+		Inbound: internal.NewBoundResultImpl(func(inOutBoundParams internal.InOutBoundParams) (internal.IStackBoundDefinition, error) {
+			return &internal.StackBoundDefinition{
+				PipeDefinition: func(stackData, pipeData interface{}, pipeParams internal.PipeDefinitionParams) (uuid.UUID, rxgo.Observable, error) {
 					if stackCancelFunc == nil {
-						return nil, goerrors.InvalidParam
+						return uuid.Nil, nil, goerrors.InvalidParam
 					}
+					StackData, ok := stackData.(*StackData)
+					if !ok {
+						return uuid.Nil, nil, WrongStackDataError(connectionType, stackData)
+					}
+					StackData.stackIndex = inOutBoundParams.Index
+
 					_ = pipeParams.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 						inOutBoundParams.Index,
 						pipeParams.ConnectionId,
-						stackName,
+						StackName,
 						rxgo.StreamDirectionInbound,
 						connectionManager,
 						func(ctx context.Context, rws goprotoextra.ReadWriterSize) {
-							upgradedConnectionAssignedWaitGroup.Wait()
-							_, err := io.Copy(pipeWriteClose, rws)
+							//upgradedConnectionAssignedWaitGroup.Wait()
+							_, err := io.Copy(StackData.pipeWriteClose, rws)
 							if err != nil {
 								return
 							}
 						}, opts...)
-					nextObs := rxgo.FromChannel(nextInBoundChannel.Items)
-					return nextObs, nil
+					nextObs := rxgo.FromChannel(StackData.nextInBoundChannel.Items, opts...)
+					return id, nextObs, nil
 				},
-				PipeState: internal.PipeState{
-					Start: func(ctx context.Context) error {
-						return ctx.Err()
-					},
-					End: func() error {
-						return nextInBoundChannel.Close()
-					},
-				},
-			}
-		},
-		Outbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
-			nextOutboundChannel = internal.NewChannelManager(make(chan rxgo.Item), "outbound Tls Connection", connectionId)
-			return internal.BoundDefinition{
-				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
+			}, nil
+		}),
+		Outbound: internal.NewBoundResultImpl(func(inOutBoundParams internal.InOutBoundParams) (internal.IStackBoundDefinition, error) {
+			return &internal.StackBoundDefinition{
+				PipeDefinition: func(stackData, pipeData interface{}, pipeParams internal.PipeDefinitionParams) (uuid.UUID, rxgo.Observable, error) {
+					StackData, ok := stackData.(*StackData)
+					if !ok {
+						return uuid.Nil, nil, WrongStackDataError(connectionType, stackData)
+					}
 					if stackCancelFunc == nil {
-						return nil, goerrors.InvalidParam
+						return uuid.Nil, nil, goerrors.InvalidParam
 					}
 					_ = pipeParams.Obs.(rxgo.InOutBoundObservable).DoOnNextInOutBound(
 						inOutBoundParams.Index,
 						pipeParams.ConnectionId,
-						stackName,
+						StackName,
 						rxgo.StreamDirectionOutbound,
 						connectionManager,
 						func(ctx context.Context, size goprotoextra.ReadWriterSize) {
-							upgradedConnectionAssignedWaitGroup.Wait()
-							_, err := io.Copy(upgradedConnection, size)
+							//upgradedConnectionAssignedWaitGroup.Wait()
+							_, err := io.Copy(StackData.upgradedConnection, size)
 							if err != nil {
 								stackCancelFunc("copy data to upgradedConnection", false, err)
 							}
 						}, opts...)
-					nextObs := rxgo.FromChannel(nextOutboundChannel.Items, opts...)
-					return nextObs, nil
+					nextObs := rxgo.FromChannel(StackData.nextOutboundChannel.Items, opts...)
+					return id, nextObs, nil
 				},
-				PipeState: internal.PipeState{
-					Start: func(ctx context.Context) error {
-						return ctx.Err()
-					},
-					End: func() error {
-						return nextOutboundChannel.Close()
-					},
-				},
-			}
-		},
-		StackState: internal.StackState{
-			Start: func(startParams internal.StackStartStateParams) (net.Conn, error) {
-				if startParams.Ctx.Err() != nil {
-					return nil, startParams.Ctx.Err()
+			}, nil
+		}),
+		StackState: &internal.StackState{
+			Id: id,
+			Create: func(Conn net.Conn, Url *url.URL, ctx context.Context, CancelFunc internal.CancelFunc, cfr intf.IConnectionReactorFactoryExtractValues) (interface{}, error) {
+				return NewStackData(connectionType, Conn, connectionId, ctx)
+			},
+			Destroy: func(stackData interface{}) error {
+				if _, ok := stackData.(*StackData); !ok {
+					return WrongStackDataError(connectionType, stackData)
 				}
-				var pipeRead io.Reader
-				pipeRead, pipeWriteClose = internal.Pipe(startParams.Ctx)
-				if startParams.Ctx.Err() != nil {
-					return nil, startParams.Ctx.Err()
+				if closer, ok := stackData.(io.Closer); ok {
+					return closer.Close()
 				}
-				connWrapper = connectionWrapper.NewConnWrapper(
-					startParams.Conn,
-					startParams.Ctx,
-					pipeRead,
-					nextOutBoundPath(startParams.Ctx, nextOutboundChannel))
+				return nil
+			},
+			Start: func(stackData interface{}, startParams internal.StackStartStateParams) (net.Conn, error) {
+				sd, ok := stackData.(*StackData)
+				if !ok {
+					return nil, WrongStackDataError(connectionType, stackData)
+				}
 
 				var tlsConn *tls.Conn
 				if connectionType == internal.ServerConnection {
@@ -160,37 +205,31 @@ func StackDefinition(
 							return nil
 						},
 					}
-					tlsConn = tls.Server(connWrapper, config)
+					tlsConn = tls.Server(sd.connWrapper, config)
 				} else {
 					config := &tls.Config{
 						InsecureSkipVerify: true,
 						ServerName:         "localhost"}
-					tlsConn = tls.Client(connWrapper, config)
+					tlsConn = tls.Client(sd.connWrapper, config)
 				}
-				upgradedConnection = tlsConn
-				upgradedConnectionAssignedWaitGroup.Done()
-				if startParams.Ctx.Err() != nil {
-					return nil, startParams.Ctx.Err()
-				}
+				sd.upgradedConnection = tlsConn
 
 				go internal.ReadDataFromConnection(
-					upgradedConnection,
+					sd.upgradedConnection,
 					stackCancelFunc,
 					startParams.Ctx,
 					connectionManager,
 					connectionId,
-					stackIndex-1,
+					sd.stackIndex-1,
 					"Read TLS Connection",
 					func(rws goprotoextra.IReadWriterSize, cancelCtx context.Context, CancelFunc internal.CancelFunc) {
-						nextInBoundChannel.Send(cancelCtx, rws)
+						sd.nextInBoundChannel.Send(cancelCtx, rws)
 					})
 
-				return startParams.Conn, startParams.Ctx.Err()
+				return sd.upgradedConnection, startParams.Ctx.Err()
 			},
-			End: func(endParams internal.StackEndStateParams) error {
-				err := pipeWriteClose.Close()
-				err = multierr.Append(err, upgradedConnection.Close())
-				err = multierr.Append(err, connWrapper.Close())
+			Stop: func(stackData interface{}, endParams internal.StackEndStateParams) error {
+				var err error = nil
 				return err
 			},
 		},

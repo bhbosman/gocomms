@@ -13,13 +13,14 @@ import (
 
 func TestMessageNumberStackDefinition(t *testing.T) {
 	t.Run("Inbound: Check error function ", func(t *testing.T) {
-		_, err := StackDefinition(nil, nil)
+		_, err := StackDefinition(internal.ServerConnection, nil, nil)
 		assert.Error(t, err)
 		assert.EqualError(t, err, "invalid param")
 	})
 
 	t.Run("Inbound001", func(t *testing.T) {
 		stack, err := StackDefinition(
+			internal.ServerConnection,
 			nil,
 			func(s string, inbound bool, err error) {
 
@@ -27,7 +28,17 @@ func TestMessageNumberStackDefinition(t *testing.T) {
 		assert.NoError(t, err)
 		ch := make(chan rxgo.Item)
 		obs := rxgo.FromChannel(ch)
-		obs2, err := stack.Inbound(1, context.Background()).PipeDefinition(
+		cb, err := stack.Inbound.GetBoundResult()
+		assert.NoError(t, err)
+		assert.NotNil(t, cb)
+		r, err := cb(internal.NewInOutBoundParams(1))
+		assert.NoError(t, err)
+		assert.NotNil(t, r)
+		pipeDefCallback := r.GetPipeDefinition()
+		assert.NotNil(t, pipeDefCallback)
+		_, obs2, err := pipeDefCallback(
+			nil,
+			nil,
 			internal.PipeDefinitionParams{
 				CancelContext:   context.Background(),
 				StackCancelFunc: func(context string, inbound bool, err error) {},
@@ -59,6 +70,7 @@ func TestMessageNumberStackDefinition(t *testing.T) {
 
 	t.Run("Inbound1000", func(t *testing.T) {
 		stack, err := StackDefinition(
+			internal.ServerConnection,
 			nil,
 			func(s string, inbound bool, err error) {
 				assert.NoError(t, err)
@@ -67,7 +79,17 @@ func TestMessageNumberStackDefinition(t *testing.T) {
 		assert.NoError(t, err)
 		ch := make(chan rxgo.Item)
 		obs := rxgo.FromChannel(ch)
-		obs2, err := stack.Inbound(2, context.Background()).PipeDefinition(
+		cb, err := stack.Inbound.GetBoundResult()
+		assert.NoError(t, err)
+		assert.NotNil(t, cb)
+		r, err := cb(internal.NewInOutBoundParams(2))
+		assert.NoError(t, err)
+		assert.NotNil(t, r)
+		pipeDefCallback := r.GetPipeDefinition()
+		assert.NotNil(t, pipeDefCallback)
+		_, obs2, err := pipeDefCallback(
+			nil,
+			nil,
 			internal.PipeDefinitionParams{
 
 				CancelContext:   context.Background(),
@@ -106,6 +128,7 @@ func TestMessageNumberStackDefinition(t *testing.T) {
 
 	t.Run("Outbound", func(t *testing.T) {
 		stack, err := StackDefinition(
+			internal.ServerConnection,
 			nil,
 			func(s string, inbound bool, err error) {
 
@@ -113,7 +136,17 @@ func TestMessageNumberStackDefinition(t *testing.T) {
 		assert.NoError(t, err)
 		ch := make(chan rxgo.Item)
 		obs := rxgo.FromChannel(ch)
-		obs2, err := stack.Outbound(9, context.Background()).PipeDefinition(
+		cb, err := stack.Outbound.GetBoundResult()
+		assert.NoError(t, err)
+		assert.NotNil(t, cb)
+		r, err := cb(internal.NewInOutBoundParams(9))
+		assert.NoError(t, err)
+		assert.NotNil(t, r)
+		pipeDefCallback := r.GetPipeDefinition()
+		assert.NotNil(t, pipeDefCallback)
+		_, obs2, err := pipeDefCallback(
+			nil,
+			nil,
 			internal.PipeDefinitionParams{
 				CancelContext:   context.Background(),
 				StackCancelFunc: func(context string, inbound bool, err error) {},

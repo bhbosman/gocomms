@@ -1,47 +1,20 @@
 package Top
 
 import (
-	"context"
-	"github.com/bhbosman/gocomms/internal"
-	"github.com/bhbosman/goerrors"
-	"github.com/bhbosman/goprotoextra"
+	commsInternal "github.com/bhbosman/gocomms/internal"
+	topInternal "github.com/bhbosman/gocomms/stacks/Top/internal"
+	"github.com/google/uuid"
 	"github.com/reactivex/rxgo/v2"
 )
 
 func StackDefinition(
-	connectionType internal.ConnectionType,
-	opts ...rxgo.Option) (*internal.StackDefinition, error) {
-	return &internal.StackDefinition{
-		Name: goerrors.TopStackName,
-		Inbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
-			return internal.BoundDefinition{
-				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
-					return pipeParams.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
-						inOutBoundParams.Index,
-						pipeParams.ConnectionId,
-						goerrors.TopStackName,
-						rxgo.StreamDirectionInbound,
-						pipeParams.ConnectionManager,
-						func(ctx context.Context, rws goprotoextra.ReadWriterSize) (goprotoextra.ReadWriterSize, error) {
-							return rws, ctx.Err()
-						}), nil
-				},
-			}
-		},
-		Outbound: func(inOutBoundParams internal.InOutBoundParams) internal.BoundDefinition {
-			return internal.BoundDefinition{
-				PipeDefinition: func(pipeParams internal.PipeDefinitionParams) (rxgo.Observable, error) {
-					return pipeParams.Obs.(rxgo.InOutBoundObservable).MapInOutBound(
-						inOutBoundParams.Index,
-						pipeParams.ConnectionId,
-						goerrors.TopStackName,
-						rxgo.StreamDirectionOutbound,
-						pipeParams.ConnectionManager,
-						func(ctx context.Context, rws goprotoextra.ReadWriterSize) (goprotoextra.ReadWriterSize, error) {
-							return rws, ctx.Err()
-						}), nil
-				},
-			}
-		},
+	connectionType commsInternal.ConnectionType,
+	opts ...rxgo.Option) (*commsInternal.StackDefinition, error) {
+	id := uuid.New()
+	return &commsInternal.StackDefinition{
+		IId:      id,
+		Name:     topInternal.StackName,
+		Inbound:  commsInternal.NewBoundResultImpl(topInternal.Inbound(connectionType, id, opts...)),
+		Outbound: commsInternal.NewBoundResultImpl(topInternal.Outbound(connectionType, id, opts...)),
 	}, nil
 }

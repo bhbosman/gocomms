@@ -33,12 +33,12 @@ func CreateEmptyStack(
 	_ context.Context,
 	_ internal.CancelFunc,
 	opts ...rxgo.Option) (*internal.TwoWayPipeDefinition, error) {
-	result := internal.NewTwoWayPipeDefinition(nil)
+	result := internal.NewTwoWayPipeDefinition()
 
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return Top.StackDefinition(connectionType, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return Bottom.StackDefinition(connectionType, opts...)
 	})
 	return result, nil
@@ -52,15 +52,15 @@ func CreateWebSocketStack(
 	cancelContext context.Context,
 	stackCancelFunc internal.CancelFunc,
 	opts ...rxgo.Option) (*internal.TwoWayPipeDefinition, error) {
-	result := internal.NewTwoWayPipeDefinition(nil)
+	result := internal.NewTwoWayPipeDefinition()
 
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return Top.StackDefinition(connectionType, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return websocket.StackDefinition(connectionType, stackCancelFunc, connectionManager, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return Bottom.StackDefinition(connectionType, opts...)
 	})
 	return result, nil
@@ -74,16 +74,16 @@ func CreateDefaultStack(
 	cancelContext context.Context,
 	stackCancelFunc internal.CancelFunc,
 	opts ...rxgo.Option) (*internal.TwoWayPipeDefinition, error) {
-	result := internal.NewTwoWayPipeDefinition(nil)
+	result := internal.NewTwoWayPipeDefinition()
 
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return Top.StackDefinition(connectionType, opts...)
 	})
 
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return KillConnection.StackDefinition(connectionType, cancelContext, stackCancelFunc, connectionManager, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return Bottom.StackDefinition(connectionType, opts...)
 	})
 	return result, nil
@@ -97,23 +97,23 @@ func CreateCompressedStack(
 	_ context.Context,
 	stackCancelFunc internal.CancelFunc,
 	opts ...rxgo.Option) (*internal.TwoWayPipeDefinition, error) {
-	result := internal.NewTwoWayPipeDefinition(nil)
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result := internal.NewTwoWayPipeDefinition()
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return Top.StackDefinition(connectionType, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
-		return pingPong.StackDefinition(connectionType, connectionId, opts...)
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
+		return pingPong.StackDefinition(connectionType, connectionId, stackCancelFunc, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
-		return messageCompressor.StackDefinition(stackCancelFunc, opts...)
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
+		return messageCompressor.StackDefinition(connectionType, stackCancelFunc, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return messageNumber.StackDefinition(connectionType, userContext, stackCancelFunc, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return bvisMessageBreaker.StackDefinition(connectionType, connectionId, stackCancelFunc, nil, connectionManager, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return Bottom.StackDefinition(connectionType, opts...)
 	})
 	return result, nil
@@ -127,20 +127,20 @@ func CreateUnCompressedStack(
 	_ context.Context,
 	stackCancelFunc internal.CancelFunc,
 	opts ...rxgo.Option) (*internal.TwoWayPipeDefinition, error) {
-	result := internal.NewTwoWayPipeDefinition(nil)
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result := internal.NewTwoWayPipeDefinition()
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return Top.StackDefinition(connectionType, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
-		return pingPong.StackDefinition(connectionType, connectionId, opts...)
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
+		return pingPong.StackDefinition(connectionType, connectionId, stackCancelFunc, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return messageNumber.StackDefinition(connectionType, userContext, stackCancelFunc, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return bvisMessageBreaker.StackDefinition(connectionType, connectionId, stackCancelFunc, nil, connectionManager, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return Bottom.StackDefinition(connectionType, opts...)
 	})
 	return result, nil
@@ -154,26 +154,26 @@ func CreateCompressedTlsStack(
 	_ context.Context,
 	stackCancelFunc internal.CancelFunc,
 	opts ...rxgo.Option) (*internal.TwoWayPipeDefinition, error) {
-	result := internal.NewTwoWayPipeDefinition(nil)
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result := internal.NewTwoWayPipeDefinition()
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return Top.StackDefinition(connectionType, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
-		return pingPong.StackDefinition(connectionType, connectionId, opts...)
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
+		return pingPong.StackDefinition(connectionType, connectionId, stackCancelFunc, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
-		return messageCompressor.StackDefinition(stackCancelFunc, opts...)
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
+		return messageCompressor.StackDefinition(connectionType, stackCancelFunc, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return messageNumber.StackDefinition(connectionType, userContext, stackCancelFunc, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return bvisMessageBreaker.StackDefinition(connectionType, connectionId, stackCancelFunc, nil, connectionManager, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return tlsConnection.StackDefinition(connectionType, stackCancelFunc, connectionManager, connectionId, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return Bottom.StackDefinition(connectionType, opts...)
 	})
 	return result, nil
@@ -187,24 +187,24 @@ func CreateUnCompressedTlsStack(
 	_ context.Context,
 	stackCancelFunc internal.CancelFunc,
 	opts ...rxgo.Option) (*internal.TwoWayPipeDefinition, error) {
-	result := internal.NewTwoWayPipeDefinition(nil)
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result := internal.NewTwoWayPipeDefinition()
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return Top.StackDefinition(connectionType, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
-		return pingPong.StackDefinition(connectionType, connectionId, opts...)
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
+		return pingPong.StackDefinition(connectionType, connectionId, stackCancelFunc, opts...)
 	})
 
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return messageNumber.StackDefinition(connectionType, userContext, stackCancelFunc, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return bvisMessageBreaker.StackDefinition(connectionType, connectionId, stackCancelFunc, nil, connectionManager, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return tlsConnection.StackDefinition(connectionType, stackCancelFunc, connectionManager, connectionId, opts...)
 	})
-	result.AddStackDefinitionFunc(func() (*internal.StackDefinition, error) {
+	result.AddStackDefinitionFunc(func() (internal.IStackDefinition, error) {
 		return Bottom.StackDefinition(connectionType, opts...)
 	})
 	return result, nil

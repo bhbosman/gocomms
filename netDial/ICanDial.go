@@ -15,7 +15,8 @@ func NewCanDialDefaultImpl() *CanDialDefaultImpl {
 }
 
 func (self *CanDialDefaultImpl) CanDial() bool {
-	return self.count > 0
+	return true
+	//return self.count > 0
 }
 
 func (self *CanDialDefaultImpl) RemoveConsumer() {
