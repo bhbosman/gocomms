@@ -43,8 +43,7 @@ func (self *NetManager) NewReaderWriterCloserInstanceOptions(
 ) fx.Option {
 
 	settings := &newConnectionInstanceSettings{
-		options:                         nil,
-		ProvideCreateIConnectionReactor: internal.ProvideCreateIConnectionReactor(),
+		options: nil,
 	}
 	for _, settingOption := range settingOptions {
 		settingOption.apply(settings)
@@ -73,7 +72,6 @@ func (self *NetManager) NewReaderWriterCloserInstanceOptions(
 		self.AdditionalFxOptionsForConnectionInstance(),
 		internal.ProvideRxOptions(),
 		internal.ProvideCreateStackDefinition(),
-		settings.ProvideCreateIConnectionReactor,
 		internal.ProvideCreateStackCancelFunc(),
 		internal.ProvideCreateTransportLayer00(),
 		internal.ProvideChannel("InBoundChannel"),
