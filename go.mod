@@ -1,31 +1,48 @@
 module github.com/bhbosman/gocomms
 
-go 1.15
+go 1.18
 
 require (
-	github.com/bhbosman/goMessages v0.0.0-20210414134625-4d7166d206a6
-	github.com/bhbosman/gocommon v0.0.0-20210414135919-fd7afceec0b0
-	github.com/bhbosman/goerrors v0.0.0-20210201065523-bb3e832fa9ab
-	github.com/bhbosman/gologging v0.0.0-20200921180328-d29fc55c00bc
-	github.com/bhbosman/gomessageblock v0.0.0-20210414135653-cd754835d03b
-	github.com/bhbosman/goprotoextra v0.0.2-0.20210414124526-a342e2a9e82f
-	github.com/bhbosman/gorxextra v0.0.0-20210414134625-43435ac5bf2d
-	github.com/cskr/pubsub v1.0.2
-	github.com/gobwas/httphead v0.0.0-20200921212729-da3d93bc3c58 // indirect
-	github.com/gobwas/pool v0.2.1 // indirect
-	github.com/gobwas/ws v1.0.4
-	github.com/golang/mock v1.4.4 // indirect
-	github.com/golang/protobuf v1.4.2
-	github.com/google/uuid v1.1.2
+	github.com/bhbosman/goCommsDefinitions v0.0.0-20220628093721-7191a8828f7f
+	github.com/bhbosman/goConnectionManager v0.0.0-20220628055237-4a995b1ae47c
+	github.com/bhbosman/gocommon v0.0.0-20220627073905-4951fb81c325
+	github.com/bhbosman/goerrors v0.0.0-20220623084908-4d7bbcd178cf
+	github.com/bhbosman/gomessageblock v0.0.0-20210901070622-be36a3f8d303
+	github.com/bhbosman/goprotoextra v0.0.2-0.20210817141206-117becbef7c7
+	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.8.0
-	github.com/icza/gox v0.0.0-20200702115100-7dc3510ae515
-	github.com/reactivex/rxgo/v2 v2.1.0
-	github.com/stretchr/testify v1.6.1
-	go.uber.org/fx v1.13.1
+	github.com/reactivex/rxgo/v2 v2.5.0
+	github.com/stretchr/testify v1.7.0
+	go.uber.org/fx v1.17.1
 	go.uber.org/multierr v1.6.0
-	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
-	google.golang.org/protobuf v1.25.0
-
+	go.uber.org/zap v1.21.0
+	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f
 )
 
-replace github.com/reactivex/rxgo/v2 => ../../reactivex/rxgo
+require (
+	github.com/bhbosman/gologging v0.0.0-20200921180328-d29fc55c00bc // indirect
+	github.com/cenkalti/backoff/v4 v4.0.0 // indirect
+	github.com/cskr/pubsub v1.0.2 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/emirpasic/gods v1.12.0 // indirect
+	github.com/icza/gox v0.0.0-20220321141217-e2d488ab2fbc // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/objx v0.1.0 // indirect
+	github.com/teivah/onecontext v0.0.0-20200513185103-40f981bfd775 // indirect
+	go.uber.org/atomic v1.7.0 // indirect
+	go.uber.org/dig v1.14.0 // indirect
+	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+)
+
+replace github.com/bhbosman/gocommon => ../gocommon
+
+replace github.com/golang/mock => github.com/bhbosman/gomock v1.6.1-0.20220617134815-f277ff266f47
+
+replace github.com/bhbosman/goCommsDefinitions => ../goCommsDefinitions
+
+//replace github.com/bhbosman/goerrors => ../goerrors
+
+replace github.com/bhbosman/goConnectionManager => ../goConnectionManager
+
+replace github.com/bhbosman/goprotoextra => ../goprotoextra

@@ -2,11 +2,15 @@ package provide
 
 import (
 	"context"
-	"github.com/bhbosman/gocomms/internal"
+	"github.com/bhbosman/gocommon/GoFunctionCounter"
+	"github.com/bhbosman/gocomms/common"
 	"github.com/gorilla/mux"
 	"go.uber.org/fx"
+	"go.uber.org/fx/fxevent"
+	"go.uber.org/zap"
 	"net/http"
 	url2 "net/url"
+	"time"
 )
 
 func RegisterHttpHandler(url string) fx.Option {
@@ -14,34 +18,59 @@ func RegisterHttpHandler(url string) fx.Option {
 		fx.Provide(
 			fx.Annotated{
 				Group: "Apps",
-				Target: func(params struct {
-					fx.In
-					RouteDefinition []*RouteDefinition `group:"RouteDefinition"`
-				}) *fx.App {
+				Target: func(
+					params struct {
+						fx.In
+						RouteDefinition []*RouteDefinition `group:"RouteDefinition"`
+						Logger          *zap.Logger
+					},
+				) *fx.App {
 					fxApp := fx.New(
+						fx.StartTimeout(time.Hour),
+						fx.StopTimeout(time.Hour),
+						fx.Provide(func() *zap.Logger {
+							return params.Logger.Named("HttpHandler")
+						}),
+						fx.WithLogger(
+							func(logger *zap.Logger) fxevent.Logger {
+								return &fxevent.ZapLogger{Logger: logger}
+							},
+						),
 						fx.Supply(params.RouteDefinition),
-						fx.Provide(fx.Annotated{Target: internal.CreateUrl(url)}),
+						fx.Provide(fx.Annotated{Target: common.CreateUrl(url)}),
 						fx.Provide(fx.Annotated{Target: createHttpHandler}),
 						fx.Provide(fx.Annotated{Target: createHttpServer}),
-						fx.Invoke(func(params struct {
-							fx.In
-							Lifecycle fx.Lifecycle
-							Server    *http.Server
-						}) {
-							params.Lifecycle.Append(fx.Hook{
-								OnStart: func(ctx context.Context) error {
-									go func() {
-										err := params.Server.ListenAndServe()
-										println(err.Error())
-									}()
+						fx.Invoke(
+							func(
+								params struct {
+									fx.In
+									Lifecycle         fx.Lifecycle
+									Server            *http.Server
+									GoFunctionCounter GoFunctionCounter.IService
+								},
+							) {
+								params.Lifecycle.Append(fx.Hook{
+									OnStart: func(ctx context.Context) error {
 
-									return nil
-								},
-								OnStop: func(ctx context.Context) error {
-									return params.Server.Close()
-								},
-							})
-						}))
+										// this function is part of the GoFunctionCounter count
+										go func() {
+											functionName := params.GoFunctionCounter.CreateFunctionName("RegisterHttpHandler.OnStart")
+											defer func(GoFunctionCounter GoFunctionCounter.IService, name string) {
+												_ = GoFunctionCounter.Remove(name)
+											}(params.GoFunctionCounter, functionName)
+											_ = params.GoFunctionCounter.Add(functionName)
+
+											//
+											err := params.Server.ListenAndServe()
+											println(err.Error())
+										}()
+										return nil
+									},
+									OnStop: func(ctx context.Context) error {
+										return params.Server.Close()
+									},
+								})
+							}))
 					return fxApp
 				},
 			}),
