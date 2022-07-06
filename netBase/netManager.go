@@ -5,6 +5,7 @@ import (
 	"github.com/bhbosman/goCommsDefinitions"
 	"github.com/bhbosman/goConnectionManager"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
+	"github.com/bhbosman/gocommon/Services/Providers"
 	"github.com/bhbosman/gocommon/Services/interfaces"
 	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/gocomms/intf"
@@ -55,7 +56,7 @@ func (self *NetManager) NewReaderWriterCloserInstanceOptions(
 		internal.WithLogger(),
 		internal.ProvideStackName(stackName),
 		fx.Supply(self.ConnectionUrl, connectionType),
-		internal.ProvideUniqueReferenceService(self.UniqueSessionNumber),
+		Providers.ProvideUniqueReferenceServiceInstance(self.UniqueSessionNumber),
 		goConnectionManager.ProvideConnectionManager(self.ConnectionManager),
 		goConnectionManager.ProvideCommandsToConnectionManager(),
 		goConnectionManager.ProvideObtainConnectionManagerInformation(),
