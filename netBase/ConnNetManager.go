@@ -28,7 +28,7 @@ func NewConnNetManager(
 	connectionUrl *url.URL,
 	cancelCtx context.Context,
 	cancelFunction context.CancelFunc,
-	stackName string,
+	//stackName string,
 	connectionManager goConnectionManager.IService,
 	userContext interface{},
 	ZapLogger *zap.Logger,
@@ -45,7 +45,7 @@ func NewConnNetManager(
 		connectionUrl,
 		cancelCtx,
 		cancelFunction,
-		stackName,
+		//stackName,
 		connectionManager,
 		userContext,
 		ZapLogger,
@@ -73,7 +73,8 @@ func (self *ConnNetManager) NewConnectionInstance(
 		goFunctionCounter,
 		connectionType,
 		conn,
-		self.StackName)
+		//self.StackName,
+	)
 }
 
 // NewConnectionInstanceWithStackName give the ability to override the stack name, after it has been set
@@ -83,7 +84,7 @@ func (self *ConnNetManager) NewConnectionInstanceWithStackName(
 	goFunctionCounter GoFunctionCounter.IService,
 	connectionType model.ConnectionType,
 	conn net.Conn,
-	stackName string,
+	//stackName string,
 	settingOptions ...INewConnectionInstanceSettingsApply,
 ) (*fx.App, context.Context, context.CancelFunc) {
 	var resultContext context.Context
@@ -93,7 +94,7 @@ func (self *ConnNetManager) NewConnectionInstanceWithStackName(
 		goFunctionCounter,
 		connectionType,
 		conn,
-		stackName,
+		//stackName,
 		NewAddFxOptions(fx.Populate(&resultContext)),
 		NewAddFxOptions(fx.Populate(&resultCancelFunc)),
 		newAddSettings(settingOptions...),
@@ -125,7 +126,7 @@ func (self *ConnNetManager) NewConnectionInstanceOptions(
 	goFunctionCounter GoFunctionCounter.IService,
 	connectionType model.ConnectionType,
 	conn net.Conn,
-	stackName string,
+	//stackName string,
 	settingOptions ...INewConnectionInstanceSettingsApply,
 ) fx.Option {
 	rwcOptions := self.NewReaderWriterCloserInstanceOptions(
@@ -133,7 +134,7 @@ func (self *ConnNetManager) NewConnectionInstanceOptions(
 		goFunctionCounter,
 		connectionType,
 		conn,
-		stackName,
+		//stackName,
 		fx.Provide(
 			func() (*zap.Logger, error) {
 				if self.ZapLogger == nil {

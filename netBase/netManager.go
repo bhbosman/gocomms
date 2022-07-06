@@ -17,10 +17,10 @@ import (
 )
 
 type NetManager struct {
-	CancelCtx                                context.Context
-	cancelFunction                           context.CancelFunc
-	ZapLogger                                *zap.Logger
-	StackName                                string
+	CancelCtx      context.Context
+	cancelFunction context.CancelFunc
+	ZapLogger      *zap.Logger
+	//StackName                                string
 	ConnectionManager                        goConnectionManager.IService
 	ConnectionUrl                            *url.URL
 	UseProxy                                 bool
@@ -38,7 +38,7 @@ func (self *NetManager) NewReaderWriterCloserInstanceOptions(
 	goFunctionCounter GoFunctionCounter.IService,
 	connectionType model.ConnectionType,
 	rwc io.ReadWriteCloser,
-	stackName string,
+	//stackName string,
 	provideLogger fx.Option,
 	settingOptions ...INewConnectionInstanceSettingsApply,
 ) fx.Option {
@@ -54,7 +54,7 @@ func (self *NetManager) NewReaderWriterCloserInstanceOptions(
 		internal.InvokeContextCancelFunc(),
 		provideLogger,
 		internal.WithLogger(),
-		internal.ProvideStackName(stackName),
+		//goCommsDefinitions.ProvideStackName(stackName),
 		fx.Supply(self.ConnectionUrl, connectionType),
 		Providers.ProvideUniqueReferenceServiceInstance(self.UniqueSessionNumber),
 		goConnectionManager.ProvideConnectionManager(self.ConnectionManager),
@@ -108,7 +108,7 @@ func NewNetManager(
 	connectionUrl *url.URL,
 	cancelCtx context.Context,
 	cancelFunction context.CancelFunc,
-	stackName string,
+	//stackName string,
 	connectionManager goConnectionManager.IService,
 	userContext interface{},
 	ZapLogger *zap.Logger,
@@ -117,10 +117,10 @@ func NewNetManager(
 	GoFunctionCounter GoFunctionCounter.IService,
 ) (NetManager, error) {
 	return NetManager{
-		CancelCtx:                                cancelCtx,
-		cancelFunction:                           cancelFunction,
-		ZapLogger:                                ZapLogger,
-		StackName:                                stackName,
+		CancelCtx:      cancelCtx,
+		cancelFunction: cancelFunction,
+		ZapLogger:      ZapLogger,
+		//StackName:                                stackName,
 		ConnectionManager:                        connectionManager,
 		ConnectionUrl:                            connectionUrl,
 		ProxyUrl:                                 proxyUrl,
