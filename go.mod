@@ -3,11 +3,11 @@ module github.com/bhbosman/gocomms
 go 1.18
 
 require (
-	github.com/bhbosman/goCommsDefinitions v0.0.0-20220628093721-7191a8828f7f
-	github.com/bhbosman/goConnectionManager v0.0.0-20220628055237-4a995b1ae47c
-	github.com/bhbosman/gocommon v0.0.0-20220627073905-4951fb81c325
+	github.com/bhbosman/goCommsDefinitions v0.0.0-20220707044904-ceb8c2737904
+	github.com/bhbosman/goConnectionManager v0.0.0-20220705103338-3f5a18784e60
+	github.com/bhbosman/gocommon v0.0.0-20220707045107-1b6a40e49fd5
 	github.com/bhbosman/goerrors v0.0.0-20220623084908-4d7bbcd178cf
-	github.com/bhbosman/gomessageblock v0.0.0-20210901070622-be36a3f8d303
+	github.com/bhbosman/gomessageblock v0.0.0-20220617132215-32f430d7de62
 	github.com/bhbosman/goprotoextra v0.0.2-0.20210817141206-117becbef7c7
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.8.0
@@ -20,7 +20,6 @@ require (
 )
 
 require (
-	github.com/bhbosman/gologging v0.0.0-20200921180328-d29fc55c00bc // indirect
 	github.com/cenkalti/backoff/v4 v4.0.0 // indirect
 	github.com/cskr/pubsub v1.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -35,8 +34,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
-replace github.com/bhbosman/gocommon => ../gocommon
-
 replace github.com/golang/mock => github.com/bhbosman/gomock v1.6.1-0.20220617134815-f277ff266f47
 
 replace github.com/bhbosman/goCommsDefinitions => ../goCommsDefinitions
@@ -46,3 +43,5 @@ replace github.com/bhbosman/goCommsDefinitions => ../goCommsDefinitions
 replace github.com/bhbosman/goConnectionManager => ../goConnectionManager
 
 replace github.com/bhbosman/goprotoextra => ../goprotoextra
+
+replace github.com/bhbosman/gocommon => ../gocommon
