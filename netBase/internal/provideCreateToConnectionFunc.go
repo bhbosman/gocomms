@@ -2,7 +2,6 @@ package internal
 
 import (
 	"context"
-	"github.com/bhbosman/goprotoextra"
 	"github.com/reactivex/rxgo/v2"
 	"go.uber.org/fx"
 )
@@ -19,14 +18,9 @@ func ProvideCreateToConnectionFunc(name string) fx.Option {
 					ErrorFunc    rxgo.ErrFunc       `name:"OutBoundChannel"`
 					CompleteFunc rxgo.CompletedFunc `name:"OutBoundChannel"`
 				},
-			) goprotoextra.ToConnectionFunc {
-				return func(rw goprotoextra.ReadWriterSize) error {
-					err := params.CancelCtx.Err()
-					if err != nil {
-						return err
-					}
-					params.NextFunc(rw)
-					return nil
+			) rxgo.NextFunc {
+				return func(i interface{}) {
+					params.NextFunc(i)
 				}
 			},
 		},

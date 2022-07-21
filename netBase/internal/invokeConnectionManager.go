@@ -21,9 +21,6 @@ func InvokeConnectionManager() fx.Option {
 			params.Lifecycle.Append(
 				fx.Hook{
 					OnStart: func(_ context.Context) error {
-						if params.CancelCtx.Err() != nil {
-							return params.CancelCtx.Err()
-						}
 						return params.ConnectionManager.RegisterConnection(
 							params.ConnectionId,
 							params.CancelFunction,

@@ -8,14 +8,27 @@ import (
 )
 
 type InvokeInboundTransportLayerHandler struct {
-	isDisposed bool
-	errorState error
-	conn       goConnectionManager.IPublishConnectionInformation
-	sendData   func(data interface{})
-	sendOther  func(interface{}) error
+	isDisposed  bool
+	errorState  error
+	conn        goConnectionManager.IPublishConnectionInformation
+	sendData    func(data interface{})
+	trySendData func(data interface{}) bool
+	sendOther   func(interface{}) error
 
 	sendError func(err error)
 	complete  func()
+}
+
+func (self *InvokeInboundTransportLayerHandler) IsActive() bool {
+	return true
+}
+
+func (self *InvokeInboundTransportLayerHandler) OnSendData(i interface{}) {
+	self.sendData(i)
+}
+
+func (self *InvokeInboundTransportLayerHandler) OnTrySendData(i interface{}) bool {
+	return self.trySendData(i)
 }
 
 func (self *InvokeInboundTransportLayerHandler) GetAdditionalBytesIncoming() int {
@@ -32,27 +45,29 @@ func (self *InvokeInboundTransportLayerHandler) GetAdditionalBytesSend() int {
 	return 0
 }
 
-func (self *InvokeInboundTransportLayerHandler) ReadMessage(i interface{}) error {
+func (self *InvokeInboundTransportLayerHandler) ReadMessage(i interface{}) (interface{}, bool, error) {
 	if publishRxHandlerCounters, ok := i.(*model.PublishRxHandlerCounters); ok {
-		return self.conn.ConnectionInformationReceived(publishRxHandlerCounters)
+		return nil, false, self.conn.ConnectionInformationReceived(publishRxHandlerCounters)
 	}
-	return nil
+	return nil, false, nil
 }
 
 func NewInvokeInboundTransportLayerHandler(
 	conn goConnectionManager.IPublishConnectionInformation,
 	sendData func(data interface{}),
+	trySendData func(data interface{}) bool,
 	sendOther func(interface{}) error,
 	sendError func(err error),
 	complete func(),
 ) (*InvokeInboundTransportLayerHandler, error) {
 	return &InvokeInboundTransportLayerHandler{
-		errorState: nil,
-		conn:       conn,
-		sendData:   sendData,
-		sendOther:  sendOther,
-		sendError:  sendError,
-		complete:   complete,
+		errorState:  nil,
+		conn:        conn,
+		sendData:    sendData,
+		trySendData: trySendData,
+		sendOther:   sendOther,
+		sendError:   sendError,
+		complete:    complete,
 	}, nil
 }
 
@@ -65,7 +80,7 @@ func (self *InvokeInboundTransportLayerHandler) Close() error {
 }
 
 func (self *InvokeInboundTransportLayerHandler) SendData(data interface{}) {
-	_ = self.ReadMessage(data)
+	_, _, _ = self.ReadMessage(data)
 	if self.sendData != nil {
 		self.sendData(data)
 	}

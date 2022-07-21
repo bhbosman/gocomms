@@ -33,7 +33,7 @@ func ProvideChannel(name string) fx.Option {
 						return nil
 					},
 				})
-				nextFunc, errFunc, completedFunc, err := RxHandlers.All(
+				handler, err := RxHandlers.All2(
 					fmt.Sprintf(
 						"ProvideChannel %v",
 						params.ConnectionId),
@@ -41,11 +41,12 @@ func ProvideChannel(name string) fx.Option {
 					result,
 					params.Logger,
 					params.Ctx,
+					true,
 				)
 				if err != nil {
 					return nil, nil, nil, nil, err
 				}
-				return result, nextFunc, errFunc, completedFunc, nil
+				return result, handler.OnSendData, handler.OnError, handler.OnComplete, nil
 			},
 		},
 	)

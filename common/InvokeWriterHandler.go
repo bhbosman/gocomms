@@ -15,6 +15,25 @@ type InvokeWriterHandler struct {
 	oci        goConnectionManager.IPublishConnectionInformation
 }
 
+func (self *InvokeWriterHandler) IsActive() bool {
+	return true
+}
+
+func (self *InvokeWriterHandler) OnSendData(i interface{}) {
+	if self.errorState != nil {
+		return
+	}
+	_, _, _ = self.ReadMessage(i)
+}
+
+func (self *InvokeWriterHandler) OnTrySendData(i interface{}) bool {
+	if self.errorState != nil {
+		return false
+	}
+	_, _, _ = self.ReadMessage(i)
+	return true
+}
+
 func (self *InvokeWriterHandler) GetAdditionalBytesIncoming() int {
 	return 0
 }
@@ -26,18 +45,18 @@ func (self *InvokeWriterHandler) GetAdditionalBytesSend() int {
 	return 0
 }
 
-func (self *InvokeWriterHandler) ReadMessage(i interface{}) error {
+func (self *InvokeWriterHandler) ReadMessage(i interface{}) (interface{}, bool, error) {
 	if publishRxHandlerCounters, ok := i.(*model.PublishRxHandlerCounters); ok {
-		return self.oci.ConnectionInformationReceived(publishRxHandlerCounters)
+		return nil, false, self.oci.ConnectionInformationReceived(publishRxHandlerCounters)
 	}
-	return nil
+	return nil, false, nil
 }
 
 func (self *InvokeWriterHandler) SendData(data interface{}) {
 	if self.errorState != nil {
 		return
 	}
-	self.ReadMessage(data)
+	_, _, _ = self.ReadMessage(data)
 }
 
 func (self *InvokeWriterHandler) Close() error {
@@ -59,7 +78,7 @@ func (self *InvokeWriterHandler) NextReadWriterSize(
 	if self.errorState != nil {
 		return self.errorState
 	}
-	sizeUpdate(rws.Size())
+	_ = sizeUpdate(rws.Size())
 	_, err := io.Copy(self.Writer, rws)
 	if err != nil {
 		self.errorState = err

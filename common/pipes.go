@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"github.com/bhbosman/gocommon/model"
-	"github.com/bhbosman/goprotoextra"
 	"github.com/reactivex/rxgo/v2"
 	"net"
 )
@@ -35,7 +34,7 @@ type IInputStreamForStack net.Conn
 type StackStartState func(
 	conn IInputStreamForStack,
 	stackData IStackCreateData,
-	ToReactorFunc goprotoextra.ToReactorFunc,
+	ToReactorFunc rxgo.NextFunc,
 ) (IInputStreamForStack, error)
 type StackStopState func(stackData interface{}, endParams StackEndStateParams) error
 

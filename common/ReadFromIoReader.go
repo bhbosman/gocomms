@@ -2,9 +2,7 @@ package common
 
 import (
 	"context"
-	"fmt"
-	"github.com/bhbosman/gocommon/model"
-	"github.com/bhbosman/gocomms/RxHandlers"
+	"github.com/bhbosman/goCommsDefinitions"
 	"github.com/bhbosman/gomessageblock"
 	"io"
 )
@@ -15,8 +13,8 @@ func ReadFromIoReader(
 	context string,
 	reader io.Reader,
 	CancelCtx context.Context,
-	ConnectionCancelFunc model.ConnectionCancelFunc,
-	rxNextHandler RxHandlers.IRxNextHandler,
+	cancelFunc context.CancelFunc,
+	rxNextHandler goCommsDefinitions.IRxNextHandler,
 ) {
 
 	var buffer []byte
@@ -36,7 +34,8 @@ func ReadFromIoReader(
 		if err != nil {
 			rxNextHandler.OnError(err)
 			rxNextHandler.OnComplete()
-			ConnectionCancelFunc(fmt.Sprintf("ReadFromIoReader(%v)", context), true, err)
+			cancelFunc()
+			//ConnectionCancelFunc(fmt.Sprintf("ReadFromIoReader(%v)", context), true, err)
 			return
 		}
 		if CancelCtx.Err() != nil {

@@ -1,7 +1,9 @@
 package RxHandlers
 
 import (
+	"github.com/bhbosman/goCommsDefinitions"
 	model2 "github.com/bhbosman/gocommon/model"
+	"github.com/bhbosman/goerrors"
 	"github.com/bhbosman/goprotoextra"
 	"github.com/reactivex/rxgo/v2"
 	"go.uber.org/multierr"
@@ -10,10 +12,20 @@ import (
 
 type RxNextHandler struct {
 	BaseRxHandler
-	stackHandler IRxNextStackHandler
-	onSendData   rxgo.NextFunc
-	onSendError  rxgo.ErrFunc
-	onComplete   rxgo.CompletedFunc
+	stackHandler  IRxNextStackHandler
+	onSendData    rxgo.NextFunc
+	onSendError   rxgo.ErrFunc
+	onComplete    rxgo.CompletedFunc
+	onTrySendData goCommsDefinitions.TryNextFunc
+	isActive      func() bool
+}
+
+func (self *RxNextHandler) IsActive() bool {
+	return self.isActive()
+}
+
+func (self *RxNextHandler) OnTrySendData(i interface{}) bool {
+	return self.onTrySendData(i)
 }
 
 func (self *RxNextHandler) Close() error {
@@ -140,10 +152,30 @@ func NewRxNextHandler(
 	name string,
 	ConnectionCancelFunc model2.ConnectionCancelFunc,
 	next IRxNextStackHandler,
-	onSendData func(data interface{}),
-	onSendError func(err error),
-	onComplete func(),
+	onSendData rxgo.NextFunc,
+	onTrySendData goCommsDefinitions.TryNextFunc,
+	onSendError rxgo.ErrFunc,
+	onComplete rxgo.CompletedFunc,
+	isActive func() bool,
 	logger *zap.Logger) (*RxNextHandler, error) {
+
+	if onSendData == nil {
+		return nil, goerrors.InvalidParam
+	}
+	if onTrySendData == nil {
+		return nil, goerrors.InvalidParam
+	}
+	if onSendError == nil {
+		return nil, goerrors.InvalidParam
+	}
+	if onComplete == nil {
+		return nil, goerrors.InvalidParam
+	}
+	// got a hander for it
+	//if isActive == nil {
+	//	return nil, goerrors.InvalidParam
+	//}
+
 	return &RxNextHandler{
 		BaseRxHandler: BaseRxHandler{
 			Logger:               logger,
@@ -155,9 +187,41 @@ func NewRxNextHandler(
 			errorState:           nil,
 			ConnectionCancelFunc: ConnectionCancelFunc,
 		},
-		stackHandler: next,
-		onSendData:   onSendData,
-		onSendError:  onSendError,
-		onComplete:   onComplete,
+		stackHandler:  next,
+		onSendData:    onSendData,
+		onTrySendData: onTrySendData,
+		onSendError:   onSendError,
+		onComplete:    onComplete,
+		isActive: func(isActive func() bool) func() bool {
+			if isActive != nil {
+				return isActive
+			}
+			return func() bool {
+				return true
+			}
+		}(isActive),
 	}, nil
+
+}
+
+func NewRxNextHandler2(
+	name string,
+	ConnectionCancelFunc model2.ConnectionCancelFunc,
+	next IRxNextStackHandler,
+	defaultRxNextHandler goCommsDefinitions.IRxNextHandler,
+	logger *zap.Logger,
+) (*RxNextHandler, error) {
+	if defaultRxNextHandler == nil {
+		return nil, goerrors.InvalidParam
+	}
+	return NewRxNextHandler(
+		name,
+		ConnectionCancelFunc,
+		next,
+		defaultRxNextHandler.OnSendData,
+		defaultRxNextHandler.OnTrySendData,
+		defaultRxNextHandler.OnError,
+		defaultRxNextHandler.OnComplete,
+		defaultRxNextHandler.IsActive,
+		logger)
 }

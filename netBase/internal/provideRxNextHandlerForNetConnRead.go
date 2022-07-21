@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"github.com/bhbosman/goCommsDefinitions"
 	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/gocomms/RxHandlers"
 	"github.com/bhbosman/gocomms/common"
@@ -25,13 +26,13 @@ func ProvideRxNextHandlerForNetConnRead22(name string) fx.Option {
 					Logger               *zap.Logger
 					ConnectionId         string `name:"ConnectionId"`
 				},
-			) (*RxHandlers.RxNextHandler, rxgo.NextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, error) {
+			) (*RxHandlers.RxNextHandler, rxgo.NextFunc, goCommsDefinitions.TryNextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, error) {
 
 				// DO NOT set complete param to RxHandlers.CreateComplete(params.InBoundChannel)
 				// as it will lead to a double close and a panic
 				// The params.Inbound Channel will eb closed by die FxApp.Shutdown, so no further close() is required
-
-				nextFunc, errFunc, completedFunc, err := RxHandlers.All(
+				// make sure useCompleteCallback = false
+				eventHandler, err := RxHandlers.All2(
 					fmt.Sprintf(
 						"ProvideRxNextHandlerForNetConnRead %v",
 						params.ConnectionId),
@@ -39,23 +40,22 @@ func ProvideRxNextHandlerForNetConnRead22(name string) fx.Option {
 					params.InBoundChannel,
 					params.Logger,
 					params.Ctx,
+					false,
 				)
 				if err != nil {
-					return nil, nil, nil, nil, err
+					return nil, nil, nil, nil, nil, err
 				}
 
-				result, err := RxHandlers.NewRxNextHandler(
+				result, err := RxHandlers.NewRxNextHandler2(
 					"net.conn.read",
 					params.ConnectionCancelFunc,
 					nil,
-					nextFunc,
-					errFunc,
-					nil, /*see comment*/
+					eventHandler, /*see comment*/
 					params.Logger)
 				if err != nil {
-					return nil, nil, nil, nil, err
+					return nil, nil, nil, nil, nil, err
 				}
-				return result, nextFunc, errFunc, completedFunc, nil
+				return result, eventHandler.OnSendData, eventHandler.OnTrySendData, eventHandler.OnError, eventHandler.OnComplete, nil
 			},
 		},
 	)

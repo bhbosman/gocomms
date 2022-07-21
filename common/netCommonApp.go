@@ -9,7 +9,6 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
-	"net/url"
 	"time"
 )
 
@@ -18,10 +17,6 @@ func ConnectionApp(
 	stopTimeOut time.Duration,
 	connectionName string,
 	connectionInstancePrefix string,
-	UseProxy bool,
-	ProxyUrl *url.URL,
-	ConnectionUrl *url.URL,
-	stackName string,
 	params NetAppFuncInParams,
 	additionalFxOptionsForConnectionInstance func() fx.Option,
 	option ...fx.Option,
@@ -41,10 +36,6 @@ func ConnectionApp(
 		fx.Provide(fx.Annotated{Target: func() interfaces.IUniqueReferenceService { return params.UniqueSessionNumber_ }}),
 		goCommsDefinitions.ProvideStringContext("ConnectionName", connectionName),
 		goCommsDefinitions.ProvideStringContext("ConnectionInstancePrefix", connectionInstancePrefix),
-		goCommsDefinitions.ProvideStringContext("StackName", stackName),
-		goCommsDefinitions.ProvideUrl("ConnectionUrl", ConnectionUrl),
-		goCommsDefinitions.ProvideUrl("ProxyUrl", ProxyUrl),
-		goCommsDefinitions.ProvideBool("UseProxy", UseProxy),
 		goConnectionManager.ProvideConnectionManager(params.ConnectionManager),
 		goConnectionManager.ProvideCommandsToConnectionManager(),
 		goConnectionManager.ProvideObtainConnectionManagerInformation(),

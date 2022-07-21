@@ -19,6 +19,7 @@ func InvokeFxLifeCycleReadDataFromConnectionStartStop() fx.Option {
 				Lifecycle                   fx.Lifecycle
 				ConnectionCancelFunc        model.ConnectionCancelFunc
 				CancelCtx                   context.Context
+				CancelFunc                  context.CancelFunc
 				RxNextHandlerForNetConnRead *RxHandlers.RxNextHandler `name:"net.conn.read"`
 				GoFunctionCounter           GoFunctionCounter.IService
 			},
@@ -31,25 +32,19 @@ func InvokeFxLifeCycleReadDataFromConnectionStartStop() fx.Option {
 						}
 
 						// this function is part of the GoFunctionCounter count
-						go func() {
-							functionName := params.GoFunctionCounter.CreateFunctionName("InvokeFxLifeCycleReadDataFromConnectionStartStop.ReadFromIoReader")
-							defer func(GoFunctionCounter GoFunctionCounter.IService, name string) {
-								_ = GoFunctionCounter.Remove(name)
-							}(params.GoFunctionCounter, functionName)
-							_ = params.GoFunctionCounter.Add(functionName)
-
-							//
-							common.ReadFromIoReader(
-								"net.conn.read",
-								params.Conn,
-								params.CancelCtx,
-								params.ConnectionCancelFunc,
-								params.RxNextHandlerForNetConnRead,
-							)
-
-						}()
-
-						return nil
+						return params.GoFunctionCounter.GoRun(
+							"InvokeFxLifeCycleReadDataFromConnectionStartStop.ReadFromIoReader",
+							func() {
+								common.ReadFromIoReader(
+									"net.conn.read",
+									params.Conn,
+									params.CancelCtx,
+									params.CancelFunc,
+									//params.ConnectionCancelFunc,
+									params.RxNextHandlerForNetConnRead,
+								)
+							},
+						)
 					},
 					OnStop: func(_ context.Context) error {
 						return params.Conn.Close()

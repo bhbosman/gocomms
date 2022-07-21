@@ -37,28 +37,23 @@ func ProvideRxNextHandlerForNetConnWrite2(name string) fx.Option {
 				var err error
 
 				handler = common.NewInvokeOutBoundTransportLayerHandler(params.Conn, params.PublishConnectionInformation)
-				rxHandler, err = RxHandlers.NewRxNextHandler(
+				rxHandler, err = RxHandlers.NewRxNextHandler2(
 					"net.conn.write",
 					params.ConnectionCancelFunc,
 					handler,
-					handler.SendData,
-					handler.SendError,
-					handler.Complete,
+					handler,
 					params.Logger)
 				if err != nil {
 					return nil, nil, err
 				}
 
-				rxOverride.ForEach(
+				rxOverride.ForEach2(
 					"net.conn.write",
 					model.StreamDirectionUnknown,
 					params.OutgoingObs.OutboundObservable,
 					params.Ctx,
 					params.GoFunctionCounter,
-					rxHandler.OnSendData,
-					rxHandler.OnError,
-					rxHandler.OnComplete,
-					false,
+					rxHandler,
 					params.RxOptions...,
 				)
 				return rxHandler, handler, nil

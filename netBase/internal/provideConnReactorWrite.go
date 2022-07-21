@@ -35,7 +35,7 @@ func ProvideConnReactorWrite2(name string) fx.Option {
 				var handler *common.InvokeInboundTransportLayerHandler
 				var rxHandler *RxHandlers.RxNextHandler
 
-				createSendData, createSendError, createComplete, err := RxHandlers.All(
+				eventHandler, err := RxHandlers.All2(
 					fmt.Sprintf(
 						"ProvideConnReactorWrite %v",
 						params.ConnectionId),
@@ -43,6 +43,7 @@ func ProvideConnReactorWrite2(name string) fx.Option {
 					params.ChannelManager,
 					params.Logger,
 					params.Ctx,
+					true,
 				)
 				if err != nil {
 					return nil, nil, err
@@ -50,37 +51,34 @@ func ProvideConnReactorWrite2(name string) fx.Option {
 
 				handler, err = common.NewInvokeInboundTransportLayerHandler(
 					params.PublishConnectionInformation,
-					createSendData,
+					eventHandler.OnSendData,
+					eventHandler.OnTrySendData,
 					func(i interface{}) error {
 						return nil
 					},
-					createSendError,
-					createComplete)
+					eventHandler.OnError,
+					eventHandler.OnComplete,
+				)
 				if err != nil {
 					return nil, nil, err
 				}
 
-				rxHandler, err = RxHandlers.NewRxNextHandler(
+				rxHandler, err = RxHandlers.NewRxNextHandler2(
 					"conn.reactor.write",
 					params.ConnectionCancelFunc,
 					handler,
-					handler.SendData,
-					handler.SendError,
-					handler.Complete,
+					handler,
 					params.Logger)
 				if err != nil {
 					return nil, nil, err
 				}
-				_ = rxOverride.ForEach(
+				_ = rxOverride.ForEach2(
 					"conn.reactor.write",
-					model.StreamDirectionUnknown,
+					model.StreamDirectionInbound,
 					params.IncomingObs.InboundObservable,
 					params.Ctx,
 					params.GoFunctionCounter,
-					rxHandler.OnSendData,
-					rxHandler.OnError,
-					rxHandler.OnComplete,
-					false,
+					rxHandler,
 					params.RxOptions...)
 				return rxHandler, handler, nil
 			},

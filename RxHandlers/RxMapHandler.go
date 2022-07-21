@@ -2,7 +2,6 @@ package RxHandlers
 
 import (
 	"context"
-	"fmt"
 	model2 "github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/goerrors"
 	"github.com/bhbosman/goprotoextra"
@@ -19,18 +18,22 @@ func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface
 	if rws, ok := i.(goprotoextra.ReadWriterSize); ok {
 		self.RwsMessageCount++
 		self.RwsByteCountIn += int64(rws.Size())
-		if self.next != nil {
-			newRws, err := self.next.MapReadWriterSize(ctx, rws)
-			if err != nil {
-				return nil, err
-			}
-			if newRws != nil {
-				self.RwsByteCountOut += int64(newRws.Size())
-				return newRws, err
-			}
-			return nil, fmt.Errorf("unknown error in %v, where newRws is nil", self.Name)
+
+		newRws, err := self.next.MapReadWriterSize(ctx, rws)
+		if err != nil {
+			return nil, err
 		}
-		return i, nil
+		message, b, err := self.next.ReadMessage(rws)
+		if err != nil {
+			return nil, err
+		}
+		if b {
+			self.OtherMessageCount++
+			return message, nil
+		}
+
+		self.RwsByteCountOut += int64(newRws.Size())
+		return newRws, err
 	} else {
 		self.OtherMessageCount++
 		if self.next != nil {
@@ -43,10 +46,19 @@ func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface
 					self.RwsByteCountIn,
 					self.RwsByteCountOut)
 				v.Add(counters)
-				_ = self.next.ReadMessage(i)
+				_, _, err := self.next.ReadMessage(i)
+				if err != nil {
+					return nil, err
+				}
 				break
 			default:
-				_ = self.next.ReadMessage(i)
+				message, b, err := self.next.ReadMessage(i)
+				if err != nil {
+					return nil, err
+				}
+				if b {
+					return message, nil
+				}
 				break
 			}
 		}

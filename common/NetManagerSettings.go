@@ -1,21 +1,21 @@
 package common
 
 import (
-	"github.com/bhbosman/goCommsDefinitions"
 	"go.uber.org/fx"
 )
 
 type NetManagerSettings struct {
-	MaxConnections                 int
-	OnCreateConnectionFactory      interface{} //func(IOnCreateConnection, err)
-	OnCreateIConnectionReactor     fx.Option   //func(intf.IConnectionReactor, err)
+	MaxConnections int
+	//OnCreateConnectionFactory      interface{} //func(IOnCreateConnection, err)
+	OnCreateIConnectionReactor     fx.Option //func(intf.IConnectionReactor, err)
 	FxOptionsForConnectionInstance []fx.Option
 	MoreOptions                    []fx.Option
 }
 
-func (self *NetManagerSettings) SetOnCreateConnection(factory func() (goCommsDefinitions.IOnCreateConnection, error)) {
-	self.OnCreateConnectionFactory = factory
-}
+//
+//func (self *NetManagerSettings) SetOnCreateConnection(factory func() (goCommsDefinitions.IOnCreateConnection, error)) {
+//	self.OnCreateConnectionFactory = factory
+//}
 
 func (self *NetManagerSettings) AddFxOptionsForConnectionInstance(options []fx.Option) {
 	self.FxOptionsForConnectionInstance = append(self.FxOptionsForConnectionInstance, options...)
@@ -40,8 +40,8 @@ func NewNetManagerSettings(
 	maxConnections int,
 ) NetManagerSettings {
 	return NetManagerSettings{
-		MaxConnections:                 maxConnections,
-		OnCreateConnectionFactory:      ProvideIOnCreateConnectionResource,
+		MaxConnections: maxConnections,
+		//OnCreateConnectionFactory:      ProvideIOnCreateConnectionResource,
 		FxOptionsForConnectionInstance: nil,
 	}
 }

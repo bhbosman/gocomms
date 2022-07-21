@@ -1,29 +1,30 @@
 package common
 
 import (
+	"github.com/bhbosman/goerrors"
 	"net"
 	"sync"
 )
 
 type netConnWithSemaphoreWrapper struct {
 	net.Conn
-	mutex            sync.Mutex
-	closed           bool
-	releaseSemaphore interface {
-		Release(int64)
-	}
+	mutex           sync.Mutex
+	closed          bool
+	releaseCallback func()
 }
 
 func NewNetConnWithSemaphoreWrapper(
 	conn net.Conn,
-	releaseSemaphore interface {
-		Release(int64)
-	}) *netConnWithSemaphoreWrapper {
-	return &netConnWithSemaphoreWrapper{
-		Conn:             conn,
-		mutex:            sync.Mutex{},
-		releaseSemaphore: releaseSemaphore,
+	releaseCallback func(),
+) (*netConnWithSemaphoreWrapper, error) {
+	if releaseCallback == nil {
+		return nil, goerrors.InvalidParam
 	}
+	return &netConnWithSemaphoreWrapper{
+		Conn:            conn,
+		mutex:           sync.Mutex{},
+		releaseCallback: releaseCallback,
+	}, nil
 }
 
 func (self *netConnWithSemaphoreWrapper) Close() error {
@@ -37,10 +38,11 @@ func (self *netConnWithSemaphoreWrapper) Close() error {
 	}
 	self.closed = true
 	err := self.Conn.Close()
-	local := self.releaseSemaphore
-	self.releaseSemaphore = nil
+
+	local := self.releaseCallback
+	self.releaseCallback = nil
 	if local != nil {
-		local.Release(1)
+		local()
 	}
 	return err
 }

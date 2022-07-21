@@ -1,10 +1,10 @@
 package internal
 
 import (
+	"github.com/bhbosman/goCommsDefinitions"
 	"github.com/bhbosman/gocommon/model"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	"golang.org/x/net/context"
 )
 
 func ProvideCreateStackCancelFunc() fx.Option {
@@ -12,13 +12,13 @@ func ProvideCreateStackCancelFunc() fx.Option {
 		func(
 			params struct {
 				fx.In
-				CancelFunc context.CancelFunc
-				Logger     *zap.Logger
+				CancellationContext goCommsDefinitions.ICancellationContext
+				Logger              *zap.Logger
 			},
 		) (model.ConnectionCancelFunc, error) {
 			return func(context string, inbound bool, err error) {
 				params.Logger.Error(context, zap.Error(err))
-				params.CancelFunc()
+				params.CancellationContext.CancelWithError(err)
 			}, nil
 		},
 	)

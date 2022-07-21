@@ -3,7 +3,7 @@ package internal
 import (
 	"fmt"
 	"github.com/bhbosman/gocomms/common"
-	"github.com/bhbosman/goprotoextra"
+	"github.com/reactivex/rxgo/v2"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
@@ -22,7 +22,7 @@ func InvokeFxLifeCycleStackStateStartStop() fx.Option {
 				StackState    []*common.StackState
 				StackData     map[string]*common.StackDataContainer
 				Logger        *zap.Logger
-				ToReactorFunc goprotoextra.ToReactorFunc `name:"ForReactor"`
+				ToReactorFunc rxgo.NextFunc `name:"ForReactor"`
 			},
 		) error {
 			localConn := params.Conn
