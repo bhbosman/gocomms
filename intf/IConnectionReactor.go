@@ -10,7 +10,7 @@ type IConnectionReactor interface {
 	Init(
 		onSendToReactor rxgo.NextFunc,
 		onSendToConnection rxgo.NextFunc,
-	) (rxgo.NextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, chan interface{}, error)
+	) (rxgo.NextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, error)
 	Open() error
 }
 

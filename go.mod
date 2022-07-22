@@ -9,6 +9,7 @@ require (
 	github.com/bhbosman/goerrors v0.0.0-20220623084908-4d7bbcd178cf
 	github.com/bhbosman/gomessageblock v0.0.0-20220617132215-32f430d7de62
 	github.com/bhbosman/goprotoextra v0.0.1
+	github.com/cskr/pubsub v1.0.2
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.8.0
 	github.com/reactivex/rxgo/v2 v2.5.0
@@ -21,7 +22,6 @@ require (
 
 require (
 	github.com/cenkalti/backoff/v4 v4.0.0 // indirect
-	github.com/cskr/pubsub v1.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emirpasic/gods v1.12.0 // indirect
 	github.com/icza/gox v0.0.0-20220321141217-e2d488ab2fbc // indirect
@@ -45,3 +45,5 @@ replace github.com/bhbosman/goConnectionManager => ../goConnectionManager
 replace github.com/bhbosman/goprotoextra => ../goprotoextra
 
 replace github.com/bhbosman/gocommon => ../gocommon
+
+replace github.com/cskr/pubsub => ../pubsub

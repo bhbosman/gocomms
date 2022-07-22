@@ -33,7 +33,7 @@ func all(
 	Items chan<- rxgo.Item,
 	logger *zap.Logger,
 	ctx context.Context,
-) (rxgo.NextFunc, goCommsDefinitions.TryNextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, func() bool, error) {
+) (rxgo.NextFunc, goCommsDefinitions.TryNextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, goCommsDefinitions.IsNextActive, error) {
 	isClosed := false
 	//errorHappen := false
 	return func(data interface{}) {

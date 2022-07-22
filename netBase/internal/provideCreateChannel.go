@@ -22,7 +22,15 @@ func ProvideCreateChannel(name string) fx.Option {
 					Logger       *zap.Logger
 					ConnectionId string `name:"ConnectionId"`
 				},
-			) (rxgo.Observable, chan rxgo.Item, rxgo.NextFunc, goCommsDefinitions.TryNextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, error) {
+			) (rxgo.Observable,
+				chan rxgo.Item,
+				rxgo.NextFunc,
+				goCommsDefinitions.TryNextFunc,
+				rxgo.ErrFunc,
+				rxgo.CompletedFunc,
+				goCommsDefinitions.IsNextActive,
+				error,
+			) {
 				ch := make(chan rxgo.Item)
 				obs := rxgo.FromChannel(ch, rxgo.WithContext(params.CancelCtx))
 
@@ -37,9 +45,16 @@ func ProvideCreateChannel(name string) fx.Option {
 					true,
 				)
 				if err != nil {
-					return nil, nil, nil, nil, nil, nil, err
+					return nil, nil, nil, nil, nil, nil, nil, err
 				}
-				return obs, ch, eventHandler.OnSendData, eventHandler.OnTrySendData, eventHandler.OnError, eventHandler.OnComplete, nil
+				return obs,
+					ch,
+					eventHandler.OnSendData,
+					eventHandler.OnTrySendData,
+					eventHandler.OnError,
+					eventHandler.OnComplete,
+					eventHandler.IsActive,
+					nil
 			},
 		},
 	)
