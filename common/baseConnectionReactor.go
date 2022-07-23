@@ -23,8 +23,8 @@ type BaseConnectionReactor struct {
 	UniqueReference             string
 	PubSub                      *pubsub.PubSub
 	GoFunctionCounter           GoFunctionCounter.IService
-	onSendToReactorPubSubBag    *pubsub.NextFuncSubscription
-	onSendToConnectionPubSubBag *pubsub.NextFuncSubscription
+	OnSendToReactorPubSubBag    *pubsub.NextFuncSubscription
+	OnSendToConnectionPubSubBag *pubsub.NextFuncSubscription
 }
 
 func (self *BaseConnectionReactor) Init(
@@ -33,8 +33,8 @@ func (self *BaseConnectionReactor) Init(
 ) (rxgo.NextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, error) {
 	self.OnSendToReactor = onSendToReactor
 	self.OnSendToConnection = onSendToConnection
-	self.onSendToReactorPubSubBag = pubsub.NewNextFuncSubscription(self.OnSendToReactor)
-	self.onSendToConnectionPubSubBag = pubsub.NewNextFuncSubscription(self.OnSendToConnection)
+	self.OnSendToReactorPubSubBag = pubsub.NewNextFuncSubscription(self.OnSendToReactor)
+	self.OnSendToConnectionPubSubBag = pubsub.NewNextFuncSubscription(self.OnSendToConnection)
 
 	return func(i interface{}) {
 
@@ -51,7 +51,7 @@ func (self *BaseConnectionReactor) Close() error {
 		"Unsubscribe from Pubsub",
 		self.PubSub,
 		self.GoFunctionCounter,
-		self.onSendToReactorPubSubBag,
+		self.OnSendToReactorPubSubBag,
 	)
 	err = multierr.Append(
 		err,
@@ -59,7 +59,7 @@ func (self *BaseConnectionReactor) Close() error {
 			"Unsubscribe from Pubsub",
 			self.PubSub,
 			self.GoFunctionCounter,
-			self.onSendToConnectionPubSubBag,
+			self.OnSendToConnectionPubSubBag,
 		),
 	)
 	return err
@@ -68,15 +68,6 @@ func (self *BaseConnectionReactor) Close() error {
 func (self *BaseConnectionReactor) Open() error {
 	return nil
 }
-
-//
-//func (self *BaseConnectionReactor) SendStringToConnection(s string) error {
-//	rws, err := gomessageblock.NewReaderWriterString(s)
-//	if err != nil {
-//		return err
-//	}
-//	return self.ToConnection(rws)
-//}
 
 func NewBaseConnectionReactor(
 	logger *zap.Logger,
