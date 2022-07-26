@@ -12,26 +12,26 @@ import (
 
 type NetAppFuncInParams struct {
 	fx.In
-	ParentContext        context.Context `name:"Application"`
-	ConnectionManager    goConnectionManager.IService
-	ZapLogger            *zap.Logger
-	UniqueSessionNumber_ interfaces.IUniqueReferenceService
-	GoFunctionCounter    GoFunctionCounter.IService
+	ParentContext       context.Context `name:"Application"`
+	ConnectionManager   goConnectionManager.IService
+	ZapLogger           *zap.Logger
+	UniqueSessionNumber interfaces.IUniqueReferenceService
+	GoFunctionCounter   GoFunctionCounter.IService
 }
 
 func NewNetAppFuncInParams(
 	parentContext context.Context,
 	connectionManager goConnectionManager.IService,
 	zapLogger *zap.Logger,
-	uniqueSessionNumber_ interfaces.IUniqueReferenceService,
+	uniqueSessionNumber interfaces.IUniqueReferenceService,
 	goFunctionCounter GoFunctionCounter.IService,
 ) NetAppFuncInParams {
 	return NetAppFuncInParams{
-		ParentContext:        parentContext,
-		ConnectionManager:    connectionManager,
-		ZapLogger:            zapLogger,
-		UniqueSessionNumber_: uniqueSessionNumber_,
-		GoFunctionCounter:    goFunctionCounter,
+		ParentContext:       parentContext,
+		ConnectionManager:   connectionManager,
+		ZapLogger:           zapLogger,
+		UniqueSessionNumber: uniqueSessionNumber,
+		GoFunctionCounter:   goFunctionCounter,
 	}
 }
 
