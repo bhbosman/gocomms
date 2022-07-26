@@ -42,12 +42,13 @@ func ConnectionApp(
 		goConnectionManager.ProvideRegisterToConnectionManager(),
 		goConnectionManager.ProvidePublishConnectionInformation(),
 		goCommsDefinitions.ProvideCancelContext(params.ParentContext),
-
-		fx.Provide(fx.Annotated{Target: func() func() fx.Option {
-			return additionalFxOptionsForConnectionInstance
-
-		}}),
-
+		fx.Provide(
+			fx.Annotated{
+				Target: func() func() fx.Option {
+					return additionalFxOptionsForConnectionInstance
+				},
+			},
+		),
 		fx.Options(option...),
 	)
 }
