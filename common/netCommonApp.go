@@ -33,7 +33,13 @@ func ConnectionApp(
 		),
 		fx.Provide(func() *zap.Logger { return params.ZapLogger.Named(connectionName) }),
 		fx.WithLogger(func(logger *zap.Logger) fxevent.Logger { return &fxevent.ZapLogger{Logger: logger} }),
-		fx.Provide(fx.Annotated{Target: func() interfaces.IUniqueReferenceService { return params.UniqueSessionNumber_ }}),
+		fx.Provide(
+			fx.Annotated{
+				Target: func() interfaces.IUniqueReferenceService {
+					return params.UniqueSessionNumber_
+				},
+			},
+		),
 		goCommsDefinitions.ProvideStringContext("ConnectionName", connectionName),
 		goCommsDefinitions.ProvideStringContext("ConnectionInstancePrefix", connectionInstancePrefix),
 		goConnectionManager.ProvideConnectionManager(params.ConnectionManager),
