@@ -36,6 +36,9 @@ func (self *BaseConnectionReactor) Init(
 	self.OnSendToReactorPubSubBag = pubsub.NewNextFuncSubscription(self.OnSendToReactor)
 	self.OnSendToConnectionPubSubBag = pubsub.NewNextFuncSubscription(self.OnSendToConnection)
 
+	// to make sure no accidental removal from pubsub
+	self.PubSub.AddSub(self.OnSendToReactorPubSubBag, self.UniqueReference)
+	self.PubSub.AddSub(self.OnSendToConnectionPubSubBag, self.UniqueReference)
 	return func(i interface{}) {
 
 		}, func(err error) {
