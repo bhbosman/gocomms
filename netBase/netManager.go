@@ -11,13 +11,12 @@ import (
 )
 
 type NetManager struct {
-	CancelCtx         context.Context
-	ZapLogger         *zap.Logger
-	ConnectionManager goConnectionManager.IService
-	ConnectionUrl     *url.URL
-	UseProxy          bool
-	ProxyUrl          *url.URL
-	//UserContext                              interface{}
+	CancelCtx                                context.Context
+	ZapLogger                                *zap.Logger
+	ConnectionManager                        goConnectionManager.IService
+	ConnectionUrl                            *url.URL
+	UseProxy                                 bool
+	ProxyUrl                                 *url.URL
 	Name                                     string
 	ConnectionInstancePrefix                 string
 	UniqueSessionNumber                      interfaces.IUniqueReferenceService
@@ -33,20 +32,18 @@ func NewNetManager(
 	connectionUrl *url.URL,
 	cancelCtx context.Context,
 	connectionManager goConnectionManager.IService,
-	//userContext interface{},
 	ZapLogger *zap.Logger,
 	uniqueSessionNumber interfaces.IUniqueReferenceService,
 	additionalFxOptionsForConnectionInstance func() fx.Option,
 	GoFunctionCounter GoFunctionCounter.IService,
 ) (NetManager, error) {
 	return NetManager{
-		CancelCtx:         cancelCtx,
-		ZapLogger:         ZapLogger,
-		ConnectionManager: connectionManager,
-		ConnectionUrl:     connectionUrl,
-		ProxyUrl:          proxyUrl,
-		UseProxy:          useProxy,
-		//UserContext:                              userContext,
+		CancelCtx:                                cancelCtx,
+		ZapLogger:                                ZapLogger,
+		ConnectionManager:                        connectionManager,
+		ConnectionUrl:                            connectionUrl,
+		ProxyUrl:                                 proxyUrl,
+		UseProxy:                                 useProxy,
 		Name:                                     name,
 		ConnectionInstancePrefix:                 connectionInstancePrefix,
 		UniqueSessionNumber:                      uniqueSessionNumber,
