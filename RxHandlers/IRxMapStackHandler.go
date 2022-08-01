@@ -3,10 +3,12 @@ package RxHandlers
 import (
 	"context"
 	"github.com/bhbosman/goprotoextra"
+	"github.com/reactivex/rxgo/v2"
 )
 
 type IRxMapStackHandler interface {
 	IStackHandler
 	MapReadWriterSize(context.Context, goprotoextra.ReadWriterSize) (goprotoextra.ReadWriterSize, error)
 	ErrorState() error
+	FlatMapHandler(item rxgo.Item) rxgo.Observable
 }

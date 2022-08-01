@@ -64,7 +64,7 @@ func ProvideConnReactorWrite2(name string) fx.Option {
 				}
 
 				rxHandler, err = RxHandlers.NewRxNextHandler2(
-					"conn.reactor.write",
+					"ConnectionReactor",
 					params.ConnectionCancelFunc,
 					handler,
 					handler,
