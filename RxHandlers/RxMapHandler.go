@@ -74,7 +74,10 @@ func (self *RxMapHandler) FlatMapHandler(ctx context.Context) func(item rxgo.Ite
 	return func(item rxgo.Item) rxgo.Observable {
 		switch {
 		case item.V != nil:
-			result := self.next.FlatMapHandler(item.V)
+			result, err := self.next.FlatMapHandler(item.V)
+			if err != nil {
+				return rxgo.Just(err)()
+			}
 			if result.UseDefaultPath {
 				unk, err := self.Handler(ctx, item.V)
 				if err != nil {
