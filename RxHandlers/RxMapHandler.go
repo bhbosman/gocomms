@@ -5,7 +5,6 @@ import (
 	model2 "github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/goerrors"
 	"github.com/bhbosman/goprotoextra"
-	"github.com/reactivex/rxgo/v2"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 )
@@ -70,9 +69,10 @@ func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface
 	}
 }
 
-func (self *RxMapHandler) FlatMapHandler(item rxgo.Item) rxgo.Observable {
-	return self.next.FlatMapHandler(item)
-}
+//
+//func (self *RxMapHandler) FlatMapHandler(item rxgo.Item) rxgo.Observable {
+//	return self.next.FlatMapHandler(item)
+//}
 
 func NewRxMapHandler(
 	name string,
