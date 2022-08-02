@@ -61,7 +61,7 @@ func InvokeCompleteIncomingObservable() fx.Option {
 							//}
 							func(i interface{}) {
 								params.GoFunctionCounter.GoRun(
-									"ProvideCreateToReactorFunc",
+									"ThreadSwitch to protect incoming channel",
 									func() {
 										params.ToReactorFunc(i)
 									},
