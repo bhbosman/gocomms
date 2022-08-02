@@ -45,15 +45,33 @@ func InvokeCompleteIncomingObservable() fx.Option {
 							return params.CancelCtx.Err()
 						}
 						NextFunc, ErrFunc, CompletedFunc, err := params.ClientContext.Init(
-							params.ToReactorFunc,
+							// this is a thread switch to protect the incoming channel at all cost
+							// what happens is that the reactor will send messages to itself, and if the channel is full,
+							// we will hang. doing a thread switch is an easy way to fix it, but a better mechanism is required
+							// TODO: try to figure out how to protect the channel, without doing a thread switch
+							// something like
+							//for {
+							//	select {
+							//	case channel that
+							//		params.ToReactorFunc
+							//		uses
+							//	case context
+							//	case time out
+							//	}
+							//}
+							func(i interface{}) {
+								params.GoFunctionCounter.GoRun(
+									"ProvideCreateToReactorFunc",
+									func() {
+										params.ToReactorFunc(i)
+									},
+								)
+							},
 							params.ToConnectionFunc,
 						)
 						if err != nil {
 							return err
 						}
-
-						// place holders
-						//if channel == nil {
 						handler := goCommsDefinitions.NewDefaultRxNextHandler(
 							NextFunc,
 							params.TryNextFunc,
@@ -70,26 +88,6 @@ func InvokeCompleteIncomingObservable() fx.Option {
 							handler,
 							params.RxOptions...,
 						)
-
-						//} else {
-						//	handler := goCommsDefinitions.NewDefaultRxNextHandler(
-						//		NextFunc,
-						//		params.TryNextFunc,
-						//		ErrFunc,
-						//		CompletedFunc,
-						//		params.IsNextActive,
-						//	)
-						//	rxOverride.ForEachWithChannel(
-						//		"InvokeCompleteIncomingObservable for Connection ID",
-						//		model.StreamDirectionUnknown,
-						//		params.Obs,
-						//		params.CancelCtx,
-						//		params.GoFunctionCounter,
-						//		channel,
-						//		handler,
-						//		params.RxOptions...,
-						//	)
-						//}
 						return nil
 					},
 					OnStop: func(_ context.Context) error {
