@@ -82,7 +82,7 @@ func (self *RxMapHandler) FlatMapHandler(ctx context.Context) func(item rxgo.Ite
 				}
 				return rxgo.Just(unk)()
 			}
-			return result.Items
+			return rxgo.Just(result.Items...)()
 		case item.E != nil:
 			return rxgo.Just(item.E)()
 		default:
