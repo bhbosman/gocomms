@@ -20,5 +20,5 @@ type IRxMapStackHandler interface {
 	IStackHandler
 	MapReadWriterSize(context.Context, goprotoextra.ReadWriterSize) (goprotoextra.ReadWriterSize, error)
 	ErrorState() error
-	FlatMapHandler(item rxgo.Item) FlatMapHandlerResult
+	FlatMapHandler(item interface{}) FlatMapHandlerResult
 }
