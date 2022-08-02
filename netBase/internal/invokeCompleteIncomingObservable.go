@@ -2,16 +2,13 @@ package internal
 
 import (
 	"github.com/bhbosman/goCommsDefinitions"
-	"github.com/bhbosman/goConnectionManager"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/gocommon/rxOverride"
 	"github.com/bhbosman/gocomms/intf"
 	"github.com/reactivex/rxgo/v2"
 	"go.uber.org/fx"
-	"go.uber.org/zap"
 	"golang.org/x/net/context"
-	"net/url"
 )
 
 func InvokeCompleteIncomingObservable() fx.Option {
@@ -19,19 +16,14 @@ func InvokeCompleteIncomingObservable() fx.Option {
 		func(
 			params struct {
 				fx.In
-				Url               *url.URL
 				Lifecycle         fx.Lifecycle
 				ClientContext     intf.IConnectionReactor
-				ConnectionId      string `name:"ConnectionId"`
-				ConnectionManager goConnectionManager.IService
 				ToConnectionFunc  rxgo.NextFunc                   `name:"ToConnectionFunc"`
 				ToReactorFunc     rxgo.NextFunc                   `name:"ForReactor"`
 				Obs               rxgo.Observable                 `name:"QWERTY"`
 				TryNextFunc       goCommsDefinitions.TryNextFunc  `name:"QWERTY"`
 				IsNextActive      goCommsDefinitions.IsNextActive `name:"QWERTY"`
 				CancelCtx         context.Context
-				CancelFunc        context.CancelFunc
-				Logger            *zap.Logger
 				GoFunctionCounter GoFunctionCounter.IService
 				RxOptions         []rxgo.Option
 			},
@@ -60,9 +52,15 @@ func InvokeCompleteIncomingObservable() fx.Option {
 							//	}
 							//}
 							func(i interface{}) {
+								if params.CancelCtx.Err() != nil {
+									return
+								}
 								params.GoFunctionCounter.GoRun(
 									"ThreadSwitch to protect incoming channel",
 									func() {
+										if params.CancelCtx.Err() != nil {
+											return
+										}
 										params.ToReactorFunc(i)
 									},
 								)
