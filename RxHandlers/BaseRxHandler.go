@@ -9,8 +9,10 @@ import (
 
 type BaseRxHandler struct {
 	Logger               *zap.Logger
-	RwsMessageCount      int64
-	OtherMessageCount    int64
+	RwsMessageCountIn    int64
+	OtherMessageCountIn  int64
+	RwsMessageCountOut   int64
+	OtherMessageCountOut int64
 	RwsByteCountIn       int64
 	RwsByteCountOut      int64
 	Name                 string

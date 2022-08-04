@@ -82,12 +82,20 @@ func NewBaseConnectionReactor(
 	GoFunctionCounter GoFunctionCounter.IService,
 ) BaseConnectionReactor {
 	return BaseConnectionReactor{
-		CancelCtx:            cancelCtx,
-		CancelFunc:           cancelFunc,
-		ConnectionCancelFunc: connectionCancelFunc,
-		Logger:               logger,
-		UniqueReference:      uniqueReference,
-		PubSub:               PubSub,
-		GoFunctionCounter:    GoFunctionCounter,
+		CancelCtx: cancelCtx,
+		CancelFunc: func() {
+			go func() {
+				cancelFunc()
+			}()
+		},
+		ConnectionCancelFunc: func(context string, inbound bool, err error) {
+			go func() {
+				connectionCancelFunc(context, inbound, err)
+			}()
+		},
+		Logger:            logger,
+		UniqueReference:   uniqueReference,
+		PubSub:            PubSub,
+		GoFunctionCounter: GoFunctionCounter,
 	}
 }

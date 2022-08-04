@@ -8,11 +8,22 @@ import (
 type FlatMapHandlerResult struct {
 	UseDefaultPath bool
 	Items          []interface{}
-	MessageCount   int
+	RwsCount       int
+	OtherCount     int
 }
 
-func NewFlatMapHandlerResult(useDefaultPath bool, items []interface{}, messageCount int) FlatMapHandlerResult {
-	return FlatMapHandlerResult{UseDefaultPath: useDefaultPath, Items: items, MessageCount: messageCount}
+func NewFlatMapHandlerResult(
+	useDefaultPath bool,
+	items []interface{},
+	RwsCount int,
+	OtherCount int,
+) FlatMapHandlerResult {
+	return FlatMapHandlerResult{
+		UseDefaultPath: useDefaultPath,
+		Items:          items,
+		OtherCount:     OtherCount,
+		RwsCount:       RwsCount,
+	}
 }
 
 type IRxMapStackHandler interface {
