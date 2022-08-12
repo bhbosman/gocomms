@@ -2,6 +2,7 @@ package netBase
 
 import (
 	"context"
+	"github.com/bhbosman/goCommsDefinitions"
 	"github.com/bhbosman/goConnectionManager"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	"github.com/bhbosman/gocommon/Services/interfaces"
@@ -11,6 +12,7 @@ import (
 )
 
 type NetManager struct {
+	CancellationContext                      goCommsDefinitions.ICancellationContext
 	CancelCtx                                context.Context
 	ZapLogger                                *zap.Logger
 	ConnectionManager                        goConnectionManager.IService
@@ -31,6 +33,7 @@ func NewNetManager(
 	proxyUrl *url.URL,
 	connectionUrl *url.URL,
 	cancelCtx context.Context,
+	CancellationContext goCommsDefinitions.ICancellationContext,
 	connectionManager goConnectionManager.IService,
 	ZapLogger *zap.Logger,
 	uniqueSessionNumber interfaces.IUniqueReferenceService,
@@ -38,12 +41,13 @@ func NewNetManager(
 	GoFunctionCounter GoFunctionCounter.IService,
 ) (NetManager, error) {
 	return NetManager{
+		CancellationContext:                      CancellationContext,
 		CancelCtx:                                cancelCtx,
 		ZapLogger:                                ZapLogger,
 		ConnectionManager:                        connectionManager,
 		ConnectionUrl:                            connectionUrl,
-		ProxyUrl:                                 proxyUrl,
 		UseProxy:                                 useProxy,
+		ProxyUrl:                                 proxyUrl,
 		Name:                                     name,
 		ConnectionInstancePrefix:                 connectionInstancePrefix,
 		UniqueSessionNumber:                      uniqueSessionNumber,

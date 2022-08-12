@@ -23,10 +23,9 @@ import (
 )
 
 type ConnectionInstance struct {
-	ConnectionUrl       *url.URL
-	UniqueSessionNumber sss.IUniqueReferenceService
-	ConnectionManager   goConnectionManager.IService
-	//UserContext                              interface{}
+	ConnectionUrl                            *url.URL
+	UniqueSessionNumber                      sss.IUniqueReferenceService
+	ConnectionManager                        goConnectionManager.IService
 	CancelCtx                                context.Context
 	AdditionalFxOptionsForConnectionInstance func() fx.Option
 	ZapLogger                                *zap.Logger
@@ -36,16 +35,14 @@ func NewConnectionInstance(
 	connectionUrl *url.URL,
 	uniqueSessionNumber sss.IUniqueReferenceService,
 	connectionManager goConnectionManager.IService,
-	//userContext interface{},
 	cancelCtx context.Context,
 	additionalFxOptionsForConnectionInstance func() fx.Option,
 	zapLogger *zap.Logger,
 ) ConnectionInstance {
 	return ConnectionInstance{
-		ConnectionUrl:       connectionUrl,
-		UniqueSessionNumber: uniqueSessionNumber,
-		ConnectionManager:   connectionManager,
-		//UserContext:                              userContext,
+		ConnectionUrl:                            connectionUrl,
+		UniqueSessionNumber:                      uniqueSessionNumber,
+		ConnectionManager:                        connectionManager,
 		CancelCtx:                                cancelCtx,
 		AdditionalFxOptionsForConnectionInstance: additionalFxOptionsForConnectionInstance,
 		ZapLogger:                                zapLogger,
