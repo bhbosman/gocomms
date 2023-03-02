@@ -3,7 +3,7 @@ module github.com/bhbosman/gocomms
 go 1.18
 
 require (
-	github.com/bhbosman/goCommsDefinitions v0.0.0-20220801175552-c5aa68065af3
+	github.com/bhbosman/goCommsDefinitions v0.0.0-20230302063431-887458f90947
 	github.com/bhbosman/goConnectionManager v0.0.0-20220721070628-0f4b3c036d93
 	github.com/bhbosman/gocommon v0.0.0-20220718213201-2711fee77ae4
 	github.com/bhbosman/goerrors v0.0.0-20220623084908-4d7bbcd178cf
