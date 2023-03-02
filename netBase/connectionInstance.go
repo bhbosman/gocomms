@@ -79,7 +79,6 @@ func (self ConnectionInstance) NewReaderWriterCloserInstanceOptions(
 		internal.ProvideExtractPipeInStates("PipeInStates"),
 		internal.ProvideExtractPipeOutStates("PipeOutStates"),
 		internal.ProvideCreateStackData(),
-		//fx.Provide(fx.Annotated{Name: intf.UserContext, Target: func() interface{} { return self.UserContext }}),
 		fx.Provide(fx.Annotated{Name: intf.ConnectionId, Target: func() string { return uniqueReference }}),
 		fx.Provide(fx.Annotated{Target: func() GoFunctionCounter.IService { return goFunctionCounter }}),
 		goCommsDefinitions.ProvideCancelContextWithRwc(self.CancelCtx),

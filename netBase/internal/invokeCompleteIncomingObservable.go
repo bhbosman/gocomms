@@ -15,18 +15,18 @@ func InvokeCompleteIncomingObservable() fx.Option {
 	return fx.Invoke(
 		func(
 			params struct {
-				fx.In
-				Lifecycle         fx.Lifecycle
-				ClientContext     intf.IConnectionReactor
-				ToConnectionFunc  rxgo.NextFunc                   `name:"ToConnectionFunc"`
-				ToReactorFunc     rxgo.NextFunc                   `name:"ForReactor"`
-				Obs               rxgo.Observable                 `name:"QWERTY"`
-				TryNextFunc       goCommsDefinitions.TryNextFunc  `name:"QWERTY"`
-				IsNextActive      goCommsDefinitions.IsNextActive `name:"QWERTY"`
-				CancelCtx         context.Context
-				GoFunctionCounter GoFunctionCounter.IService
-				RxOptions         []rxgo.Option
-			},
+			fx.In
+			Lifecycle         fx.Lifecycle
+			ClientContext     intf.IConnectionReactor
+			ToConnectionFunc  rxgo.NextFunc                   `name:"ToConnectionFunc"`
+			ToReactorFunc     rxgo.NextFunc                   `name:"ForReactor"`
+			Obs               rxgo.Observable                 `name:"QWERTY"`
+			TryNextFunc       goCommsDefinitions.TryNextFunc  `name:"QWERTY"`
+			IsNextActive      goCommsDefinitions.IsNextActive `name:"QWERTY"`
+			CancelCtx         context.Context
+			GoFunctionCounter GoFunctionCounter.IService
+			RxOptions         []rxgo.Option
+		},
 		) {
 			params.Lifecycle.Append(
 				fx.Hook{
@@ -70,13 +70,17 @@ func InvokeCompleteIncomingObservable() fx.Option {
 						if err != nil {
 							return err
 						}
-						handler := goCommsDefinitions.NewDefaultRxNextHandler(
+						handler, err := goCommsDefinitions.NewDefaultRxNextHandler(
 							NextFunc,
 							params.TryNextFunc,
 							ErrFunc,
 							CompletedFunc,
 							params.IsNextActive,
 						)
+						if err != nil {
+							return err
+						}
+
 						rxOverride.ForEach2(
 							"InvokeCompleteIncomingObservable for Connection ID",
 							model.StreamDirectionUnknown,
