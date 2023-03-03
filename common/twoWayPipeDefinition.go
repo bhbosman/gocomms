@@ -17,9 +17,6 @@ func (self *twoWayPipeDefinition) AddStackDefinition(stack IStackDefinition) {
 	self.Stacks = append(
 		self.Stacks,
 		stack,
-		//&StackDefinitionIndex{
-		//	StackDefinition: stack,
-		//},
 	)
 }
 
@@ -62,7 +59,6 @@ func (self *twoWayPipeDefinition) BuildOutgoingObs(
 	stackDataMap map[string]*StackDataContainer,
 	cancelCtx context.Context,
 ) (*OutgoingObs, error) {
-
 	var err error
 	var obsOut gocommon.IObservable
 	obsOut, err = self.buildOutBoundObservables(stackDataMap, outBoundChannel, rxgo.WithContext(cancelCtx))
@@ -146,8 +142,6 @@ func (self *twoWayPipeDefinition) buildOutBoundObservables(
 	for i := 0; i < len(self.Stacks); i++ {
 		stack := self.Stacks[i].GetOutbound()
 		if stack != nil {
-			//var err error
-			//var boundResult boundResult
 			boundResultInstance, err := stack.GetBoundResult()
 			if boundResultInstance == nil {
 				return nil, goerrors.InvalidParam
