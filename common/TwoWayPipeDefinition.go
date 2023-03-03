@@ -9,34 +9,24 @@ import (
 	"strings"
 )
 
-type IStackDefinitionIndex interface {
-	GetStackDefinition() IStackDefinition
-}
-
-type StackDefinitionIndex struct {
-	StackDefinition IStackDefinition
-}
-
-func (self *StackDefinitionIndex) GetStackDefinition() IStackDefinition {
-	return self.StackDefinition
-}
-
 type TwoWayPipeDefinition struct {
-	Stacks []IStackDefinitionIndex
+	Stacks []IStackDefinition
 }
 
 func (self *TwoWayPipeDefinition) AddStackDefinition(stack IStackDefinition) {
 	self.Stacks = append(
 		self.Stacks,
-		&StackDefinitionIndex{
-			StackDefinition: stack,
-		})
+		stack,
+		//&StackDefinitionIndex{
+		//	StackDefinition: stack,
+		//},
+	)
 }
 
 func (self *TwoWayPipeDefinition) BuildStackState() ([]*StackState, error) {
 	var allStackState []*StackState
 	for _, item := range self.Stacks {
-		stackState := item.GetStackDefinition().GetStackState()
+		stackState := item.GetStackState()
 		if stackState == nil {
 			continue
 		}
@@ -89,7 +79,7 @@ func (self *TwoWayPipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, error
 		if currentStack == nil {
 			continue
 		}
-		stack := currentStack.GetStackDefinition().GetOutbound()
+		stack := currentStack.GetOutbound()
 		if stack == nil {
 			continue
 		}
@@ -153,7 +143,7 @@ func (self *TwoWayPipeDefinition) buildOutBoundObservables(
 		return nil
 	}
 	for i := 0; i < len(self.Stacks); i++ {
-		stack := self.Stacks[i].GetStackDefinition().GetOutbound()
+		stack := self.Stacks[i].GetOutbound()
 		if stack != nil {
 			//var err error
 			//var boundResult boundResult
@@ -167,7 +157,7 @@ func (self *TwoWayPipeDefinition) buildOutBoundObservables(
 			if err != nil {
 				return nil, err
 			}
-			err = handleStack(self.Stacks[i].GetStackDefinition().GetId(), stackBoundDefinition)
+			err = handleStack(self.Stacks[i].GetId(), stackBoundDefinition)
 			if err != nil {
 				return nil, err
 			}
@@ -184,7 +174,7 @@ func (self *TwoWayPipeDefinition) BuildInBoundPipeStates() ([]*PipeState, error)
 		if currentStack == nil {
 			continue
 		}
-		stack := currentStack.GetStackDefinition().GetInbound()
+		stack := currentStack.GetInbound()
 		if stack == nil {
 			continue
 		}
@@ -248,7 +238,7 @@ func (self *TwoWayPipeDefinition) buildInBoundPipesObservables(
 		return nil
 	}
 	for i := len(self.Stacks) - 1; i >= 0; i-- {
-		stack := self.Stacks[i].GetStackDefinition().GetInbound()
+		stack := self.Stacks[i].GetInbound()
 		if stack != nil {
 			var err error
 			var boundResultInstance BoundResult
@@ -262,7 +252,7 @@ func (self *TwoWayPipeDefinition) buildInBoundPipesObservables(
 			if err != nil {
 				return nil, err
 			}
-			err = handleStack(self.Stacks[i].GetStackDefinition().GetId(), stackBoundDefinition)
+			err = handleStack(self.Stacks[i].GetId(), stackBoundDefinition)
 			if err != nil {
 				return nil, err
 			}
