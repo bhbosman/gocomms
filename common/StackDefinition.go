@@ -12,13 +12,13 @@ func NewStackDefinition(
 	inbound IBoundResult,
 	outbound IBoundResult,
 	stackState *StackState,
-) *StackDefinition {
+) (*StackDefinition, error) {
 	return &StackDefinition{
 		Name:       name,
 		Inbound:    inbound,
 		Outbound:   outbound,
 		StackState: stackState,
-	}
+	}, nil
 }
 
 func (self *StackDefinition) GetId() string {
