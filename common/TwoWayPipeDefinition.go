@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"github.com/bhbosman/gocommon"
 	"github.com/bhbosman/goerrors"
 	"github.com/reactivex/rxgo/v2"
 	"strings"
@@ -54,7 +55,11 @@ func (self TwoWayPipeDefinition) BuildStackState() ([]*StackState, error) {
 	return allStackState, nil
 }
 
-func (self TwoWayPipeDefinition) BuildIncomingObs(inBoundChannel chan rxgo.Item, stackDataMap map[string]*StackDataContainer, cancelCtx context.Context) (*IncomingObs, error) {
+func (self TwoWayPipeDefinition) BuildIncomingObs(
+	inBoundChannel chan rxgo.Item,
+	stackDataMap map[string]*StackDataContainer,
+	cancelCtx context.Context,
+) (*IncomingObs, error) {
 	obsIn, err := self.buildInBoundPipesObservables(stackDataMap, inBoundChannel, rxgo.WithContext(cancelCtx))
 	if err != nil {
 		return nil, err
@@ -68,7 +73,7 @@ func (self TwoWayPipeDefinition) BuildOutgoingObs(
 	cancelCtx context.Context) (*OutgoingObs, error) {
 
 	var err error
-	var obsOut rxgo.Observable
+	var obsOut gocommon.IObservable
 	obsOut, err = self.buildOutBoundObservables(stackDataMap, outBoundChannel, rxgo.WithContext(cancelCtx))
 	if err != nil {
 		return nil, err
@@ -122,8 +127,12 @@ func (self *TwoWayPipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, error
 	return pipeStarts, nil
 }
 
-func (self *TwoWayPipeDefinition) buildOutBoundObservables(stackDataMap map[string]*StackDataContainer, outbound chan rxgo.Item, opts ...rxgo.Option) (rxgo.Observable, error) {
-	obs := rxgo.FromChannel(outbound, opts...)
+func (self *TwoWayPipeDefinition) buildOutBoundObservables(
+	stackDataMap map[string]*StackDataContainer,
+	outbound chan rxgo.Item,
+	opts ...rxgo.Option,
+) (gocommon.IObservable, error) {
+	var obs gocommon.IObservable = rxgo.FromChannel(outbound, opts...)
 
 	handleStack := func(id string, currentStack IStackBoundDefinition) error {
 		cb := currentStack.GetPipeDefinition()
@@ -213,8 +222,12 @@ func (self *TwoWayPipeDefinition) BuildInBoundPipeStates() ([]*PipeState, error)
 	return pipeStarts, nil
 }
 
-func (self *TwoWayPipeDefinition) buildInBoundPipesObservables(stackDataMap map[string]*StackDataContainer, inbound chan rxgo.Item, opts ...rxgo.Option) (rxgo.Observable, error) {
-	obs := rxgo.FromChannel(inbound, opts...)
+func (self *TwoWayPipeDefinition) buildInBoundPipesObservables(
+	stackDataMap map[string]*StackDataContainer,
+	inbound chan rxgo.Item,
+	opts ...rxgo.Option,
+) (gocommon.IObservable, error) {
+	var obs gocommon.IObservable = rxgo.FromChannel(inbound, opts...)
 
 	handleStack := func(id string, currentStack IStackBoundDefinition) error {
 		cb := currentStack.GetPipeDefinition()

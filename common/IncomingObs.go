@@ -1,14 +1,14 @@
 package common
 
 import (
-	"github.com/reactivex/rxgo/v2"
+	"github.com/bhbosman/gocommon"
 )
 
 type IncomingObs struct {
-	InboundObservable rxgo.Observable
+	InboundObservable gocommon.IObservable
 }
 
-func NewIncomingObs(inboundObservable rxgo.Observable) *IncomingObs {
+func NewIncomingObs(inboundObservable gocommon.IObservable) *IncomingObs {
 	return &IncomingObs{
 		InboundObservable: inboundObservable,
 	}
