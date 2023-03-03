@@ -13,7 +13,10 @@ func (self *stackBoundDefinition) GetPipeState() *PipeState {
 	return self.PipeState
 }
 
-func NewBoundDefinition(pipeDefinition PipeDefinition, pipeState *PipeState) IStackBoundDefinition {
+func NewBoundDefinition(
+	pipeDefinition PipeDefinition,
+	pipeState *PipeState,
+) IStackBoundDefinition {
 	return &stackBoundDefinition{
 		PipeDefinition: pipeDefinition,
 		PipeState:      pipeState,
