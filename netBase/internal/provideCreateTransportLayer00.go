@@ -11,7 +11,7 @@ func ProvideCreateTransportLayer00() fx.Option {
 			Target: func(
 				params struct {
 					fx.In
-					TwoWayPipeDefinition *common.TwoWayPipeDefinition
+					TwoWayPipeDefinition common.ITwoWayPipeDefinition
 				},
 			) ([]*common.StackState, error) {
 				return params.TwoWayPipeDefinition.BuildStackState()

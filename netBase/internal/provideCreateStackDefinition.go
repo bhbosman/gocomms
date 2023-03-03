@@ -24,7 +24,7 @@ func ProvideCreateStackDefinition() fx.Option {
 					TransportFactories   []*goCommsDefinitions.TransportFactory `group:"TransportFactory"`
 					StackFactories       []*common.StackDefinition              `group:"StackDefinition"`
 				},
-			) (*common.TwoWayPipeDefinition, error) {
+			) (common.ITwoWayPipeDefinition, error) {
 				params.Logger.Info("createStackDefinition...")
 				var factory *goCommsDefinitions.TransportFactory = nil
 				for _, item := range params.TransportFactories {

@@ -15,7 +15,7 @@ func ProvideCreateTransportLayer02Step01() fx.Option {
 				fx.In
 				Logger               *zap.Logger
 				CancelCtx            context.Context
-				TwoWayPipeDefinition *common.TwoWayPipeDefinition
+				TwoWayPipeDefinition common.ITwoWayPipeDefinition
 				StackData            map[string]*common.StackDataContainer
 				InBoundChannel       chan rxgo.Item `name:"InBoundChannel"`
 			},

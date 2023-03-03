@@ -13,7 +13,7 @@ func ProvideExtractPipeOutStates(name string) fx.Option {
 				params struct {
 					fx.In
 					LifeCycle            fx.Lifecycle
-					TwoWayPipeDefinition *common.TwoWayPipeDefinition
+					TwoWayPipeDefinition common.ITwoWayPipeDefinition
 				},
 			) ([]*common.PipeState, error) {
 				return params.TwoWayPipeDefinition.BuildOutBoundPipeStates()
