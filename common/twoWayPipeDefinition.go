@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/bhbosman/gocommon"
-	"github.com/bhbosman/goerrors"
 	"github.com/reactivex/rxgo/v2"
 	"strings"
 )
@@ -73,15 +72,7 @@ func (self *twoWayPipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, error
 		if stack == nil {
 			continue
 		}
-		boundResult, err := stack.GetBoundResult()
-		if err != nil {
-			return nil, err
-		}
-		if boundResult == nil {
-			continue
-		}
-		var stackBoundDefinition IStackBoundDefinition
-		stackBoundDefinition, err = boundResult()
+		stackBoundDefinition, err := stack()
 		if err != nil {
 			return nil, err
 		}
@@ -135,13 +126,7 @@ func (self *twoWayPipeDefinition) buildOutBoundObservables(
 	for i := 0; i < len(self.Stacks); i++ {
 		stack := self.Stacks[i].Outbound()
 		if stack != nil {
-			boundResultInstance, err := stack.GetBoundResult()
-			if boundResultInstance == nil {
-				return nil, goerrors.InvalidParam
-			}
-
-			var stackBoundDefinition IStackBoundDefinition
-			stackBoundDefinition, err = boundResultInstance()
+			stackBoundDefinition, err := stack()
 			if err != nil {
 				return nil, err
 			}
@@ -166,15 +151,7 @@ func (self *twoWayPipeDefinition) BuildInBoundPipeStates() ([]*PipeState, error)
 		if stack == nil {
 			continue
 		}
-		boundResult, err := stack.GetBoundResult()
-		if err != nil {
-			return nil, err
-		}
-		if boundResult == nil {
-			continue
-		}
-		var stackBoundDefinition IStackBoundDefinition
-		stackBoundDefinition, err = boundResult()
+		stackBoundDefinition, err := stack()
 		if err != nil {
 			return nil, err
 		}
@@ -228,15 +205,7 @@ func (self *twoWayPipeDefinition) buildInBoundPipesObservables(
 	for i := len(self.Stacks) - 1; i >= 0; i-- {
 		stack := self.Stacks[i].Inbound()
 		if stack != nil {
-			var err error
-			var boundResultInstance BoundResult
-			boundResultInstance, err = stack.GetBoundResult()
-			if boundResultInstance == nil {
-				return nil, goerrors.InvalidParam
-			}
-
-			var stackBoundDefinition IStackBoundDefinition
-			stackBoundDefinition, err = boundResultInstance()
+			stackBoundDefinition, err := stack()
 			if err != nil {
 				return nil, err
 			}

@@ -2,15 +2,15 @@ package common
 
 type stackDefinition struct {
 	name       string
-	inbound    IBoundResult
-	outbound   IBoundResult
+	inbound    BoundResult
+	outbound   BoundResult
 	stackState *StackState
 }
 
 func NewStackDefinition(
 	name string,
-	inbound IBoundResult,
-	outbound IBoundResult,
+	inbound BoundResult,
+	outbound BoundResult,
 	stackState *StackState,
 ) (IStackDefinition, error) {
 	return &stackDefinition{
@@ -25,11 +25,11 @@ func (self *stackDefinition) Name() string {
 	return self.name
 }
 
-func (self *stackDefinition) Inbound() IBoundResult {
+func (self *stackDefinition) Inbound() BoundResult {
 	return self.inbound
 }
 
-func (self *stackDefinition) Outbound() IBoundResult {
+func (self *stackDefinition) Outbound() BoundResult {
 	return self.outbound
 }
 
