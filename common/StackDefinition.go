@@ -1,7 +1,7 @@
 package common
 
 type StackDefinition struct {
-	name       string
+	Name       string
 	Inbound    IBoundResult
 	Outbound   IBoundResult
 	StackState *StackState
@@ -14,7 +14,7 @@ func NewStackDefinition(
 	stackState *StackState,
 ) (*StackDefinition, error) {
 	return &StackDefinition{
-		name:       name,
+		Name:       name,
 		Inbound:    inbound,
 		Outbound:   outbound,
 		StackState: stackState,
@@ -22,7 +22,7 @@ func NewStackDefinition(
 }
 
 func (self *StackDefinition) GetName() string {
-	return self.name
+	return self.Name
 }
 
 func (self *StackDefinition) GetInbound() IBoundResult {
