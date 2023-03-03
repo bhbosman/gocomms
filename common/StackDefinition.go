@@ -1,6 +1,6 @@
 package common
 
-type StackDefinition struct {
+type stackDefinition struct {
 	name       string
 	inbound    IBoundResult
 	outbound   IBoundResult
@@ -12,8 +12,8 @@ func NewStackDefinition(
 	inbound IBoundResult,
 	outbound IBoundResult,
 	stackState *StackState,
-) (*StackDefinition, error) {
-	return &StackDefinition{
+) (IStackDefinition, error) {
+	return &stackDefinition{
 		name:       name,
 		inbound:    inbound,
 		outbound:   outbound,
@@ -21,18 +21,18 @@ func NewStackDefinition(
 	}, nil
 }
 
-func (self *StackDefinition) GetName() string {
+func (self *stackDefinition) Name() string {
 	return self.name
 }
 
-func (self *StackDefinition) GetInbound() IBoundResult {
+func (self *stackDefinition) Inbound() IBoundResult {
 	return self.inbound
 }
 
-func (self *StackDefinition) GetOutbound() IBoundResult {
+func (self *stackDefinition) Outbound() IBoundResult {
 	return self.outbound
 }
 
-func (self *StackDefinition) GetStackState() *StackState {
+func (self *stackDefinition) StackState() *StackState {
 	return self.stackState
 }

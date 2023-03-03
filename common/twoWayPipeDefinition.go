@@ -23,7 +23,7 @@ func (self *twoWayPipeDefinition) AddStackDefinition(stack IStackDefinition) {
 func (self *twoWayPipeDefinition) BuildStackState() ([]*StackState, error) {
 	var allStackState []*StackState
 	for _, item := range self.Stacks {
-		stackState := item.GetStackState()
+		stackState := item.StackState()
 		if stackState == nil {
 			continue
 		}
@@ -76,7 +76,7 @@ func (self *twoWayPipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, error
 		if currentStack == nil {
 			continue
 		}
-		stack := currentStack.GetOutbound()
+		stack := currentStack.Outbound()
 		if stack == nil {
 			continue
 		}
@@ -140,7 +140,7 @@ func (self *twoWayPipeDefinition) buildOutBoundObservables(
 		return nil
 	}
 	for i := 0; i < len(self.Stacks); i++ {
-		stack := self.Stacks[i].GetOutbound()
+		stack := self.Stacks[i].Outbound()
 		if stack != nil {
 			boundResultInstance, err := stack.GetBoundResult()
 			if boundResultInstance == nil {
@@ -152,7 +152,7 @@ func (self *twoWayPipeDefinition) buildOutBoundObservables(
 			if err != nil {
 				return nil, err
 			}
-			err = handleStack(self.Stacks[i].GetName(), stackBoundDefinition)
+			err = handleStack(self.Stacks[i].Name(), stackBoundDefinition)
 			if err != nil {
 				return nil, err
 			}
@@ -169,7 +169,7 @@ func (self *twoWayPipeDefinition) BuildInBoundPipeStates() ([]*PipeState, error)
 		if currentStack == nil {
 			continue
 		}
-		stack := currentStack.GetInbound()
+		stack := currentStack.Inbound()
 		if stack == nil {
 			continue
 		}
@@ -233,7 +233,7 @@ func (self *twoWayPipeDefinition) buildInBoundPipesObservables(
 		return nil
 	}
 	for i := len(self.Stacks) - 1; i >= 0; i-- {
-		stack := self.Stacks[i].GetInbound()
+		stack := self.Stacks[i].Inbound()
 		if stack != nil {
 			var err error
 			var boundResultInstance BoundResult
@@ -247,7 +247,7 @@ func (self *twoWayPipeDefinition) buildInBoundPipesObservables(
 			if err != nil {
 				return nil, err
 			}
-			err = handleStack(self.Stacks[i].GetName(), stackBoundDefinition)
+			err = handleStack(self.Stacks[i].Name(), stackBoundDefinition)
 			if err != nil {
 				return nil, err
 			}

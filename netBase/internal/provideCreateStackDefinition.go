@@ -22,7 +22,7 @@ func ProvideCreateStackDefinition() fx.Option {
 					Logger               *zap.Logger
 					StackName            string                                 `name:"StackName"`
 					TransportFactories   []*goCommsDefinitions.TransportFactory `group:"TransportFactory"`
-					StackFactories       []*common.StackDefinition              `group:"StackDefinition"`
+					StackFactories       []common.IStackDefinition              `group:"StackDefinition"`
 				},
 			) (common.ITwoWayPipeDefinition, error) {
 				params.Logger.Info("createStackDefinition...")
@@ -34,9 +34,9 @@ func ProvideCreateStackDefinition() fx.Option {
 					}
 				}
 				if factory != nil {
-					dict := make(map[string]*common.StackDefinition)
+					dict := make(map[string]common.IStackDefinition)
 					for _, stackFactory := range params.StackFactories {
-						dict[stackFactory.GetName()] = stackFactory
+						dict[stackFactory.Name()] = stackFactory
 					}
 					var errList error = nil
 					for _, stackName := range factory.StackNames {
