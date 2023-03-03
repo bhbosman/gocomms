@@ -50,13 +50,13 @@ func ProvideCreateStackDefinition() fx.Option {
 						params.ConnectionCancelFunc("On stack creation", false, errList)
 						return nil, errList
 					}
-
-					result := common.NewTwoWayPipeDefinition()
+					var stacks []common.IStackDefinition
 					for _, stackName := range factory.StackNames {
 						if item, ok := dict[stackName]; ok {
-							result.AddStackDefinition(item)
+							stacks = append(stacks, item)
 						}
 					}
+					result := common.NewTwoWayPipeDefinition(stacks)
 					return result, nil
 				}
 				return nil, fmt.Errorf("connectionstack factory definition \"%v\", not found", params.StackName)

@@ -13,13 +13,6 @@ type twoWayPipeDefinition struct {
 	Stacks []IStackDefinition
 }
 
-func (self *twoWayPipeDefinition) AddStackDefinition(stack IStackDefinition) {
-	self.Stacks = append(
-		self.Stacks,
-		stack,
-	)
-}
-
 func (self *twoWayPipeDefinition) BuildStackState() ([]*StackState, error) {
 	var allStackState []*StackState
 	for _, item := range self.Stacks {
@@ -257,7 +250,6 @@ func (self *twoWayPipeDefinition) buildInBoundPipesObservables(
 }
 
 type ITwoWayPipeDefinition interface {
-	AddStackDefinition(stack IStackDefinition)
 	BuildStackState() ([]*StackState, error)
 	BuildIncomingObs(
 		inBoundChannel chan rxgo.Item,
@@ -273,6 +265,8 @@ type ITwoWayPipeDefinition interface {
 	BuildOutBoundPipeStates() ([]*PipeState, error)
 }
 
-func NewTwoWayPipeDefinition() ITwoWayPipeDefinition {
-	return &twoWayPipeDefinition{}
+func NewTwoWayPipeDefinition(stacks []IStackDefinition) ITwoWayPipeDefinition {
+	return &twoWayPipeDefinition{
+		Stacks: stacks,
+	}
 }
