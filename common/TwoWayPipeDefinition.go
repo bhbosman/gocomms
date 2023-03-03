@@ -33,7 +33,7 @@ func (self *TwoWayPipeDefinition) AddStackDefinition(stack IStackDefinition) {
 		})
 }
 
-func (self TwoWayPipeDefinition) BuildStackState() ([]*StackState, error) {
+func (self *TwoWayPipeDefinition) BuildStackState() ([]*StackState, error) {
 	var allStackState []*StackState
 	for _, item := range self.Stacks {
 		stackState := item.GetStackDefinition().GetStackState()
@@ -55,7 +55,7 @@ func (self TwoWayPipeDefinition) BuildStackState() ([]*StackState, error) {
 	return allStackState, nil
 }
 
-func (self TwoWayPipeDefinition) BuildIncomingObs(
+func (self *TwoWayPipeDefinition) BuildIncomingObs(
 	inBoundChannel chan rxgo.Item,
 	stackDataMap map[string]*StackDataContainer,
 	cancelCtx context.Context,
@@ -67,7 +67,7 @@ func (self TwoWayPipeDefinition) BuildIncomingObs(
 	return NewIncomingObs(obsIn), nil
 }
 
-func (self TwoWayPipeDefinition) BuildOutgoingObs(
+func (self *TwoWayPipeDefinition) BuildOutgoingObs(
 	outBoundChannel chan rxgo.Item,
 	stackDataMap map[string]*StackDataContainer,
 	cancelCtx context.Context) (*OutgoingObs, error) {
