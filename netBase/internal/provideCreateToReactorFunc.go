@@ -14,10 +14,7 @@ func ProvideCreateToReactorFunc(name string) fx.Option {
 				params struct {
 					fx.In
 					CancelCtx context.Context
-					//GoFunctionCounter GoFunctionCounter.IService
-					NextFunc rxgo.NextFunc `name:"QWERTY"`
-					//ErrFunc           rxgo.ErrFunc       `name:"QWERTY"`
-					//CompletedFunc     rxgo.CompletedFunc `name:"QWERTY"`
+					NextFunc  rxgo.NextFunc `name:"QWERTY"`
 				},
 
 			) rxgo.NextFunc {
