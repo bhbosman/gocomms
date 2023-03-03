@@ -8,7 +8,12 @@ import (
 )
 
 type IPipeCreateData interface{}
-type PipeDefinition func(stackData IStackCreateData, pipeData IPipeCreateData, obs rxgo.Observable) (rxgo.Observable, error)
+
+type IObservable interface {
+	rxgo.Observable
+}
+
+type PipeDefinition func(stackData IStackCreateData, pipeData IPipeCreateData, obs IObservable) (rxgo.Observable, error)
 
 type PipeCreate func(stackData IStackCreateData, ctx context.Context) (interface{}, error)
 type PipeDestroy func(stackData IStackCreateData, pipeData IPipeCreateData) error
