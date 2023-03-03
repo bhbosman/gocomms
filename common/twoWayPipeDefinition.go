@@ -152,7 +152,7 @@ func (self *twoWayPipeDefinition) buildOutBoundObservables(
 			if err != nil {
 				return nil, err
 			}
-			err = handleStack(self.Stacks[i].GetId(), stackBoundDefinition)
+			err = handleStack(self.Stacks[i].GetName(), stackBoundDefinition)
 			if err != nil {
 				return nil, err
 			}
@@ -247,7 +247,7 @@ func (self *twoWayPipeDefinition) buildInBoundPipesObservables(
 			if err != nil {
 				return nil, err
 			}
-			err = handleStack(self.Stacks[i].GetId(), stackBoundDefinition)
+			err = handleStack(self.Stacks[i].GetName(), stackBoundDefinition)
 			if err != nil {
 				return nil, err
 			}
