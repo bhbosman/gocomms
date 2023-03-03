@@ -36,7 +36,7 @@ func ProvideCreateStackDefinition() fx.Option {
 				if factory != nil {
 					dict := make(map[string]*common.StackDefinition)
 					for _, stackFactory := range params.StackFactories {
-						dict[stackFactory.Name] = stackFactory
+						dict[stackFactory.GetName()] = stackFactory
 					}
 					var errList error = nil
 					for _, stackName := range factory.StackNames {
