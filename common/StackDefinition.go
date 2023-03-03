@@ -7,6 +7,20 @@ type StackDefinition struct {
 	StackState *StackState
 }
 
+func NewStackDefinition(
+	name string,
+	inbound IBoundResult,
+	outbound IBoundResult,
+	stackState *StackState,
+) *StackDefinition {
+	return &StackDefinition{
+		Name:       name,
+		Inbound:    inbound,
+		Outbound:   outbound,
+		StackState: stackState,
+	}
+}
+
 func (self *StackDefinition) GetId() string {
 	return self.Name
 }
