@@ -66,7 +66,6 @@ func ProvideCreateStackDefinition() fx.Option {
 								}
 							}
 							return result
-
 						}())
 
 					outboundPipeDefinition := common.NewOutboundPipeDefinition(
