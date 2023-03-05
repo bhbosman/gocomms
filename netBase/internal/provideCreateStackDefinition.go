@@ -16,14 +16,14 @@ func ProvideCreateStackDefinition() fx.Option {
 		fx.Annotated{
 			Target: func(
 				params struct {
-					fx.In
-					CancelFunc           context.CancelFunc
-					ConnectionCancelFunc model.ConnectionCancelFunc
-					Logger               *zap.Logger
-					StackName            string                                 `name:"StackName"`
-					TransportFactories   []*goCommsDefinitions.TransportFactory `group:"TransportFactory"`
-					StackFactories       []common.IStackDefinition              `group:"StackDefinition"`
-				},
+				fx.In
+				CancelFunc           context.CancelFunc
+				ConnectionCancelFunc model.ConnectionCancelFunc
+				Logger               *zap.Logger
+				StackName            string                                 `name:"StackName"`
+				TransportFactories   []*goCommsDefinitions.TransportFactory `group:"TransportFactory"`
+				StackFactories       []common.IStackDefinition              `group:"StackDefinition"`
+			},
 			) (common.ITwoWayPipeDefinition, common.IInboundPipeDefinition, common.IOutboundPipeDefinition, error) {
 				params.Logger.Info("createStackDefinition...")
 				var factory *goCommsDefinitions.TransportFactory = nil
@@ -50,18 +50,19 @@ func ProvideCreateStackDefinition() fx.Option {
 						params.ConnectionCancelFunc("On stack creation", false, errList)
 						return nil, nil, nil, errList
 					}
-					result := common.NewTwoWayPipeDefinition(
-						func() []common.IStackDefinition {
-							var stacks []common.IStackDefinition
-							for _, stackName := range factory.StackNames {
-								if item, ok := dict[stackName]; ok {
-									stacks = append(stacks, item)
-								}
-							}
-							return stacks
-						}(),
-					)
-					return result, nil, nil, nil
+
+					var stacks []common.IStackDefinition
+					for _, stackName := range factory.StackNames {
+						if item, ok := dict[stackName]; ok {
+							stacks = append(stacks, item)
+						}
+					}
+					twoWayPipeDefinition, err := common.NewTwoWayPipeDefinition(stacks)
+					if err != nil {
+						return nil, nil, nil, err
+					}
+
+					return twoWayPipeDefinition, nil, nil, nil
 				}
 				return nil, nil, nil, fmt.Errorf("connectionstack factory definition \"%v\", not found", params.StackName)
 			},

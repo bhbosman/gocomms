@@ -12,6 +12,10 @@ type outboundPipeDefinition struct {
 	stacks []IStackDefinition
 }
 
+func NewOutboundPipeDefinition(stacks []IStackDefinition) IOutboundPipeDefinition {
+	return &outboundPipeDefinition{stacks: stacks}
+}
+
 func (self *outboundPipeDefinition) BuildOutgoingObs(
 	outBoundChannel chan rxgo.Item,
 	stackDataMap map[string]*StackDataContainer,
