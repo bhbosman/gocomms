@@ -8,11 +8,16 @@ import (
 	"strings"
 )
 
-type inboundPipeDefinition struct {
-	stacks []IStackDefinition
+type IInboundData interface {
+	Name() string
+	Inbound() BoundResult
 }
 
-func NewInboundPipeDefinition(stacks []IStackDefinition) IInboundPipeDefinition {
+type inboundPipeDefinition struct {
+	stacks []IInboundData
+}
+
+func NewInboundPipeDefinition(stacks []IInboundData) IInboundPipeDefinition {
 	return &inboundPipeDefinition{stacks: stacks}
 }
 

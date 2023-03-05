@@ -57,7 +57,18 @@ func ProvideCreateStackDefinition() fx.Option {
 							stacks = append(stacks, item)
 						}
 					}
-					inboundPipeDefinition := common.NewInboundPipeDefinition(stacks)
+					inboundPipeDefinition := common.NewInboundPipeDefinition(
+						func() []common.IInboundData {
+							var result []common.IInboundData
+							for _, stackName := range factory.StackNames {
+								if item, ok := dict[stackName]; ok {
+									result = append(result, item)
+								}
+							}
+							return result
+
+						}())
+
 					outboundPipeDefinition := common.NewOutboundPipeDefinition(stacks)
 					twoWayPipeDefinition, err := common.NewTwoWayPipeDefinition(
 						stacks,
