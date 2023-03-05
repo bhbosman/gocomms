@@ -218,20 +218,28 @@ func (self *twoWayPipeDefinition) buildInBoundPipesObservables(
 	return obs, nil
 }
 
-type ITwoWayPipeDefinition interface {
-	BuildStackState() ([]*StackState, error)
+type IInboundPipeDefinition interface {
+	BuildOutBoundPipeStates() ([]*PipeState, error)
 	BuildIncomingObs(
 		inBoundChannel chan rxgo.Item,
 		stackDataMap map[string]*StackDataContainer,
 		cancelCtx context.Context,
 	) (*IncomingObs, error)
+}
+
+type IOutboundPipeDefinition interface {
+	BuildInBoundPipeStates() ([]*PipeState, error)
 	BuildOutgoingObs(
 		outBoundChannel chan rxgo.Item,
 		stackDataMap map[string]*StackDataContainer,
 		cancelCtx context.Context,
 	) (*OutgoingObs, error)
-	BuildInBoundPipeStates() ([]*PipeState, error)
-	BuildOutBoundPipeStates() ([]*PipeState, error)
+}
+
+type ITwoWayPipeDefinition interface {
+	IOutboundPipeDefinition
+	IInboundPipeDefinition
+	BuildStackState() ([]*StackState, error)
 }
 
 func NewTwoWayPipeDefinition(stacks []IStackDefinition) ITwoWayPipeDefinition {
