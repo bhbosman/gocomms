@@ -8,8 +8,15 @@ import (
 	"strings"
 )
 
+type outboundPipeDefinition struct {
+}
+type inboundPipeDefinition struct {
+}
+
 type twoWayPipeDefinition struct {
-	Stacks []IStackDefinition
+	outboundPipeDefinition outboundPipeDefinition
+	inboundPipeDefinition  inboundPipeDefinition
+	Stacks                 []IStackDefinition
 }
 
 func (self *twoWayPipeDefinition) BuildStackState() ([]*StackState, error) {
@@ -244,6 +251,8 @@ type ITwoWayPipeDefinition interface {
 
 func NewTwoWayPipeDefinition(stacks []IStackDefinition) ITwoWayPipeDefinition {
 	return &twoWayPipeDefinition{
-		Stacks: stacks,
+		outboundPipeDefinition: outboundPipeDefinition{},
+		inboundPipeDefinition:  inboundPipeDefinition{},
+		Stacks:                 stacks,
 	}
 }
