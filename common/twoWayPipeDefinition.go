@@ -16,12 +16,12 @@ type inboundPipeDefinition struct {
 type twoWayPipeDefinition struct {
 	outboundPipeDefinition outboundPipeDefinition
 	inboundPipeDefinition  inboundPipeDefinition
-	Stacks                 []IStackDefinition
+	stacks                 []IStackDefinition
 }
 
 func (self *twoWayPipeDefinition) BuildStackState() ([]*StackState, error) {
 	var allStackState []*StackState
-	for _, item := range self.Stacks {
+	for _, item := range self.stacks {
 		stackState := item.StackState()
 		if stackState == nil {
 			continue
@@ -71,7 +71,7 @@ func (self *twoWayPipeDefinition) BuildOutgoingObs(
 func (self *twoWayPipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, error) {
 	var pipeStarts []*PipeState
 
-	for _, currentStack := range self.Stacks {
+	for _, currentStack := range self.stacks {
 		if currentStack == nil {
 			continue
 		}
@@ -130,14 +130,14 @@ func (self *twoWayPipeDefinition) buildOutBoundObservables(
 		}
 		return nil
 	}
-	for i := 0; i < len(self.Stacks); i++ {
-		stack := self.Stacks[i].Outbound()
+	for i := 0; i < len(self.stacks); i++ {
+		stack := self.stacks[i].Outbound()
 		if stack != nil {
 			stackBoundDefinition, err := stack()
 			if err != nil {
 				return nil, err
 			}
-			err = handleStack(self.Stacks[i].Name(), stackBoundDefinition)
+			err = handleStack(self.stacks[i].Name(), stackBoundDefinition)
 			if err != nil {
 				return nil, err
 			}
@@ -150,7 +150,7 @@ func (self *twoWayPipeDefinition) buildOutBoundObservables(
 func (self *twoWayPipeDefinition) BuildInBoundPipeStates() ([]*PipeState, error) {
 	var pipeStarts []*PipeState
 
-	for _, currentStack := range self.Stacks {
+	for _, currentStack := range self.stacks {
 		if currentStack == nil {
 			continue
 		}
@@ -209,14 +209,14 @@ func (self *twoWayPipeDefinition) buildInBoundPipesObservables(
 		}
 		return nil
 	}
-	for i := len(self.Stacks) - 1; i >= 0; i-- {
-		stack := self.Stacks[i].Inbound()
+	for i := len(self.stacks) - 1; i >= 0; i-- {
+		stack := self.stacks[i].Inbound()
 		if stack != nil {
 			stackBoundDefinition, err := stack()
 			if err != nil {
 				return nil, err
 			}
-			err = handleStack(self.Stacks[i].Name(), stackBoundDefinition)
+			err = handleStack(self.stacks[i].Name(), stackBoundDefinition)
 			if err != nil {
 				return nil, err
 			}
@@ -253,6 +253,6 @@ func NewTwoWayPipeDefinition(stacks []IStackDefinition) ITwoWayPipeDefinition {
 	return &twoWayPipeDefinition{
 		outboundPipeDefinition: outboundPipeDefinition{},
 		inboundPipeDefinition:  inboundPipeDefinition{},
-		Stacks:                 stacks,
+		stacks:                 stacks,
 	}
 }
