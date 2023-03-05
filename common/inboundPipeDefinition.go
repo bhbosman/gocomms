@@ -56,11 +56,11 @@ func (self *inboundPipeDefinition) buildInBoundPipesObservables(
 	for i := len(self.stacks) - 1; i >= 0; i-- {
 		stack := self.stacks[i].Inbound()
 		if stack != nil {
-			stackBoundDefinition, err := stack()
+			definition, err := stack()
 			if err != nil {
 				return nil, err
 			}
-			err = handleStack(self.stacks[i].Name(), stackBoundDefinition)
+			err = handleStack(self.stacks[i].Name(), definition)
 			if err != nil {
 				return nil, err
 			}
