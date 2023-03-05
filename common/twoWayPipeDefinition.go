@@ -84,10 +84,14 @@ func (self *twoWayPipeDefinition) BuildInBoundPipeStates() ([]*PipeState, error)
 	return self.inboundPipeDefinition.BuildInBoundPipeStates()
 }
 
-func NewTwoWayPipeDefinition(stacks []IStackDefinition) (ITwoWayPipeDefinition, error) {
+func NewTwoWayPipeDefinition(
+	stacks []IStackDefinition,
+	outboundPipeDefinition IOutboundPipeDefinition,
+	inboundPipeDefinition IInboundPipeDefinition,
+) (ITwoWayPipeDefinition, error) {
 	return &twoWayPipeDefinition{
-		outboundPipeDefinition: NewOutboundPipeDefinition(stacks),
-		inboundPipeDefinition:  NewInboundPipeDefinition(stacks),
+		outboundPipeDefinition: outboundPipeDefinition,
+		inboundPipeDefinition:  inboundPipeDefinition,
 		stacks:                 stacks,
 	}, nil
 }
