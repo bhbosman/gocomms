@@ -16,14 +16,14 @@ func ProvideCreateStackDefinition() fx.Option {
 		fx.Annotated{
 			Target: func(
 				params struct {
-				fx.In
-				CancelFunc           context.CancelFunc
-				ConnectionCancelFunc model.ConnectionCancelFunc
-				Logger               *zap.Logger
-				StackName            string                                 `name:"StackName"`
-				TransportFactories   []*goCommsDefinitions.TransportFactory `group:"TransportFactory"`
-				StackFactories       []common.IStackDefinition              `group:"StackDefinition"`
-			},
+					fx.In
+					CancelFunc           context.CancelFunc
+					ConnectionCancelFunc model.ConnectionCancelFunc
+					Logger               *zap.Logger
+					StackName            string                                 `name:"StackName"`
+					TransportFactories   []*goCommsDefinitions.TransportFactory `group:"TransportFactory"`
+					StackFactories       []common.IStackDefinition              `group:"StackDefinition"`
+				},
 			) (common.ITwoWayPipeDefinition, common.IInboundPipeDefinition, common.IOutboundPipeDefinition, error) {
 				params.Logger.Info("createStackDefinition...")
 				var factory *goCommsDefinitions.TransportFactory = nil
@@ -67,7 +67,7 @@ func ProvideCreateStackDefinition() fx.Option {
 						return nil, nil, nil, err
 					}
 
-					return twoWayPipeDefinition, nil, nil, nil
+					return twoWayPipeDefinition, inboundPipeDefinition, outboundPipeDefinition, nil
 				}
 				return nil, nil, nil, fmt.Errorf("connectionstack factory definition \"%v\", not found", params.StackName)
 			},
