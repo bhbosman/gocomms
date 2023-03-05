@@ -9,8 +9,10 @@ import (
 )
 
 type outboundPipeDefinition struct {
+	stacks []IStackDefinition
 }
 type inboundPipeDefinition struct {
+	stacks []IStackDefinition
 }
 
 type twoWayPipeDefinition struct {
@@ -41,7 +43,7 @@ func (self *twoWayPipeDefinition) BuildStackState() ([]*StackState, error) {
 	return allStackState, nil
 }
 
-func (self *twoWayPipeDefinition) BuildIncomingObs(
+func (self *inboundPipeDefinition) BuildIncomingObs(
 	inBoundChannel chan rxgo.Item,
 	stackDataMap map[string]*StackDataContainer,
 	cancelCtx context.Context,
@@ -51,6 +53,14 @@ func (self *twoWayPipeDefinition) BuildIncomingObs(
 		return nil, err
 	}
 	return NewIncomingObs(obsIn), nil
+}
+
+func (self *twoWayPipeDefinition) BuildIncomingObs(
+	inBoundChannel chan rxgo.Item,
+	stackDataMap map[string]*StackDataContainer,
+	cancelCtx context.Context,
+) (*IncomingObs, error) {
+	return self.inboundPipeDefinition.BuildIncomingObs(inBoundChannel, stackDataMap, cancelCtx)
 }
 
 func (self *twoWayPipeDefinition) BuildOutgoingObs(
@@ -184,7 +194,7 @@ func (self *twoWayPipeDefinition) BuildInBoundPipeStates() ([]*PipeState, error)
 	return pipeStarts, nil
 }
 
-func (self *twoWayPipeDefinition) buildInBoundPipesObservables(
+func (self *inboundPipeDefinition) buildInBoundPipesObservables(
 	stackDataMap map[string]*StackDataContainer,
 	inbound chan rxgo.Item,
 	opts ...rxgo.Option,
@@ -251,8 +261,12 @@ type ITwoWayPipeDefinition interface {
 
 func NewTwoWayPipeDefinition(stacks []IStackDefinition) ITwoWayPipeDefinition {
 	return &twoWayPipeDefinition{
-		outboundPipeDefinition: outboundPipeDefinition{},
-		inboundPipeDefinition:  inboundPipeDefinition{},
-		stacks:                 stacks,
+		outboundPipeDefinition: outboundPipeDefinition{
+			stacks: stacks,
+		},
+		inboundPipeDefinition: inboundPipeDefinition{
+			stacks: stacks,
+		},
+		stacks: stacks,
 	}
 }
