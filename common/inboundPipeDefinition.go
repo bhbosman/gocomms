@@ -1,9 +1,11 @@
 package common
 
 import (
+	"fmt"
 	"github.com/bhbosman/gocommon"
 	"github.com/reactivex/rxgo/v2"
 	"golang.org/x/net/context"
+	"strings"
 )
 
 type inboundPipeDefinition struct {
@@ -61,4 +63,41 @@ func (self *inboundPipeDefinition) buildInBoundPipesObservables(
 		}
 	}
 	return obs, nil
+}
+
+func (self *inboundPipeDefinition) BuildInBoundPipeStates() ([]*PipeState, error) {
+	var pipeStarts []*PipeState
+
+	for _, currentStack := range self.stacks {
+		if currentStack == nil {
+			continue
+		}
+		stack := currentStack.Inbound()
+		if stack == nil {
+			continue
+		}
+		stackBoundDefinition, err := stack()
+		if err != nil {
+			return nil, err
+		}
+		if stackBoundDefinition == nil {
+			continue
+		}
+		pipeState := stackBoundDefinition.GetPipeState()
+		if pipeState == nil {
+			continue
+		}
+		b := true
+		b = b && (0 != strings.Compare("", pipeState.ID))
+		b = b && (pipeState.Create != nil)
+		b = b && (pipeState.Destroy != nil)
+		b = b && (pipeState.Start != nil)
+		b = b && (pipeState.End != nil)
+		if !b {
+			return nil, fmt.Errorf("pipestate must be complete in full")
+		}
+
+		pipeStarts = append(pipeStarts, pipeState)
+	}
+	return pipeStarts, nil
 }

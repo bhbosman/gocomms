@@ -7,9 +7,34 @@ import (
 	"strings"
 )
 
+type IInboundPipeDefinition interface {
+	BuildInBoundPipeStates() ([]*PipeState, error)
+	BuildIncomingObs(
+		inBoundChannel chan rxgo.Item,
+		stackDataMap map[string]*StackDataContainer,
+		cancelCtx context.Context,
+	) (*IncomingObs, error)
+}
+
+type IOutboundPipeDefinition interface {
+	BuildOutBoundPipeStates() ([]*PipeState, error)
+	BuildOutgoingObs(
+		outBoundChannel chan rxgo.Item,
+		stackDataMap map[string]*StackDataContainer,
+		cancelCtx context.Context,
+	) (*OutgoingObs, error)
+}
+
+type ITwoWayPipeDefinition interface {
+	IOutboundPipeDefinition
+	IInboundPipeDefinition
+
+	BuildStackState() ([]*StackState, error)
+}
+
 type twoWayPipeDefinition struct {
-	outboundPipeDefinition outboundPipeDefinition
-	inboundPipeDefinition  inboundPipeDefinition
+	outboundPipeDefinition IOutboundPipeDefinition
+	inboundPipeDefinition  IInboundPipeDefinition
 	stacks                 []IStackDefinition
 }
 
@@ -35,6 +60,10 @@ func (self *twoWayPipeDefinition) BuildStackState() ([]*StackState, error) {
 	return allStackState, nil
 }
 
+func (self *twoWayPipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, error) {
+	return self.outboundPipeDefinition.BuildOutBoundPipeStates()
+}
+
 func (self *twoWayPipeDefinition) BuildIncomingObs(
 	inBoundChannel chan rxgo.Item,
 	stackDataMap map[string]*StackDataContainer,
@@ -51,110 +80,16 @@ func (self *twoWayPipeDefinition) BuildOutgoingObs(
 	return self.outboundPipeDefinition.BuildOutgoingObs(outBoundChannel, stackDataMap, cancelCtx)
 }
 
-func (self *twoWayPipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, error) {
-	var pipeStarts []*PipeState
-
-	for _, currentStack := range self.stacks {
-		if currentStack == nil {
-			continue
-		}
-		stack := currentStack.Outbound()
-		if stack == nil {
-			continue
-		}
-		stackBoundDefinition, err := stack()
-		if err != nil {
-			return nil, err
-		}
-		if stackBoundDefinition == nil {
-			continue
-		}
-		pipeState := stackBoundDefinition.GetPipeState()
-		if pipeState == nil {
-			continue
-		}
-		b := true
-		b = b && (0 != strings.Compare("", pipeState.ID))
-		b = b && (pipeState.Create != nil)
-		b = b && (pipeState.Destroy != nil)
-		b = b && (pipeState.Start != nil)
-		b = b && (pipeState.End != nil)
-		if !b {
-			return nil, fmt.Errorf("stackstate must be complete in full")
-		}
-		pipeStarts = append(pipeStarts, pipeState)
-	}
-
-	return pipeStarts, nil
-}
-
 func (self *twoWayPipeDefinition) BuildInBoundPipeStates() ([]*PipeState, error) {
-	var pipeStarts []*PipeState
-
-	for _, currentStack := range self.stacks {
-		if currentStack == nil {
-			continue
-		}
-		stack := currentStack.Inbound()
-		if stack == nil {
-			continue
-		}
-		stackBoundDefinition, err := stack()
-		if err != nil {
-			return nil, err
-		}
-		if stackBoundDefinition == nil {
-			continue
-		}
-		pipeState := stackBoundDefinition.GetPipeState()
-		if pipeState == nil {
-			continue
-		}
-		b := true
-		b = b && (0 != strings.Compare("", pipeState.ID))
-		b = b && (pipeState.Create != nil)
-		b = b && (pipeState.Destroy != nil)
-		b = b && (pipeState.Start != nil)
-		b = b && (pipeState.End != nil)
-		if !b {
-			return nil, fmt.Errorf("pipestate must be complete in full")
-		}
-
-		pipeStarts = append(pipeStarts, pipeState)
-	}
-	return pipeStarts, nil
-}
-
-type IInboundPipeDefinition interface {
-	BuildOutBoundPipeStates() ([]*PipeState, error)
-	BuildIncomingObs(
-		inBoundChannel chan rxgo.Item,
-		stackDataMap map[string]*StackDataContainer,
-		cancelCtx context.Context,
-	) (*IncomingObs, error)
-}
-
-type IOutboundPipeDefinition interface {
-	BuildInBoundPipeStates() ([]*PipeState, error)
-	BuildOutgoingObs(
-		outBoundChannel chan rxgo.Item,
-		stackDataMap map[string]*StackDataContainer,
-		cancelCtx context.Context,
-	) (*OutgoingObs, error)
-}
-
-type ITwoWayPipeDefinition interface {
-	IOutboundPipeDefinition
-	IInboundPipeDefinition
-	BuildStackState() ([]*StackState, error)
+	return self.inboundPipeDefinition.BuildInBoundPipeStates()
 }
 
 func NewTwoWayPipeDefinition(stacks []IStackDefinition) ITwoWayPipeDefinition {
 	return &twoWayPipeDefinition{
-		outboundPipeDefinition: outboundPipeDefinition{
+		outboundPipeDefinition: &outboundPipeDefinition{
 			stacks: stacks,
 		},
-		inboundPipeDefinition: inboundPipeDefinition{
+		inboundPipeDefinition: &inboundPipeDefinition{
 			stacks: stacks,
 		},
 		stacks: stacks,
