@@ -27,7 +27,7 @@ type IOutboundPipeDefinition interface {
 
 type ITwoWayPipeDefinition interface {
 	//IOutboundPipeDefinition
-	IInboundPipeDefinition
+	//IInboundPipeDefinition
 
 	BuildStackState() ([]*StackState, error)
 }

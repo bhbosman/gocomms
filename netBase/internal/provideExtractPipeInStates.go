@@ -12,11 +12,11 @@ func ProvideExtractPipeInStates(name string) fx.Option {
 			Target: func(
 				params struct {
 					fx.In
-					LifeCycle            fx.Lifecycle
-					TwoWayPipeDefinition common.ITwoWayPipeDefinition
+					LifeCycle             fx.Lifecycle
+					InboundPipeDefinition common.IInboundPipeDefinition
 				},
 			) ([]*common.PipeState, error) {
-				return params.TwoWayPipeDefinition.BuildInBoundPipeStates()
+				return params.InboundPipeDefinition.BuildInBoundPipeStates()
 			},
 		},
 	)

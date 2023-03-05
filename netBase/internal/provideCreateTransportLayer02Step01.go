@@ -13,16 +13,16 @@ func ProvideCreateTransportLayer02Step01() fx.Option {
 		func(
 			params struct {
 				fx.In
-				Logger               *zap.Logger
-				CancelCtx            context.Context
-				TwoWayPipeDefinition common.ITwoWayPipeDefinition
-				StackData            map[string]*common.StackDataContainer
-				InBoundChannel       chan rxgo.Item `name:"InBoundChannel"`
+				Logger                *zap.Logger
+				CancelCtx             context.Context
+				InboundPipeDefinition common.IInboundPipeDefinition
+				StackData             map[string]*common.StackDataContainer
+				InBoundChannel        chan rxgo.Item `name:"InBoundChannel"`
 			},
 		) (*common.IncomingObs, error) {
 			params.Logger.Info("createTransportLayer...")
 
-			result, err := params.TwoWayPipeDefinition.BuildIncomingObs(
+			result, err := params.InboundPipeDefinition.BuildIncomingObs(
 				params.InBoundChannel,
 				params.StackData,
 				params.CancelCtx,
