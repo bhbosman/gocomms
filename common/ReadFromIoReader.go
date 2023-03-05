@@ -10,7 +10,6 @@ import (
 const BufferSize = 4096
 
 func ReadFromIoReader(
-	context string,
 	reader io.Reader,
 	CancelCtx context.Context,
 	cancelFunc context.CancelFunc,
