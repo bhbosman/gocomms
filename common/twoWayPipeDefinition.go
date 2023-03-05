@@ -52,7 +52,6 @@ func (self *twoWayPipeDefinition) BuildStackState() ([]*StackState, error) {
 			return nil, fmt.Errorf("stackstate must be complete in full")
 		}
 		allStackState = append(allStackState, stackState)
-
 	}
 	return allStackState, nil
 }
