@@ -13,6 +13,23 @@ type IOutboundData interface {
 	Outbound() BoundResult
 }
 
+type outboundData struct {
+	name     string
+	outbound BoundResult
+}
+
+func (self *outboundData) Name() string {
+	return self.name
+}
+
+func (self *outboundData) Outbound() BoundResult {
+	return self.outbound
+}
+
+func NewOutboundData(name string, outbound BoundResult) IOutboundData {
+	return &outboundData{name: name, outbound: outbound}
+}
+
 type outboundPipeDefinition struct {
 	stacks []IOutboundData
 }
