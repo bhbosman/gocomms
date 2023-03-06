@@ -68,7 +68,7 @@ func ProvideCreateStackDefinition() fx.Option {
 								result = append(result,
 									common.NewBoundData(
 										item.Name(),
-										item.Inbound(),
+										item.OnInbound(),
 									),
 								)
 							}
@@ -86,7 +86,7 @@ func ProvideCreateStackDefinition() fx.Option {
 								result = append(result,
 									common.NewBoundData(
 										item.Name(),
-										item.Outbound(),
+										item.OnOutbound(),
 									),
 								)
 							}

@@ -2,7 +2,7 @@ package common
 
 type IStackDefinition interface {
 	Name() string
-	Inbound() BoundResult
-	Outbound() BoundResult
+	OnInbound() BoundResult
+	OnOutbound() BoundResult
 	StackState() IStackState
 }
