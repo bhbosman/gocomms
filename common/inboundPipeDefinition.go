@@ -17,10 +17,6 @@ type inboundPipeDefinition struct {
 	stacks []IInboundData
 }
 
-func NewInboundPipeDefinition(stacks []IInboundData) IInboundPipeDefinition {
-	return &inboundPipeDefinition{stacks: stacks}
-}
-
 func (self *inboundPipeDefinition) BuildIncomingObs(
 	inBoundChannel chan rxgo.Item,
 	stackDataMap map[string]*StackDataContainer,
@@ -109,4 +105,17 @@ func (self *inboundPipeDefinition) BuildInBoundPipeStates() ([]*PipeState, error
 		pipeStarts = append(pipeStarts, pipeState)
 	}
 	return pipeStarts, nil
+}
+
+type IInboundPipeDefinition interface {
+	BuildInBoundPipeStates() ([]*PipeState, error)
+	BuildIncomingObs(
+		inBoundChannel chan rxgo.Item,
+		stackDataMap map[string]*StackDataContainer,
+		cancelCtx context.Context,
+	) (*IncomingObs, error)
+}
+
+func NewInboundPipeDefinition(stacks []IInboundData) IInboundPipeDefinition {
+	return &inboundPipeDefinition{stacks: stacks}
 }
