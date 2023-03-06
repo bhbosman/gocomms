@@ -16,7 +16,7 @@ func ProvideExtractPipeOutStates(name string) fx.Option {
 					OutboundPipeDefinition common.IPipeDefinition `name:"Outbound"`
 				},
 			) ([]*common.PipeState, error) {
-				return params.OutboundPipeDefinition.BuildOutBoundPipeStates()
+				return params.OutboundPipeDefinition.BuildPipeStates()
 			},
 		},
 	)

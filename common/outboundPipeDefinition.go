@@ -76,7 +76,7 @@ func (self *pipeDefinition) buildOutBoundObservables(
 	return obs, nil
 }
 
-func (self *pipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, error) {
+func (self *pipeDefinition) BuildPipeStates() ([]*PipeState, error) {
 	var pipeStarts []*PipeState
 
 	for _, currentStack := range self.stacks {
@@ -114,7 +114,7 @@ func (self *pipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, error) {
 }
 
 type IPipeDefinition interface {
-	BuildOutBoundPipeStates() ([]*PipeState, error)
+	BuildPipeStates() ([]*PipeState, error)
 	BuildObs(
 		outBoundChannel chan rxgo.Item,
 		stackDataMap map[string]*StackDataContainer,
