@@ -17,10 +17,6 @@ type outboundPipeDefinition struct {
 	stacks []IOutboundData
 }
 
-func NewOutboundPipeDefinition(stacks []IOutboundData) IOutboundPipeDefinition {
-	return &outboundPipeDefinition{stacks: stacks}
-}
-
 func (self *outboundPipeDefinition) BuildOutgoingObs(
 	outBoundChannel chan rxgo.Item,
 	stackDataMap map[string]*StackDataContainer,
@@ -113,4 +109,17 @@ func (self *outboundPipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, err
 	}
 
 	return pipeStarts, nil
+}
+
+type IOutboundPipeDefinition interface {
+	BuildOutBoundPipeStates() ([]*PipeState, error)
+	BuildOutgoingObs(
+		outBoundChannel chan rxgo.Item,
+		stackDataMap map[string]*StackDataContainer,
+		cancelCtx context.Context,
+	) (*OutgoingObs, error)
+}
+
+func NewOutboundPipeDefinition(stacks []IOutboundData) IOutboundPipeDefinition {
+	return &outboundPipeDefinition{stacks: stacks}
 }
