@@ -52,12 +52,6 @@ func ProvideCreateStackDefinition() fx.Option {
 						return nil, nil, nil, errList
 					}
 
-					var stacks []common.IStackDefinition
-					for _, stackName := range factory.StackNames {
-						if item, ok := dict[stackName]; ok {
-							stacks = append(stacks, item)
-						}
-					}
 					inboundPipeDefinition := common.NewInboundPipeDefinition(
 						func() []common.IInboundData {
 							var result []common.IInboundData
@@ -78,11 +72,16 @@ func ProvideCreateStackDefinition() fx.Option {
 								}
 							}
 							return result
-
 						}())
 
-					BuildStackState := func() ([]common.IStackState, error) {
+					stackState, err := func() ([]common.IStackState, error) {
 						var allStackState []common.IStackState
+						var stacks []common.IStackDefinition
+						for _, stackName := range factory.StackNames {
+							if item, ok := dict[stackName]; ok {
+								stacks = append(stacks, item)
+							}
+						}
 						for _, item := range stacks {
 							stackState := item.StackState()
 							if stackState == nil {
@@ -100,9 +99,7 @@ func ProvideCreateStackDefinition() fx.Option {
 							allStackState = append(allStackState, stackState)
 						}
 						return allStackState, nil
-					}
-
-					stackState, err := BuildStackState()
+					}()
 					if err != nil {
 						return nil, nil, nil, err
 					}
