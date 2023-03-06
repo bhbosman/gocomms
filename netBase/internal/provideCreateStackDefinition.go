@@ -82,8 +82,7 @@ func ProvideCreateStackDefinition() fx.Option {
 
 					twoWayPipeDefinition, err := common.NewTwoWayPipeDefinition(
 						stacks,
-						outboundPipeDefinition,
-						inboundPipeDefinition)
+					)
 					if err != nil {
 						return nil, nil, nil, err
 					}
