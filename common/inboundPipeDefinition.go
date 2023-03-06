@@ -8,28 +8,6 @@ import (
 	"strings"
 )
 
-//type IInboundData interface {
-//	Name() string
-//	Inbound() BoundResult
-//}
-//
-//type inboundData struct {
-//	name    string
-//	inbound BoundResult
-//}
-//
-//func (self *inboundData) Name() string {
-//	return self.name
-//}
-//
-//func (self *inboundData) Inbound() BoundResult {
-//	return self.inbound
-//}
-//
-//func NewInboundData(name string, inbound BoundResult) IInboundData {
-//	return &inboundData{name: name, inbound: inbound}
-//}
-
 type inboundPipeDefinition struct {
 	stacks []IBoundData
 }
