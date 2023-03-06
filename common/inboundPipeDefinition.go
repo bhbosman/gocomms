@@ -54,19 +54,33 @@ func (self *inboundPipeDefinition) buildInBoundPipesObservables(
 		}
 		return nil
 	}
-	for i := len(self.stacks) - 1; i >= 0; i-- {
+	for i := 0; i < len(self.stacks); i++ {
 		stack := self.stacks[i].Inbound()
 		if stack != nil {
-			definition, err := stack()
+			stackBoundDefinition, err := stack()
 			if err != nil {
 				return nil, err
 			}
-			err = handleStack(self.stacks[i].Name(), definition)
+			err = handleStack(self.stacks[i].Name(), stackBoundDefinition)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
+
+	//for i := len(self.stacks) - 1; i >= 0; i-- {
+	//	stack := self.stacks[i].Inbound()
+	//	if stack != nil {
+	//		definition, err := stack()
+	//		if err != nil {
+	//			return nil, err
+	//		}
+	//		err = handleStack(self.stacks[i].Name(), definition)
+	//		if err != nil {
+	//			return nil, err
+	//		}
+	//	}
+	//}
 	return obs, nil
 }
 
