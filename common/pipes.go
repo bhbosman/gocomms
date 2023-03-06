@@ -40,6 +40,24 @@ type StackState struct {
 	Stop        StackStopState
 }
 
+func NewStackState(
+	id string,
+	hijackStack bool,
+	create StackCreate,
+	destroy StackDestroy,
+	start StackStartState,
+	stop StackStopState,
+) *StackState {
+	return &StackState{
+		Id:          id,
+		HijackStack: hijackStack,
+		Create:      create,
+		Destroy:     destroy,
+		Start:       start,
+		Stop:        stop,
+	}
+}
+
 type StackDataContainer struct {
 	StackData   IStackCreateData
 	InPipeData  interface{}
