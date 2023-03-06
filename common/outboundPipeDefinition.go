@@ -85,14 +85,14 @@ func (self *pipeDefinition) BuildPipeStates() ([]*PipeState, error) {
 		if stack == nil {
 			continue
 		}
-		stackBoundDefinition, err := stack()
+		sbd, err := stack()
 		if err != nil {
 			return nil, err
 		}
-		if stackBoundDefinition == nil {
+		if sbd == nil {
 			continue
 		}
-		pipeState := stackBoundDefinition.GetPipeState()
+		pipeState := sbd.GetPipeState()
 		if pipeState == nil {
 			continue
 		}
