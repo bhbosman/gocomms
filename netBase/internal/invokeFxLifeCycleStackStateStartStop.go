@@ -85,7 +85,7 @@ func InvokeFxLifeCycleStackStateStartStop() fx.Option {
 								if container, ok := params.StackData[localStackState.Id]; ok {
 									stackData = container.StackData
 								}
-								return localStackState.Stop(stackData, common.NewStackEndStateParams())
+								return localStackState.Stop(stackData)
 							}
 							return nil
 						},
