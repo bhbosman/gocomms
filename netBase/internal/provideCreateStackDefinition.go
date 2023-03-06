@@ -24,7 +24,7 @@ func ProvideCreateStackDefinition() fx.Option {
 					TransportFactories   []*goCommsDefinitions.TransportFactory `group:"TransportFactory"`
 					StackFactories       []common.IStackDefinition              `group:"StackDefinition"`
 				},
-			) (common.ITwoWayPipeDefinition, common.IInboundPipeDefinition, common.IOutboundPipeDefinition, error) {
+			) ([]common.IStackState, common.ITwoWayPipeDefinition, common.IInboundPipeDefinition, common.IOutboundPipeDefinition, error) {
 				params.Logger.Info("createStackDefinition...")
 				var factory *goCommsDefinitions.TransportFactory = nil
 				for _, item := range params.TransportFactories {
@@ -48,7 +48,7 @@ func ProvideCreateStackDefinition() fx.Option {
 					if errList != nil {
 						params.CancelFunc()
 						params.ConnectionCancelFunc("On stack creation", false, errList)
-						return nil, nil, nil, errList
+						return nil, nil, nil, nil, errList
 					}
 
 					var stacks []common.IStackDefinition
@@ -84,12 +84,17 @@ func ProvideCreateStackDefinition() fx.Option {
 						stacks,
 					)
 					if err != nil {
-						return nil, nil, nil, err
+						return nil, nil, nil, nil, err
 					}
 
-					return twoWayPipeDefinition, inboundPipeDefinition, outboundPipeDefinition, nil
+					stackState, err := twoWayPipeDefinition.BuildStackState()
+					if err != nil {
+						return nil, nil, nil, nil, err
+					}
+
+					return stackState, twoWayPipeDefinition, inboundPipeDefinition, outboundPipeDefinition, nil
 				}
-				return nil, nil, nil, fmt.Errorf("connectionstack factory definition \"%v\", not found", params.StackName)
+				return nil, nil, nil, nil, fmt.Errorf("connectionstack factory definition \"%v\", not found", params.StackName)
 			},
 		},
 	)

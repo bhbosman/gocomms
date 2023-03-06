@@ -84,7 +84,7 @@ func (self ConnectionInstance) NewReaderWriterCloserInstanceOptions(
 		goCommsDefinitions.ProvideCancelContextWithRwc(self.CancelCtx),
 		self.AdditionalFxOptionsForConnectionInstance(),
 		internal.ProvideRxOptions(),
-		internal.ProvideCreateTransportLayer00(),
+		//internal.ProvideCreateTransportLayer00(),
 		internal.ProvideCreateStackDefinition(),
 		internal.ProvideCreateStackCancelFunc(),
 		internal.ProvideChannel("InBoundChannel"),
