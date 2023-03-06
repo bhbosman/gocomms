@@ -202,9 +202,9 @@ func (mr *MockIStackDefinitionMockRecorder) OnOutboundReturn(ret0 BoundResult) *
 // defaultArgsAsString:
 // argTypes: []
 // argString:
-// rets: [*StackState]
-// retString: *StackState
-// retString:  *StackState
+// rets: [IStackState]
+// retString: IStackState
+// retString:  IStackState
 // ia: map[]
 // idRecv: mr
 // 0
@@ -224,8 +224,8 @@ func (mr *MockIStackDefinitionMockRecorder) OnStackStateDo(
 }
 
 // retNames: [ret0]
-// retArgs: [ret0 *StackState]
-// retArgs22: ret0 *StackState
+// retArgs: [ret0 IStackState]
+// retArgs22: ret0 IStackState
 // 1
 func (mr *MockIStackDefinitionMockRecorder) OnStackStateReturn(ret0 IStackState) *gomock.Call {
 	return mr.
