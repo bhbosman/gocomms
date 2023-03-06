@@ -33,20 +33,6 @@ func (m *MockIStackDefinition) EXPECT() *MockIStackDefinitionMockRecorder {
 	return m.recorder
 }
 
-// Inbound mocks base method.
-func (m *MockIStackDefinition) Inbound() BoundResult {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Inbound")
-	ret0, _ := ret[0].(BoundResult)
-	return ret0
-}
-
-// Inbound indicates an expected call of Inbound.
-func (mr *MockIStackDefinitionMockRecorder) Inbound() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Inbound", reflect.TypeOf((*MockIStackDefinition)(nil).Inbound))
-}
-
 // Name mocks base method.
 func (m *MockIStackDefinition) Name() string {
 	m.ctrl.T.Helper()
@@ -61,18 +47,32 @@ func (mr *MockIStackDefinitionMockRecorder) Name() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockIStackDefinition)(nil).Name))
 }
 
-// Outbound mocks base method.
-func (m *MockIStackDefinition) Outbound() BoundResult {
+// OnInbound mocks base method.
+func (m *MockIStackDefinition) OnInbound() BoundResult {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Outbound")
+	ret := m.ctrl.Call(m, "OnInbound")
 	ret0, _ := ret[0].(BoundResult)
 	return ret0
 }
 
-// Outbound indicates an expected call of Outbound.
-func (mr *MockIStackDefinitionMockRecorder) Outbound() *gomock.Call {
+// OnInbound indicates an expected call of OnInbound.
+func (mr *MockIStackDefinitionMockRecorder) OnInbound() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Outbound", reflect.TypeOf((*MockIStackDefinition)(nil).Outbound))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnInbound", reflect.TypeOf((*MockIStackDefinition)(nil).OnInbound))
+}
+
+// OnOutbound mocks base method.
+func (m *MockIStackDefinition) OnOutbound() BoundResult {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OnOutbound")
+	ret0, _ := ret[0].(BoundResult)
+	return ret0
+}
+
+// OnOutbound indicates an expected call of OnOutbound.
+func (mr *MockIStackDefinitionMockRecorder) OnOutbound() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnOutbound", reflect.TypeOf((*MockIStackDefinition)(nil).OnOutbound))
 }
 
 // StackState mocks base method.
@@ -87,42 +87,6 @@ func (m *MockIStackDefinition) StackState() IStackState {
 func (mr *MockIStackDefinitionMockRecorder) StackState() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StackState", reflect.TypeOf((*MockIStackDefinition)(nil).StackState))
-}
-
-// argNames: []
-// defaultArgs: []
-// defaultArgsAsString:
-// argTypes: []
-// argString:
-// rets: [BoundResult]
-// retString: BoundResult
-// retString:  BoundResult
-// ia: map[]
-// idRecv: mr
-// 0
-func (mr *MockIStackDefinitionMockRecorder) OnInboundDoAndReturn(
-	f func() BoundResult) *gomock.Call {
-	return mr.
-		Inbound().
-		DoAndReturn(f)
-}
-
-// 0
-func (mr *MockIStackDefinitionMockRecorder) OnInboundDo(
-	f func()) *gomock.Call {
-	return mr.
-		Inbound().
-		DoAndReturn(f)
-}
-
-// retNames: [ret0]
-// retArgs: [ret0 BoundResult]
-// retArgs22: ret0 BoundResult
-// 1
-func (mr *MockIStackDefinitionMockRecorder) OnInboundReturn(ret0 BoundResult) *gomock.Call {
-	return mr.
-		Inbound().
-		Return(ret0)
 }
 
 // argNames: []
@@ -172,18 +136,18 @@ func (mr *MockIStackDefinitionMockRecorder) OnNameReturn(ret0 string) *gomock.Ca
 // ia: map[]
 // idRecv: mr
 // 0
-func (mr *MockIStackDefinitionMockRecorder) OnOutboundDoAndReturn(
+func (mr *MockIStackDefinitionMockRecorder) OnOnInboundDoAndReturn(
 	f func() BoundResult) *gomock.Call {
 	return mr.
-		Outbound().
+		OnInbound().
 		DoAndReturn(f)
 }
 
 // 0
-func (mr *MockIStackDefinitionMockRecorder) OnOutboundDo(
+func (mr *MockIStackDefinitionMockRecorder) OnOnInboundDo(
 	f func()) *gomock.Call {
 	return mr.
-		Outbound().
+		OnInbound().
 		DoAndReturn(f)
 }
 
@@ -191,9 +155,45 @@ func (mr *MockIStackDefinitionMockRecorder) OnOutboundDo(
 // retArgs: [ret0 BoundResult]
 // retArgs22: ret0 BoundResult
 // 1
-func (mr *MockIStackDefinitionMockRecorder) OnOutboundReturn(ret0 BoundResult) *gomock.Call {
+func (mr *MockIStackDefinitionMockRecorder) OnOnInboundReturn(ret0 BoundResult) *gomock.Call {
 	return mr.
-		Outbound().
+		OnInbound().
+		Return(ret0)
+}
+
+// argNames: []
+// defaultArgs: []
+// defaultArgsAsString:
+// argTypes: []
+// argString:
+// rets: [BoundResult]
+// retString: BoundResult
+// retString:  BoundResult
+// ia: map[]
+// idRecv: mr
+// 0
+func (mr *MockIStackDefinitionMockRecorder) OnOnOutboundDoAndReturn(
+	f func() BoundResult) *gomock.Call {
+	return mr.
+		OnOutbound().
+		DoAndReturn(f)
+}
+
+// 0
+func (mr *MockIStackDefinitionMockRecorder) OnOnOutboundDo(
+	f func()) *gomock.Call {
+	return mr.
+		OnOutbound().
+		DoAndReturn(f)
+}
+
+// retNames: [ret0]
+// retArgs: [ret0 BoundResult]
+// retArgs22: ret0 BoundResult
+// 1
+func (mr *MockIStackDefinitionMockRecorder) OnOnOutboundReturn(ret0 BoundResult) *gomock.Call {
+	return mr.
+		OnOutbound().
 		Return(ret0)
 }
 
