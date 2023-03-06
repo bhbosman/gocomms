@@ -8,12 +8,12 @@ import (
 	"strings"
 )
 
-type outboundPipeDefinition struct {
+type pipeDefinition struct {
 	stacks     []IBoundData
 	isOutBound bool
 }
 
-func (self *outboundPipeDefinition) BuildOutgoingObs(
+func (self *pipeDefinition) BuildObs(
 	outBoundChannel chan rxgo.Item,
 	stackDataMap map[string]*StackDataContainer,
 	cancelCtx context.Context,
@@ -28,7 +28,7 @@ func (self *outboundPipeDefinition) BuildOutgoingObs(
 	return obsOut, nil
 }
 
-func (self *outboundPipeDefinition) buildOutBoundObservables(
+func (self *pipeDefinition) buildOutBoundObservables(
 	stackDataMap map[string]*StackDataContainer,
 	outbound chan rxgo.Item,
 	opts ...rxgo.Option,
@@ -76,7 +76,7 @@ func (self *outboundPipeDefinition) buildOutBoundObservables(
 	return obs, nil
 }
 
-func (self *outboundPipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, error) {
+func (self *pipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, error) {
 	var pipeStarts []*PipeState
 
 	for _, currentStack := range self.stacks {
@@ -115,7 +115,7 @@ func (self *outboundPipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, err
 
 type IPipeDefinition interface {
 	BuildOutBoundPipeStates() ([]*PipeState, error)
-	BuildOutgoingObs(
+	BuildObs(
 		outBoundChannel chan rxgo.Item,
 		stackDataMap map[string]*StackDataContainer,
 		cancelCtx context.Context,
@@ -123,7 +123,7 @@ type IPipeDefinition interface {
 }
 
 func NewPipeDefinition(stacks []IBoundData, isOutBound bool) IPipeDefinition {
-	return &outboundPipeDefinition{
+	return &pipeDefinition{
 		stacks:     stacks,
 		isOutBound: isOutBound,
 	}
