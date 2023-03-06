@@ -60,13 +60,13 @@ func ProvideCreateStackDefinition() fx.Option {
 				}
 
 				inboundPipeDefinition := common.NewInboundPipeDefinition(
-					func() []common.IInboundData {
-						var result []common.IInboundData
+					func() []common.IBoundData {
+						var result []common.IBoundData
 						for i := len(factory.StackNames) - 1; i >= 0; i-- {
 							stackName := factory.StackNames[i]
 							if item, ok := dict[stackName]; ok {
 								result = append(result,
-									common.NewInboundData(
+									common.NewBoundData(
 										item.Name(),
 										item.Inbound(),
 									),

@@ -8,30 +8,30 @@ import (
 	"strings"
 )
 
-type IInboundData interface {
-	Name() string
-	Inbound() BoundResult
-}
-
-type inboundData struct {
-	name    string
-	inbound BoundResult
-}
-
-func (self *inboundData) Name() string {
-	return self.name
-}
-
-func (self *inboundData) Inbound() BoundResult {
-	return self.inbound
-}
-
-func NewInboundData(name string, inbound BoundResult) IInboundData {
-	return &inboundData{name: name, inbound: inbound}
-}
+//type IInboundData interface {
+//	Name() string
+//	Inbound() BoundResult
+//}
+//
+//type inboundData struct {
+//	name    string
+//	inbound BoundResult
+//}
+//
+//func (self *inboundData) Name() string {
+//	return self.name
+//}
+//
+//func (self *inboundData) Inbound() BoundResult {
+//	return self.inbound
+//}
+//
+//func NewInboundData(name string, inbound BoundResult) IInboundData {
+//	return &inboundData{name: name, inbound: inbound}
+//}
 
 type inboundPipeDefinition struct {
-	stacks []IInboundData
+	stacks []IBoundData
 }
 
 func (self *inboundPipeDefinition) BuildIncomingObs(
@@ -72,7 +72,7 @@ func (self *inboundPipeDefinition) buildInBoundPipesObservables(
 		return nil
 	}
 	for i := 0; i < len(self.stacks); i++ {
-		stack := self.stacks[i].Inbound()
+		stack := self.stacks[i].Bound()
 		if stack != nil {
 			stackBoundDefinition, err := stack()
 			if err != nil {
@@ -94,7 +94,7 @@ func (self *inboundPipeDefinition) BuildInBoundPipeStates() ([]*PipeState, error
 		if currentStack == nil {
 			continue
 		}
-		stack := currentStack.Inbound()
+		stack := currentStack.Bound()
 		if stack == nil {
 			continue
 		}
@@ -133,6 +133,6 @@ type IInboundPipeDefinition interface {
 	) (gocommon.IObservable, error)
 }
 
-func NewInboundPipeDefinition(stacks []IInboundData) IInboundPipeDefinition {
+func NewInboundPipeDefinition(stacks []IBoundData) IInboundPipeDefinition {
 	return &inboundPipeDefinition{stacks: stacks}
 }
