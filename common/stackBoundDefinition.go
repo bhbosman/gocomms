@@ -16,7 +16,7 @@ func (self *stackBoundDefinition) GetPipeState() *PipeState {
 func NewStackBoundDefinition(
 	pipeDefinition PipeDefinition,
 	pipeState *PipeState,
-) IStackBoundDefinition {
+) IStackBoundFactory {
 	return &stackBoundDefinition{
 		PipeDefinition: pipeDefinition,
 		PipeState:      pipeState,

@@ -35,7 +35,7 @@ func (self *pipeDefinition) buildBoundObservables(
 ) (gocommon.IObservable, error) {
 	var obs gocommon.IObservable = rxgo.FromChannel(outbound, opts...)
 
-	handleStack := func(id string, currentStack IStackBoundDefinition) error {
+	handleStack := func(id string, currentStack IStackBoundFactory) error {
 		cb := currentStack.GetPipeDefinition()
 		if cb != nil {
 			var err error
