@@ -9,7 +9,8 @@ import (
 )
 
 type outboundPipeDefinition struct {
-	stacks []IBoundData
+	stacks     []IBoundData
+	isOutBound bool
 }
 
 func (self *outboundPipeDefinition) BuildOutgoingObs(
@@ -42,7 +43,13 @@ func (self *outboundPipeDefinition) buildOutBoundObservables(
 			var pipeData interface{} = nil
 			if containerData, ok := stackDataMap[id]; ok {
 				stackData = containerData.StackData
-				pipeData = containerData.OutPipeData
+				pipeData = func(isOutBound bool) interface{} {
+					if isOutBound {
+
+						return containerData.OutPipeData
+					}
+					return containerData.InPipeData
+				}(self.isOutBound)
 			}
 
 			obs, err = cb(stackData, pipeData, obs)
@@ -115,6 +122,9 @@ type IPipeDefinition interface {
 	) (gocommon.IObservable, error)
 }
 
-func NewPipeDefinition(stacks []IBoundData) IPipeDefinition {
-	return &outboundPipeDefinition{stacks: stacks}
+func NewPipeDefinition(stacks []IBoundData, isOutBound bool) IPipeDefinition {
+	return &outboundPipeDefinition{
+		stacks:     stacks,
+		isOutBound: isOutBound,
+	}
 }

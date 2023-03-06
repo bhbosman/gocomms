@@ -15,7 +15,7 @@ import (
 type CreateStackDefinition struct {
 	fx.Out
 	StackState             []common.IStackState
-	InboundPipeDefinition  common.IInboundPipeDefinition
+	InboundPipeDefinition  common.IPipeDefinition `name:"Inbound"`
 	OutboundPipeDefinition common.IPipeDefinition `name:"Outbound"`
 }
 
@@ -59,7 +59,7 @@ func ProvideCreateStackDefinition() fx.Option {
 					return CreateStackDefinition{}, errList
 				}
 
-				inboundPipeDefinition := common.NewInboundPipeDefinition(
+				inboundPipeDefinition := common.NewPipeDefinition(
 					func() []common.IBoundData {
 						var result []common.IBoundData
 						for i := len(factory.StackNames) - 1; i >= 0; i-- {
@@ -74,7 +74,9 @@ func ProvideCreateStackDefinition() fx.Option {
 							}
 						}
 						return result
-					}())
+					}(),
+					false,
+				)
 
 				outboundPipeDefinition := common.NewPipeDefinition(
 					func() []common.IBoundData {
@@ -90,7 +92,9 @@ func ProvideCreateStackDefinition() fx.Option {
 							}
 						}
 						return result
-					}())
+					}(),
+					true,
+				)
 
 				stackState, err := func() ([]common.IStackState, error) {
 					var allStackState []common.IStackState
