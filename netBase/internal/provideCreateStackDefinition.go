@@ -77,12 +77,12 @@ func ProvideCreateStackDefinition() fx.Option {
 					}())
 
 				outboundPipeDefinition := common.NewPipeDefinition(
-					func() []common.IOutboundData {
-						var result []common.IOutboundData
+					func() []common.IBoundData {
+						var result []common.IBoundData
 						for _, stackName := range factory.StackNames {
 							if item, ok := dict[stackName]; ok {
 								result = append(result,
-									common.NewOutboundData(
+									common.NewBoundData(
 										item.Name(),
 										item.Outbound(),
 									),

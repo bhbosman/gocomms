@@ -8,9 +8,9 @@ import (
 	"strings"
 )
 
-type IOutboundData interface {
+type IBoundData interface {
 	Name() string
-	Outbound() BoundResult
+	Bound() BoundResult
 }
 
 type outboundData struct {
@@ -22,16 +22,16 @@ func (self *outboundData) Name() string {
 	return self.name
 }
 
-func (self *outboundData) Outbound() BoundResult {
+func (self *outboundData) Bound() BoundResult {
 	return self.outbound
 }
 
-func NewOutboundData(name string, outbound BoundResult) IOutboundData {
+func NewBoundData(name string, outbound BoundResult) IBoundData {
 	return &outboundData{name: name, outbound: outbound}
 }
 
 type outboundPipeDefinition struct {
-	stacks []IOutboundData
+	stacks []IBoundData
 }
 
 func (self *outboundPipeDefinition) BuildOutgoingObs(
@@ -75,7 +75,7 @@ func (self *outboundPipeDefinition) buildOutBoundObservables(
 		return nil
 	}
 	for i := 0; i < len(self.stacks); i++ {
-		stack := self.stacks[i].Outbound()
+		stack := self.stacks[i].Bound()
 		if stack != nil {
 			stackBoundDefinition, err := stack()
 			if err != nil {
@@ -98,7 +98,7 @@ func (self *outboundPipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, err
 		if currentStack == nil {
 			continue
 		}
-		stack := currentStack.Outbound()
+		stack := currentStack.Bound()
 		if stack == nil {
 			continue
 		}
@@ -137,6 +137,6 @@ type IPipeDefinition interface {
 	) (gocommon.IObservable, error)
 }
 
-func NewPipeDefinition(stacks []IOutboundData) IPipeDefinition {
+func NewPipeDefinition(stacks []IBoundData) IPipeDefinition {
 	return &outboundPipeDefinition{stacks: stacks}
 }
