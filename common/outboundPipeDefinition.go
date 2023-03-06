@@ -29,7 +29,7 @@ func (self *outboundPipeDefinition) BuildOutgoingObs(
 		return nil, err
 	}
 
-	return NewOutgoingObs(obsOut, cancelCtx), nil
+	return NewOutgoingObs(obsOut), nil
 }
 
 func (self *outboundPipeDefinition) buildOutBoundObservables(
