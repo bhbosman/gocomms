@@ -43,15 +43,14 @@ func (self *pipeDefinition) buildOutBoundObservables(
 			var pipeData interface{} = nil
 			if containerData, ok := stackDataMap[id]; ok {
 				stackData = containerData.StackData
-				pipeData = func(isOutBound bool) interface{} {
-					if isOutBound {
-
-						return containerData.OutPipeData
-					}
-					return containerData.InPipeData
-				}(self.isOutBound)
+				pipeData =
+					func(isOutBound bool) interface{} {
+						if isOutBound {
+							return containerData.OutPipeData
+						}
+						return containerData.InPipeData
+					}(self.isOutBound)
 			}
-
 			obs, err = cb(stackData, pipeData, obs)
 			if err != nil {
 				return err
@@ -62,17 +61,16 @@ func (self *pipeDefinition) buildOutBoundObservables(
 	for i := 0; i < len(self.stacks); i++ {
 		stack := self.stacks[i].Bound()
 		if stack != nil {
-			stackBoundDefinition, err := stack()
+			sbd, err := stack()
 			if err != nil {
 				return nil, err
 			}
-			err = handleStack(self.stacks[i].Name(), stackBoundDefinition)
+			err = handleStack(self.stacks[i].Name(), sbd)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
-
 	return obs, nil
 }
 
