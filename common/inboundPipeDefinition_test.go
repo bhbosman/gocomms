@@ -18,6 +18,6 @@ func TestCurrentBehaviorWithNoDefinedStacks(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
-	obs.InboundObservable.Observe()
+	obs.Observe()
 
 }

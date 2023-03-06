@@ -3,9 +3,9 @@ package internal
 import (
 	"fmt"
 	"github.com/bhbosman/goCommsDefinitions"
+	"github.com/bhbosman/gocommon"
 	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/gocomms/RxHandlers"
-	"github.com/bhbosman/gocomms/common"
 	"github.com/reactivex/rxgo/v2"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -19,7 +19,7 @@ func ProvideRxNextHandlerForNetConnRead22(name string) fx.Option {
 			Target: func(
 				params struct {
 					fx.In
-					IncomingObs          *common.IncomingObs
+					IncomingObs          gocommon.IObservable `name:"Inbound"`
 					Ctx                  context.Context
 					ConnectionCancelFunc model.ConnectionCancelFunc
 					InBoundChannel       chan rxgo.Item `name:"InBoundChannel"`
