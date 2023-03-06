@@ -12,7 +12,7 @@ type inboundPipeDefinition struct {
 	stacks []IBoundData
 }
 
-func (self *inboundPipeDefinition) BuildIncomingObs(
+func (self *inboundPipeDefinition) BuildOutgoingObs(
 	inBoundChannel chan rxgo.Item,
 	stackDataMap map[string]*StackDataContainer,
 	cancelCtx context.Context,
@@ -65,7 +65,7 @@ func (self *inboundPipeDefinition) buildInBoundPipesObservables(
 	return obs, nil
 }
 
-func (self *inboundPipeDefinition) BuildInBoundPipeStates() ([]*PipeState, error) {
+func (self *inboundPipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, error) {
 	var pipeStarts []*PipeState
 
 	for _, currentStack := range self.stacks {
@@ -103,9 +103,9 @@ func (self *inboundPipeDefinition) BuildInBoundPipeStates() ([]*PipeState, error
 }
 
 type IInboundPipeDefinition interface {
-	BuildInBoundPipeStates() ([]*PipeState, error)
-	BuildIncomingObs(
-		inBoundChannel chan rxgo.Item,
+	BuildOutBoundPipeStates() ([]*PipeState, error)
+	BuildOutgoingObs(
+		outBoundChannel chan rxgo.Item,
 		stackDataMap map[string]*StackDataContainer,
 		cancelCtx context.Context,
 	) (gocommon.IObservable, error)

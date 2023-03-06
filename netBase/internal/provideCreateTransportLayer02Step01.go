@@ -25,7 +25,7 @@ func ProvideCreateTransportLayer02Step01() fx.Option {
 			) (gocommon.IObservable, error) {
 				params.Logger.Info("createTransportLayer...")
 
-				result, err := params.InboundPipeDefinition.BuildIncomingObs(
+				result, err := params.InboundPipeDefinition.BuildOutgoingObs(
 					params.InBoundChannel,
 					params.StackData,
 					params.CancelCtx,
