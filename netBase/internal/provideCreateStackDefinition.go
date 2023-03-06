@@ -24,14 +24,14 @@ func ProvideCreateStackDefinition() fx.Option {
 
 		func(
 			params struct {
-				fx.In
-				CancelFunc           context.CancelFunc
-				ConnectionCancelFunc model.ConnectionCancelFunc
-				Logger               *zap.Logger
-				StackName            string                                 `name:"StackName"`
-				TransportFactories   []*goCommsDefinitions.TransportFactory `group:"TransportFactory"`
-				StackFactories       []common.IStackDefinition              `group:"StackDefinition"`
-			},
+			fx.In
+			CancelFunc           context.CancelFunc
+			ConnectionCancelFunc model.ConnectionCancelFunc
+			Logger               *zap.Logger
+			StackName            string                                 `name:"StackName"`
+			TransportFactories   []*goCommsDefinitions.TransportFactory `group:"TransportFactory"`
+			StackFactories       []common.IStackDefinition              `group:"StackDefinition"`
+		},
 		) (CreateStackDefinition, error) {
 			params.Logger.Info("createStackDefinition...")
 			var factory *goCommsDefinitions.TransportFactory = nil
@@ -65,7 +65,11 @@ func ProvideCreateStackDefinition() fx.Option {
 						for i := len(factory.StackNames) - 1; i >= 0; i-- {
 							stackName := factory.StackNames[i]
 							if item, ok := dict[stackName]; ok {
-								result = append(result, item)
+								result = append(result,
+									common.NewInboundData(
+										item.Name(),
+										item.Inbound()),
+								)
 							}
 						}
 						return result
