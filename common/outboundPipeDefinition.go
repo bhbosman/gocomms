@@ -13,21 +13,21 @@ type IBoundData interface {
 	Bound() BoundResult
 }
 
-type outboundData struct {
-	name     string
-	outbound BoundResult
+type boundData struct {
+	name  string
+	bound BoundResult
 }
 
-func (self *outboundData) Name() string {
+func (self *boundData) Name() string {
 	return self.name
 }
 
-func (self *outboundData) Bound() BoundResult {
-	return self.outbound
+func (self *boundData) Bound() BoundResult {
+	return self.bound
 }
 
 func NewBoundData(name string, outbound BoundResult) IBoundData {
-	return &outboundData{name: name, outbound: outbound}
+	return &boundData{name: name, bound: outbound}
 }
 
 type outboundPipeDefinition struct {
