@@ -4,5 +4,5 @@ type IStackDefinition interface {
 	Name() string
 	Inbound() BoundResult
 	Outbound() BoundResult
-	StackState() *StackState
+	StackState() IStackState
 }

@@ -26,7 +26,7 @@ type IOutboundPipeDefinition interface {
 }
 
 type ITwoWayPipeDefinition interface {
-	BuildStackState() ([]*StackState, error)
+	BuildStackState() ([]IStackState, error)
 }
 
 type twoWayPipeDefinition struct {
@@ -35,19 +35,19 @@ type twoWayPipeDefinition struct {
 	stacks                 []IStackDefinition
 }
 
-func (self *twoWayPipeDefinition) BuildStackState() ([]*StackState, error) {
-	var allStackState []*StackState
+func (self *twoWayPipeDefinition) BuildStackState() ([]IStackState, error) {
+	var allStackState []IStackState
 	for _, item := range self.stacks {
 		stackState := item.StackState()
 		if stackState == nil {
 			continue
 		}
 		b := true
-		b = b && (0 != strings.Compare("", stackState.Id))
-		b = b && (stackState.Create != nil)
-		b = b && (stackState.Destroy != nil)
-		b = b && (stackState.Start != nil)
-		b = b && (stackState.Stop != nil)
+		b = b && (0 != strings.Compare("", stackState.GetId()))
+		b = b && (stackState.OnCreate() != nil)
+		b = b && (stackState.OnDestroy() != nil)
+		b = b && (stackState.OnStart() != nil)
+		b = b && (stackState.OnStop() != nil)
 		if !b {
 			return nil, fmt.Errorf("stackstate must be complete in full")
 		}

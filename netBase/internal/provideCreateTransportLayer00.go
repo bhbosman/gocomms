@@ -13,7 +13,7 @@ func ProvideCreateTransportLayer00() fx.Option {
 					fx.In
 					TwoWayPipeDefinition common.ITwoWayPipeDefinition
 				},
-			) ([]*common.StackState, error) {
+			) ([]common.IStackState, error) {
 				return params.TwoWayPipeDefinition.BuildStackState()
 			},
 		},

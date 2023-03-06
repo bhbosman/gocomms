@@ -76,10 +76,10 @@ func (mr *MockIStackDefinitionMockRecorder) Outbound() *gomock.Call {
 }
 
 // StackState mocks base method.
-func (m *MockIStackDefinition) StackState() *StackState {
+func (m *MockIStackDefinition) StackState() IStackState {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "StackState")
-	ret0, _ := ret[0].(*StackState)
+	ret0, _ := ret[0].(IStackState)
 	return ret0
 }
 
@@ -209,7 +209,7 @@ func (mr *MockIStackDefinitionMockRecorder) OnOutboundReturn(ret0 BoundResult) *
 // idRecv: mr
 // 0
 func (mr *MockIStackDefinitionMockRecorder) OnStackStateDoAndReturn(
-	f func() *StackState) *gomock.Call {
+	f func() IStackState) *gomock.Call {
 	return mr.
 		StackState().
 		DoAndReturn(f)
@@ -227,7 +227,7 @@ func (mr *MockIStackDefinitionMockRecorder) OnStackStateDo(
 // retArgs: [ret0 *StackState]
 // retArgs22: ret0 *StackState
 // 1
-func (mr *MockIStackDefinitionMockRecorder) OnStackStateReturn(ret0 *StackState) *gomock.Call {
+func (mr *MockIStackDefinitionMockRecorder) OnStackStateReturn(ret0 IStackState) *gomock.Call {
 	return mr.
 		StackState().
 		Return(ret0)

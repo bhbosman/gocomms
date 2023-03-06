@@ -22,7 +22,7 @@ type StackStopState func(
 	stackData interface{},
 ) error
 
-type StackState struct {
+type stackState struct {
 	Id          string
 	HijackStack bool
 	Create      StackCreate
@@ -31,27 +31,27 @@ type StackState struct {
 	Stop        StackStopState
 }
 
-func (self *StackState) GetId() string {
+func (self *stackState) GetId() string {
 	return self.Id
 }
 
-func (self *StackState) GetHijackStack() bool {
+func (self *stackState) GetHijackStack() bool {
 	return self.HijackStack
 }
 
-func (self *StackState) OnCreate() StackCreate {
+func (self *stackState) OnCreate() StackCreate {
 	return self.Create
 }
 
-func (self *StackState) OnDestroy() StackDestroy {
+func (self *stackState) OnDestroy() StackDestroy {
 	return self.Destroy
 }
 
-func (self *StackState) OnStart() StackStartState {
+func (self *stackState) OnStart() StackStartState {
 	return self.Start
 }
 
-func (self *StackState) OnStop() StackStopState {
+func (self *stackState) OnStop() StackStopState {
 	return self.Stop
 }
 
@@ -72,7 +72,7 @@ func NewStackState(
 	start StackStartState,
 	stop StackStopState,
 ) IStackState {
-	return &StackState{
+	return &stackState{
 		Id:          id,
 		HijackStack: hijackStack,
 		Create:      create,

@@ -4,14 +4,14 @@ type stackDefinition struct {
 	name       string
 	inbound    BoundResult
 	outbound   BoundResult
-	stackState *StackState
+	stackState IStackState
 }
 
 func NewStackDefinition(
 	name string,
 	inbound BoundResult,
 	outbound BoundResult,
-	stackState *StackState,
+	stackState IStackState,
 ) (IStackDefinition, error) {
 	return &stackDefinition{
 		name:       name,
@@ -33,6 +33,6 @@ func (self *stackDefinition) Outbound() BoundResult {
 	return self.outbound
 }
 
-func (self *stackDefinition) StackState() *StackState {
+func (self *stackDefinition) StackState() IStackState {
 	return self.stackState
 }
