@@ -9,6 +9,7 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
+	"strings"
 )
 
 func ProvideCreateStackDefinition() fx.Option {
@@ -24,7 +25,7 @@ func ProvideCreateStackDefinition() fx.Option {
 					TransportFactories   []*goCommsDefinitions.TransportFactory `group:"TransportFactory"`
 					StackFactories       []common.IStackDefinition              `group:"StackDefinition"`
 				},
-			) ([]common.IStackState, common.ITwoWayPipeDefinition, common.IInboundPipeDefinition, common.IOutboundPipeDefinition, error) {
+			) ([]common.IStackState, common.IInboundPipeDefinition, common.IOutboundPipeDefinition, error) {
 				params.Logger.Info("createStackDefinition...")
 				var factory *goCommsDefinitions.TransportFactory = nil
 				for _, item := range params.TransportFactories {
@@ -48,7 +49,7 @@ func ProvideCreateStackDefinition() fx.Option {
 					if errList != nil {
 						params.CancelFunc()
 						params.ConnectionCancelFunc("On stack creation", false, errList)
-						return nil, nil, nil, nil, errList
+						return nil, nil, nil, errList
 					}
 
 					var stacks []common.IStackDefinition
@@ -80,21 +81,35 @@ func ProvideCreateStackDefinition() fx.Option {
 
 						}())
 
-					twoWayPipeDefinition, err := common.NewTwoWayPipeDefinition(
-						stacks,
-					)
-					if err != nil {
-						return nil, nil, nil, nil, err
+					BuildStackState := func() ([]common.IStackState, error) {
+						var allStackState []common.IStackState
+						for _, item := range stacks {
+							stackState := item.StackState()
+							if stackState == nil {
+								continue
+							}
+							b := true
+							b = b && (0 != strings.Compare("", stackState.GetId()))
+							b = b && (stackState.OnCreate() != nil)
+							b = b && (stackState.OnDestroy() != nil)
+							b = b && (stackState.OnStart() != nil)
+							b = b && (stackState.OnStop() != nil)
+							if !b {
+								return nil, fmt.Errorf("stackstate must be complete in full")
+							}
+							allStackState = append(allStackState, stackState)
+						}
+						return allStackState, nil
 					}
 
-					stackState, err := twoWayPipeDefinition.BuildStackState()
+					stackState, err := BuildStackState()
 					if err != nil {
-						return nil, nil, nil, nil, err
+						return nil, nil, nil, err
 					}
 
-					return stackState, twoWayPipeDefinition, inboundPipeDefinition, outboundPipeDefinition, nil
+					return stackState, inboundPipeDefinition, outboundPipeDefinition, nil
 				}
-				return nil, nil, nil, nil, fmt.Errorf("connectionstack factory definition \"%v\", not found", params.StackName)
+				return nil, nil, nil, fmt.Errorf("connectionstack factory definition \"%v\", not found", params.StackName)
 			},
 		},
 	)
