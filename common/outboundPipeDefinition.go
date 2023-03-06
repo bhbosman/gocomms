@@ -128,7 +128,7 @@ func (self *outboundPipeDefinition) BuildOutBoundPipeStates() ([]*PipeState, err
 	return pipeStarts, nil
 }
 
-type IOutboundPipeDefinition interface {
+type IPipeDefinition interface {
 	BuildOutBoundPipeStates() ([]*PipeState, error)
 	BuildOutgoingObs(
 		outBoundChannel chan rxgo.Item,
@@ -137,6 +137,6 @@ type IOutboundPipeDefinition interface {
 	) (gocommon.IObservable, error)
 }
 
-func NewOutboundPipeDefinition(stacks []IOutboundData) IOutboundPipeDefinition {
+func NewPipeDefinition(stacks []IOutboundData) IPipeDefinition {
 	return &outboundPipeDefinition{stacks: stacks}
 }

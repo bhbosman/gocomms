@@ -13,7 +13,7 @@ func ProvideExtractPipeOutStates(name string) fx.Option {
 				params struct {
 					fx.In
 					LifeCycle              fx.Lifecycle
-					OutboundPipeDefinition common.IOutboundPipeDefinition
+					OutboundPipeDefinition common.IPipeDefinition `name:"Outbound"`
 				},
 			) ([]*common.PipeState, error) {
 				return params.OutboundPipeDefinition.BuildOutBoundPipeStates()

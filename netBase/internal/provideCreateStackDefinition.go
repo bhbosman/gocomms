@@ -16,7 +16,7 @@ type CreateStackDefinition struct {
 	fx.Out
 	StackState             []common.IStackState
 	InboundPipeDefinition  common.IInboundPipeDefinition
-	OutboundPipeDefinition common.IOutboundPipeDefinition
+	OutboundPipeDefinition common.IPipeDefinition `name:"Outbound"`
 }
 
 func ProvideCreateStackDefinition() fx.Option {
@@ -76,7 +76,7 @@ func ProvideCreateStackDefinition() fx.Option {
 						return result
 					}())
 
-				outboundPipeDefinition := common.NewOutboundPipeDefinition(
+				outboundPipeDefinition := common.NewPipeDefinition(
 					func() []common.IOutboundData {
 						var result []common.IOutboundData
 						for _, stackName := range factory.StackNames {

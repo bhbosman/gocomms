@@ -18,7 +18,7 @@ func ProvideCreateTransportLayer02Step02() fx.Option {
 					fx.In
 					Logger                 *zap.Logger
 					CancelCtx              context.Context
-					OutboundPipeDefinition common.IOutboundPipeDefinition
+					OutboundPipeDefinition common.IPipeDefinition `name:"Outbound"`
 					StackData              map[string]*common.StackDataContainer
 					OutBoundChannel        chan rxgo.Item `name:"OutBoundChannel"`
 				},
