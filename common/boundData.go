@@ -19,5 +19,8 @@ func (self *boundData) Bound() BoundResult {
 }
 
 func NewBoundData(name string, outbound BoundResult) IBoundData {
-	return &boundData{name: name, bound: outbound}
+	return &boundData{
+		name:  name,
+		bound: outbound,
+	}
 }
