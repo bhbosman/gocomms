@@ -2,6 +2,7 @@ package internal
 
 import (
 	"github.com/bhbosman/goConnectionManager"
+	"github.com/bhbosman/gocommon"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/gocommon/rxOverride"
@@ -22,7 +23,7 @@ func ProvideRxNextHandlerForNetConnWrite2(name string) fx.Option {
 				params struct {
 					fx.In
 					Conn                         net.Conn
-					OutgoingObs                  *common.OutgoingObs
+					OutgoingObs                  gocommon.IObservable `name:"Outbound"`
 					RxOptions                    []rxgo.Option
 					PublishConnectionInformation goConnectionManager.IPublishConnectionInformation
 					ConnectionCancelFunc         model.ConnectionCancelFunc
@@ -50,7 +51,7 @@ func ProvideRxNextHandlerForNetConnWrite2(name string) fx.Option {
 				rxOverride.ForEach2(
 					"net.conn.write",
 					model.StreamDirectionUnknown,
-					params.OutgoingObs.OutboundObservable,
+					params.OutgoingObs,
 					params.Ctx,
 					params.GoFunctionCounter,
 					rxHandler,

@@ -21,7 +21,7 @@ func (self *outboundPipeDefinition) BuildOutgoingObs(
 	outBoundChannel chan rxgo.Item,
 	stackDataMap map[string]*StackDataContainer,
 	cancelCtx context.Context,
-) (*OutgoingObs, error) {
+) (gocommon.IObservable, error) {
 	var err error
 	var obsOut gocommon.IObservable
 	obsOut, err = self.buildOutBoundObservables(stackDataMap, outBoundChannel, rxgo.WithContext(cancelCtx))
@@ -29,7 +29,7 @@ func (self *outboundPipeDefinition) BuildOutgoingObs(
 		return nil, err
 	}
 
-	return NewOutgoingObs(obsOut), nil
+	return obsOut, nil
 }
 
 func (self *outboundPipeDefinition) buildOutBoundObservables(
@@ -117,7 +117,7 @@ type IOutboundPipeDefinition interface {
 		outBoundChannel chan rxgo.Item,
 		stackDataMap map[string]*StackDataContainer,
 		cancelCtx context.Context,
-	) (*OutgoingObs, error)
+	) (gocommon.IObservable, error)
 }
 
 func NewOutboundPipeDefinition(stacks []IOutboundData) IOutboundPipeDefinition {
