@@ -31,8 +31,8 @@ type IInputStreamForStack net.Conn
 type StackEndStateParams struct {
 }
 
-func NewStackEndStateParams() StackEndStateParams {
-	return StackEndStateParams{}
+func NewStackEndStateParams() *StackEndStateParams {
+	return &StackEndStateParams{}
 }
 
 type StackState struct {

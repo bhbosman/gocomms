@@ -20,5 +20,5 @@ type StackStartState func(
 
 type StackStopState func(
 	stackData interface{},
-	endParams StackEndStateParams,
+	endParams *StackEndStateParams,
 ) error
