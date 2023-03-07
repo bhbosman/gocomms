@@ -23,9 +23,7 @@ func ProvideRxNextHandlerForNetConnRead22(name string) fx.Option {
 					Logger               *zap.Logger
 					ConnectionId         string `name:"ConnectionId"`
 				},
-			) (*RxHandlers.RxNextHandler,
-				//rxgo.NextFunc, goCommsDefinitions.TryNextFunc, rxgo.ErrFunc, rxgo.CompletedFunc,
-				error) {
+			) (*RxHandlers.RxNextHandler, error) {
 
 				// DO NOT set complete param to RxHandlers.CreateComplete(params.InBoundChannel)
 				// as it will lead to a double close and a panic
@@ -42,9 +40,7 @@ func ProvideRxNextHandlerForNetConnRead22(name string) fx.Option {
 					false,
 				)
 				if err != nil {
-					return nil,
-						//nil, nil, nil, nil,
-						err
+					return nil, err
 				}
 
 				result, err := RxHandlers.NewRxNextHandler2(
@@ -54,13 +50,9 @@ func ProvideRxNextHandlerForNetConnRead22(name string) fx.Option {
 					eventHandler, /*see comment*/
 					params.Logger)
 				if err != nil {
-					return nil,
-						//nil, nil, nil, nil,
-						err
+					return nil, err
 				}
-				return result,
-					//eventHandler.OnSendData, eventHandler.OnTrySendData, eventHandler.OnError, eventHandler.OnComplete,
-					nil
+				return result, nil
 			},
 		},
 	)
