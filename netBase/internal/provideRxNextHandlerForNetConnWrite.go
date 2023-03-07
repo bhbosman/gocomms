@@ -22,7 +22,7 @@ func ProvideRxNextHandlerForNetConnWrite2(name string) fx.Option {
 			Target: func(
 				params struct {
 					fx.In
-					Conn                         net.Conn
+					Conn                         net.Conn             `name:"PrimaryConnection"`
 					OutgoingObs                  gocommon.IObservable `name:"Outbound"`
 					RxOptions                    []rxgo.Option
 					PublishConnectionInformation goConnectionManager.IPublishConnectionInformation

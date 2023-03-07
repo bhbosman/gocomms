@@ -15,7 +15,7 @@ func InvokeFxLifeCycleReadDataFromConnectionStartStop() fx.Option {
 		func(
 			params struct {
 				fx.In
-				Conn                        net.Conn
+				Conn                        net.Conn `name:"PrimaryConnection"`
 				Lifecycle                   fx.Lifecycle
 				ConnectionCancelFunc        model.ConnectionCancelFunc
 				CancelCtx                   context.Context

@@ -16,10 +16,47 @@ import (
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
+	"io"
 	"net"
 	"net/url"
 	"time"
 )
+
+func ProvideCancelContextWithRwc(cancelContext context.Context) fx.Option {
+	return fx.Provide(
+		fx.Annotated{
+			Target: func(
+				params struct {
+					fx.In
+					Lifecycle               fx.Lifecycle
+					Logger                  *zap.Logger
+					PrimaryConnectionCloser io.Closer `name:"PrimaryConnection"`
+				},
+			) (context.Context, context.CancelFunc, goCommsDefinitions.ICancellationContext, error) {
+				ctx, cancelFunc := context.WithCancel(cancelContext)
+				cancellationContextInstance := goCommsDefinitions.NewCancellationContext(
+					cancelFunc,
+					ctx,
+					params.Logger,
+					params.PrimaryConnectionCloser,
+				)
+				params.Lifecycle.Append(
+					fx.Hook{
+						OnStart: nil,
+						OnStop: func(ctx context.Context) error {
+							cancellationContextInstance.Cancel()
+							return nil
+						},
+					},
+				)
+				return ctx,
+					cancellationContextInstance.Cancel,
+					cancellationContextInstance,
+					nil
+			},
+		},
+	)
+}
 
 type ConnectionInstance struct {
 	ConnectionUrl                            *url.URL
@@ -80,7 +117,7 @@ func (self ConnectionInstance) NewReaderWriterCloserInstanceOptions(
 		internal.ProvideCreateStackData(),
 		fx.Provide(fx.Annotated{Name: intf.ConnectionId, Target: func() string { return uniqueReference }}),
 		fx.Provide(fx.Annotated{Target: func() GoFunctionCounter.IService { return goFunctionCounter }}),
-		goCommsDefinitions.ProvideCancelContextWithRwc(self.CancelCtx),
+		ProvideCancelContextWithRwc(self.CancelCtx),
 		self.AdditionalFxOptionsForConnectionInstance(),
 		internal.ProvideRxOptions(),
 		internal.ProvideCreateStackDefinition(),

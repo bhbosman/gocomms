@@ -16,7 +16,7 @@ func InvokeFxLifeCycleStackStateStartStop() fx.Option {
 			params struct {
 				fx.In
 				Lifecycle     fx.Lifecycle
-				Conn          net.Conn
+				Conn          net.Conn `name:"PrimaryConnection"`
 				CancelCtx     context.Context
 				CancelCtxFunc context.CancelFunc
 				StackState    []common.IStackState
