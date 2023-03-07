@@ -23,7 +23,7 @@ func ProvideConnReactorWrite2(name string) fx.Option {
 				params struct {
 					fx.In
 					IncomingObs                  gocommon.IObservable `name:"Inbound"`
-					ChannelManager               *rxgo.ItemChannel    `name:"QWERTY"`
+					ChannelManager               chan rxgo.Item       `name:"QWERTY"`
 					RxOptions                    []rxgo.Option
 					PublishConnectionInformation goConnectionManager.IPublishConnectionInformation
 					ConnectionCancelFunc         model.ConnectionCancelFunc

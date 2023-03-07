@@ -20,7 +20,7 @@ func ProvideRxNextHandlerForNetConnRead22(name string) fx.Option {
 					fx.In
 					Ctx                  context.Context
 					ConnectionCancelFunc model.ConnectionCancelFunc
-					InBoundChannel       *rxgo.ItemChannel `name:"InBoundChannel"`
+					InBoundChannel       chan rxgo.Item `name:"InBoundChannel"`
 					Logger               *zap.Logger
 					ConnectionId         string `name:"ConnectionId"`
 				},

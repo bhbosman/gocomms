@@ -22,14 +22,14 @@ func ProvideChannel(name string) fx.Option {
 					Ctx          context.Context
 					ConnectionId string `name:"ConnectionId"`
 				},
-			) (*rxgo.ItemChannel, rxgo.NextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, error) {
-				result := rxgo.NewItemChannel()
+			) (chan rxgo.Item, rxgo.NextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, error) {
+				result := make(chan rxgo.Item)
 				params.Lifecycle.Append(fx.Hook{
 					OnStart: func(_ context.Context) error {
 						return nil
 					},
 					OnStop: func(_ context.Context) error {
-						result.Close()
+						close(result)
 						return nil
 					},
 				})

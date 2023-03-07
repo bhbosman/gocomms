@@ -23,7 +23,7 @@ func ProvideCreateChannel(name string) fx.Option {
 					ConnectionId string `name:"ConnectionId"`
 				},
 			) (rxgo.Observable,
-				*rxgo.ItemChannel,
+				chan rxgo.Item,
 				rxgo.NextFunc,
 				goCommsDefinitions.TryNextFunc,
 				rxgo.ErrFunc,
@@ -31,7 +31,7 @@ func ProvideCreateChannel(name string) fx.Option {
 				goCommsDefinitions.IsNextActive,
 				error,
 			) {
-				ch := rxgo.NewItemChannel()
+				ch := make(chan rxgo.Item)
 				obs := rxgo.FromChannel(ch, rxgo.WithContext(params.CancelCtx))
 
 				eventHandler, err := RxHandlers.All2(

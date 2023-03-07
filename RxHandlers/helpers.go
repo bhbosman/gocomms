@@ -11,7 +11,7 @@ import (
 func All2(
 	description string,
 	direction model.StreamDirection,
-	Items *rxgo.ItemChannel,
+	Items chan<- rxgo.Item,
 	logger *zap.Logger,
 	ctx context.Context,
 	useCompleteCallback bool,
@@ -30,7 +30,7 @@ func All2(
 func all(
 	description string,
 	direction model.StreamDirection,
-	Items *rxgo.ItemChannel,
+	Items chan<- rxgo.Item,
 	logger *zap.Logger,
 	ctx context.Context,
 ) (rxgo.NextFunc, goCommsDefinitions.TryNextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, goCommsDefinitions.IsNextActive, error) {
@@ -101,7 +101,7 @@ func all(
 			}()
 			if !isClosed {
 				isClosed = true
-				Items.Close()
+				close(Items)
 			}
 		},
 		func() bool {
