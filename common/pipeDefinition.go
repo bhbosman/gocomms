@@ -14,7 +14,7 @@ type pipeDefinition struct {
 }
 
 func (self *pipeDefinition) BuildObs(
-	outBoundChannel chan rxgo.Item,
+	outBoundChannel *rxgo.ItemChannel,
 	stackDataMap map[string]*StackDataContainer,
 	cancelCtx context.Context,
 ) (gocommon.IObservable, error) {
@@ -30,7 +30,7 @@ func (self *pipeDefinition) BuildObs(
 
 func (self *pipeDefinition) buildBoundObservables(
 	stackDataMap map[string]*StackDataContainer,
-	outbound chan rxgo.Item,
+	outbound *rxgo.ItemChannel,
 	opts ...rxgo.Option,
 ) (gocommon.IObservable, error) {
 	var obs gocommon.IObservable = rxgo.FromChannel(outbound, opts...)
@@ -114,7 +114,7 @@ func (self *pipeDefinition) BuildPipeStates() ([]*PipeState, error) {
 type IPipeDefinition interface {
 	BuildPipeStates() ([]*PipeState, error)
 	BuildObs(
-		outBoundChannel chan rxgo.Item,
+		outBoundChannel *rxgo.ItemChannel,
 		stackDataMap map[string]*StackDataContainer,
 		cancelCtx context.Context,
 	) (gocommon.IObservable, error)

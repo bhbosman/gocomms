@@ -47,3 +47,6 @@ replace github.com/bhbosman/goprotoextra => ../goprotoextra
 replace github.com/bhbosman/gocommon => ../gocommon
 
 replace github.com/cskr/pubsub => github.com/bhbosman/pubsub v1.0.3-0.20220802200819-029949e8a8af
+replace (
+	github.com/reactivex/rxgo/v2 => ../goRx
+)

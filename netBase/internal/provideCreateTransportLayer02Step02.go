@@ -20,7 +20,7 @@ func ProvideCreateTransportLayer02Step02() fx.Option {
 					CancelCtx       context.Context
 					PipeDefinition  common.IPipeDefinition `name:"Outbound"`
 					StackData       map[string]*common.StackDataContainer
-					OutBoundChannel chan rxgo.Item `name:"OutBoundChannel"`
+					OutBoundChannel *rxgo.ItemChannel `name:"OutBoundChannel"`
 				},
 			) (gocommon.IObservable, error) {
 				params.Logger.Info("createTransportLayer...")
