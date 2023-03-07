@@ -16,7 +16,6 @@ import (
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
-	"io"
 	"net"
 	"net/url"
 	"time"
@@ -53,7 +52,7 @@ func (self ConnectionInstance) NewReaderWriterCloserInstanceOptions(
 	uniqueReference string,
 	goFunctionCounter GoFunctionCounter.IService,
 	connectionType model.ConnectionType,
-	rwc io.ReadWriteCloser,
+	conn net.Conn,
 	provideLogger fx.Option,
 	settingOptions ...INewConnectionInstanceSettingsApply,
 ) fx.Option {
@@ -75,7 +74,7 @@ func (self ConnectionInstance) NewReaderWriterCloserInstanceOptions(
 		goConnectionManager.ProvideObtainConnectionManagerInformation(),
 		goConnectionManager.ProvideRegisterToConnectionManager(),
 		goConnectionManager.ProvidePublishConnectionInformation(),
-		internal.ProvideReadWriteCloser(rwc),
+		internal.ProvideReadWriteCloser(conn),
 		internal.ProvideExtractPipeInStates("PipeInStates"),
 		internal.ProvideExtractPipeOutStates("PipeOutStates"),
 		internal.ProvideCreateStackData(),
@@ -141,16 +140,16 @@ func (self ConnectionInstance) NewConnectionInstanceOptions(
 		time.Hour,
 		time.Hour,
 		rwcOptions,
-		fx.Provide(
-			fx.Annotated{
-				Target: func() (net.Conn, error) {
-					if conn == nil {
-						return nil, fmt.Errorf("connection is nil. Please resolve")
-					}
-					return conn, nil
-				},
-			},
-		),
+		//fx.Provide(
+		//	fx.Annotated{
+		//		Target: func() (net.Conn, error) {
+		//			if conn == nil {
+		//				return nil, fmt.Errorf("connection is nil. Please resolve")
+		//			}
+		//			return conn, nil
+		//		},
+		//	},
+		//),
 	)
 }
 
