@@ -11,11 +11,11 @@ func ProvideReadWriteCloser(conn net.Conn) fx.Option {
 	return fx.Provide(
 		fx.Annotated{
 			Name: "PrimaryConnection",
-			Target: func() (net.Conn, io.ReadWriteCloser, io.Reader, io.Writer, io.Closer, error) {
+			Target: func() (net.Conn, io.Closer, error) {
 				if conn == nil {
-					return nil, nil, nil, nil, nil, fmt.Errorf("connection is nil. Please resolve")
+					return nil, nil, fmt.Errorf("connection is nil. Please resolve")
 				}
-				return conn, conn, conn, conn, conn, nil
+				return conn, conn, nil
 			},
 		},
 	)
