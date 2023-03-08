@@ -19,11 +19,11 @@ type PipeDestroy func(stackData IStackCreateData, pipeData IPipeCreateData) erro
 type PipeStart func(stackData IStackCreateData, pipeData IPipeCreateData, ctx context.Context) error
 type PipeEnd func(stackData IStackCreateData, pipeData IPipeCreateData) error
 type PipeState struct {
-	ID      string
-	Create  PipeCreate
-	Destroy PipeDestroy
-	Start   PipeStart
-	End     PipeEnd
+	ID        string
+	OnCreate  PipeCreate
+	OnDestroy PipeDestroy
+	OnStart   PipeStart
+	OnEnd     PipeEnd
 }
 
 type IInputStreamForStack net.Conn

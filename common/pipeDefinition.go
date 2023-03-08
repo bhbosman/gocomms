@@ -98,10 +98,10 @@ func (self *pipeDefinition) BuildPipeStates() ([]*PipeState, error) {
 		}
 		b := true
 		b = b && (0 != strings.Compare("", pipeState.ID))
-		b = b && (pipeState.Create != nil)
-		b = b && (pipeState.Destroy != nil)
-		b = b && (pipeState.Start != nil)
-		b = b && (pipeState.End != nil)
+		b = b && (pipeState.OnCreate != nil)
+		b = b && (pipeState.OnDestroy != nil)
+		b = b && (pipeState.OnStart != nil)
+		b = b && (pipeState.OnEnd != nil)
 		if !b {
 			return nil, fmt.Errorf("stackstate must be complete in full")
 		}
