@@ -19,20 +19,6 @@ type RxMapHandler struct {
 func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface{}, error) {
 
 	switch v := i.(type) {
-	case goprotoextra.ReadWriterSize:
-		self.RwsMessageCountIn++
-		self.RwsByteCountIn += int64(v.Size())
-		i, err := self.next.MapReadWriterSize(ctx, i)
-		if err != nil {
-			return nil, err
-		}
-
-		switch v := i.(type) {
-		case goprotoextra.ReadWriterSize:
-			self.RwsMessageCountOut++
-			self.RwsByteCountOut += int64(v.Size())
-		}
-		return i, nil
 	case *messages.EmptyQueue:
 		return i, nil
 	case *model2.PublishRxHandlerCounters:
@@ -53,19 +39,34 @@ func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface
 		self.OtherMessageCountOut++
 		return i, nil
 	default:
-		self.OtherMessageCountIn++
-		message, b, err := self.next.ReadMessage(i)
+		switch v := i.(type) {
+		case goprotoextra.ReadWriterSize:
+			self.RwsMessageCountOut++
+			self.RwsByteCountOut += int64(v.Size())
+		default:
+			self.OtherMessageCountIn++
+		}
+		i, err := self.next.MapReadWriterSize(ctx, i)
 		if err != nil {
 			return nil, err
 		}
-		if rws, ok := message.(goprotoextra.ReadWriterSize); ok {
-			self.RwsByteCountOut += int64(rws.Size())
+		switch v := i.(type) {
+		case goprotoextra.ReadWriterSize:
+			self.RwsByteCountOut += int64(v.Size())
 			self.RwsMessageCountOut++
+			return v, nil
+		default:
+			self.OtherMessageCountOut++
+			message, b, err := self.next.ReadMessage(i)
+			if err != nil {
+				return nil, err
+			}
+			if b {
+				return message, nil
+			}
+			return i, nil
 		}
-		if b {
-			return message, nil
-		}
-		return i, nil
+
 	}
 
 }
