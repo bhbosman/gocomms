@@ -23,14 +23,14 @@ func (self *InvokeWriterHandler) OnSendData(i interface{}) {
 	if self.errorState != nil {
 		return
 	}
-	_, _, _ = self.ReadMessage(i)
+	_ = self.ReadMessage(i)
 }
 
 func (self *InvokeWriterHandler) OnTrySendData(i interface{}) bool {
 	if self.errorState != nil {
 		return false
 	}
-	_, _, _ = self.ReadMessage(i)
+	_ = self.ReadMessage(i)
 	return true
 }
 
@@ -45,18 +45,18 @@ func (self *InvokeWriterHandler) GetAdditionalBytesSend() int {
 	return 0
 }
 
-func (self *InvokeWriterHandler) ReadMessage(i interface{}) (interface{}, bool, error) {
+func (self *InvokeWriterHandler) ReadMessage(i interface{}) error {
 	if publishRxHandlerCounters, ok := i.(*model.PublishRxHandlerCounters); ok {
-		return nil, false, self.oci.ConnectionInformationReceived(publishRxHandlerCounters)
+		return self.oci.ConnectionInformationReceived(publishRxHandlerCounters)
 	}
-	return nil, false, nil
+	return nil
 }
 
 func (self *InvokeWriterHandler) SendData(data interface{}) {
 	if self.errorState != nil {
 		return
 	}
-	_, _, _ = self.ReadMessage(data)
+	_ = self.ReadMessage(data)
 }
 
 func (self *InvokeWriterHandler) Close() error {

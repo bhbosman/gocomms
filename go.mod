@@ -3,7 +3,7 @@ module github.com/bhbosman/gocomms
 go 1.18
 
 require (
-	github.com/bhbosman/goCommsDefinitions v0.0.0-20230307073322-f15f4b951cb9
+	github.com/bhbosman/goCommsDefinitions v0.0.0-20230308211643-24fe88b2378e
 	github.com/bhbosman/goConnectionManager v0.0.0-20230302065222-d613f6fe8f80
 	github.com/bhbosman/gocommon v0.0.0-20230308114127-b5a97171c205
 	github.com/bhbosman/goerrors v0.0.0-20220623084908-4d7bbcd178cf
@@ -49,3 +49,4 @@ replace github.com/bhbosman/gocommon => ../gocommon
 replace github.com/cskr/pubsub => github.com/bhbosman/pubsub v1.0.3-0.20220802200819-029949e8a8af
 
 replace github.com/reactivex/rxgo/v2 => ../goRx
+replace github.com/bhbosman/goprotoextra => ../goprotoextra
