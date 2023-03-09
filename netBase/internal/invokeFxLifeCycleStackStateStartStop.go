@@ -16,10 +16,10 @@ func InvokeFxLifeCycleStackStateStartStop() fx.Option {
 			params struct {
 				fx.In
 				Lifecycle     fx.Lifecycle
-				Conn          net.Conn
+				Conn          net.Conn `name:"PrimaryConnection"`
 				CancelCtx     context.Context
 				CancelCtxFunc context.CancelFunc
-				StackState    []*common.StackState
+				StackState    []common.IStackState
 				StackData     map[string]*common.StackDataContainer
 				Logger        *zap.Logger
 				ToReactorFunc rxgo.NextFunc `name:"ForReactor"`
@@ -42,29 +42,29 @@ func InvokeFxLifeCycleStackStateStartStop() fx.Option {
 							if localConn == nil {
 								return fmt.Errorf("no incoming connection when stsrting stacks")
 							}
-							if localStackState.Start != nil {
+							if localStackState.OnStart() != nil {
 								//var err error
 								var stackData common.IStackCreateData
-								if container, ok := params.StackData[localStackState.Id]; ok {
+								if container, ok := params.StackData[localStackState.GetId()]; ok {
 									stackData = container.StackData
 								}
-								if localStackState.HijackStack && localConn == nil {
+								if localStackState.GetHijackStack() && localConn == nil {
 									hijackStackFailedError := fmt.Errorf(
 										"stack %v could not start, as it requires a connection to hi-jack and it has been set to nil by a previous stack",
-										localStackState.Id)
+										localStackState.GetId())
 									params.Logger.Error(
 										"Stack start failed, as it could not hi-jack the connection",
-										zap.String("StackName", localStackState.Id),
+										zap.String("StackName", localStackState.GetId()),
 										zap.Error(hijackStackFailedError))
 									return hijackStackFailedError
 								}
 								var err error
-								localConn, err = localStackState.Start(localConn, stackData, params.ToReactorFunc)
+								localConn, err = localStackState.OnStart()(localConn, stackData, params.ToReactorFunc)
 
 								if err != nil {
 									params.Logger.Error(
 										"Stack start failed",
-										zap.String("StackName", localStackState.Id),
+										zap.String("StackName", localStackState.GetId()),
 										zap.Error(err))
 									return err
 								}
@@ -73,19 +73,19 @@ func InvokeFxLifeCycleStackStateStartStop() fx.Option {
 									reportConnectionNilReturned = true
 									params.Logger.Info(
 										"Stack state Start method returned a nil localConn. No more hi-jacking of connection allowed",
-										zap.String("StackName", localStackState.Id))
+										zap.String("StackName", localStackState.GetId()))
 								}
 								return err
 							}
 							return params.CancelCtx.Err()
 						},
 						OnStop: func(_ context.Context) error {
-							if localStackState.Stop != nil {
+							if localStackState.OnStop() != nil {
 								var stackData interface{}
-								if container, ok := params.StackData[localStackState.Id]; ok {
+								if container, ok := params.StackData[localStackState.GetId()]; ok {
 									stackData = container.StackData
 								}
-								return localStackState.Stop(stackData, common.NewStackEndStateParams())
+								return localStackState.OnStop()(stackData)
 							}
 							return nil
 						},

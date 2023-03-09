@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"go.uber.org/fx"
 	"io"
+	"net"
 )
 
-func ProvideReadWriteCloser(rwc io.ReadWriteCloser) fx.Option {
+func ProvideReadWriteCloser(conn net.Conn) fx.Option {
 	return fx.Provide(
 		fx.Annotated{
-			Target: func() (io.ReadWriteCloser, error) {
-				if rwc == nil {
-					return nil, fmt.Errorf("connection is nil. Please resolve")
+			Name: "PrimaryConnection",
+			Target: func() (net.Conn, io.Closer, error) {
+				if conn == nil {
+					return nil, nil, fmt.Errorf("connection is nil. Please resolve")
 				}
-				return rwc, nil
+				return conn, conn, nil
 			},
 		},
 	)

@@ -2,6 +2,7 @@ package RxHandlers
 
 import (
 	"github.com/bhbosman/goCommsDefinitions"
+	"github.com/bhbosman/gocommon/messages"
 	model2 "github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/goerrors"
 	"github.com/bhbosman/goprotoextra"
@@ -37,6 +38,7 @@ func (self *RxNextHandler) Close() error {
 func (self *RxNextHandler) toNextChannelWithByteOutCount(rws goprotoextra.ReadWriterSize) error {
 	rwsSize := rws.Size()
 	if rwsSize != 0 {
+		self.RwsMessageCountOut++
 		self.RwsByteCountOut += int64(rws.Size())
 		if self.onSendData != nil {
 			self.onSendData(rws)
@@ -49,6 +51,7 @@ func (self *RxNextHandler) updateOutByteCount(size int) error {
 	if self.errorState != nil {
 		return self.errorState
 	}
+	self.RwsMessageCountOut++
 	self.RwsByteCountOut += int64(size)
 	return nil
 }
@@ -62,7 +65,7 @@ func (self *RxNextHandler) OnSendData(i interface{}) {
 	var ok bool
 	var rws goprotoextra.ReadWriterSize
 	if rws, ok = i.(goprotoextra.ReadWriterSize); ok {
-		self.RwsMessageCount++
+		self.RwsMessageCountIn++
 		self.RwsByteCountIn += int64(rws.Size())
 		if self.stackHandler != nil {
 			err := self.stackHandler.NextReadWriterSize(
@@ -85,9 +88,11 @@ func (self *RxNextHandler) OnSendData(i interface{}) {
 			}
 		}
 	} else {
-		self.OtherMessageCount++
 		switch v := i.(type) {
+		case *messages.EmptyQueue:
+			break
 		case *model2.PublishRxHandlerCounters:
+			self.OtherMessageCountIn++
 			byteOutCount := self.RwsByteCountOut
 			if self.stackHandler != nil {
 				byteOutCount += int64(self.stackHandler.GetAdditionalBytesSend())
@@ -98,8 +103,10 @@ func (self *RxNextHandler) OnSendData(i interface{}) {
 			}
 			counter := model2.NewRxHandlerCounter(
 				self.Name,
-				self.OtherMessageCount,
-				self.RwsMessageCount,
+				self.OtherMessageCountIn,
+				self.RwsMessageCountIn,
+				self.OtherMessageCountOut,
+				self.RwsMessageCountOut,
 				bytesInCount,
 				byteOutCount)
 			v.Add(counter)
@@ -107,14 +114,17 @@ func (self *RxNextHandler) OnSendData(i interface{}) {
 				self.stackHandler.ReadMessage(i)
 			}
 			if self.onSendData != nil {
+				self.OtherMessageCountOut++
 				self.onSendData(i)
 			}
 			break
 		default:
+			self.OtherMessageCountIn++
 			if self.stackHandler != nil {
 				self.stackHandler.ReadMessage(i)
 			}
 			if self.onSendData != nil {
+				self.OtherMessageCountOut++
 				self.onSendData(i)
 			}
 			break
@@ -147,8 +157,7 @@ func (self *RxNextHandler) setErrorState(err error, propagateError bool) {
 		}
 	}
 }
-
-func NewRxNextHandler(
+func newRxNextHandler(
 	name string,
 	ConnectionCancelFunc model2.ConnectionCancelFunc,
 	next IRxNextStackHandler,
@@ -171,16 +180,14 @@ func NewRxNextHandler(
 	if onComplete == nil {
 		return nil, goerrors.InvalidParam
 	}
-	// got a hander for it
-	//if isActive == nil {
-	//	return nil, goerrors.InvalidParam
-	//}
 
 	return &RxNextHandler{
 		BaseRxHandler: BaseRxHandler{
 			Logger:               logger,
-			RwsMessageCount:      0,
-			OtherMessageCount:    0,
+			RwsMessageCountIn:    0,
+			OtherMessageCountIn:  0,
+			RwsMessageCountOut:   0,
+			OtherMessageCountOut: 0,
 			RwsByteCountIn:       0,
 			RwsByteCountOut:      0,
 			Name:                 name,
@@ -201,7 +208,6 @@ func NewRxNextHandler(
 			}
 		}(isActive),
 	}, nil
-
 }
 
 func NewRxNextHandler2(
@@ -214,7 +220,7 @@ func NewRxNextHandler2(
 	if defaultRxNextHandler == nil {
 		return nil, goerrors.InvalidParam
 	}
-	return NewRxNextHandler(
+	return newRxNextHandler(
 		name,
 		ConnectionCancelFunc,
 		next,

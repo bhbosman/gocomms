@@ -54,12 +54,10 @@ func RegisterHttpHandler(url string) fx.Option {
 
 										// this function is part of the GoFunctionCounter count
 										go func() {
-											functionName := params.GoFunctionCounter.CreateFunctionName("RegisterHttpHandler.OnStart")
-											defer func(GoFunctionCounter GoFunctionCounter.IService, name string) {
-												_ = GoFunctionCounter.Remove(name)
-											}(params.GoFunctionCounter, functionName)
-											_ = params.GoFunctionCounter.Add(functionName)
-
+											params.GoFunctionCounter.Add("RegisterHttpHandler.OnStart")
+											defer func(GoFunctionCounter GoFunctionCounter.IService) {
+												_ = GoFunctionCounter.Remove("RegisterHttpHandler.OnStart")
+											}(params.GoFunctionCounter)
 											//
 											err := params.Server.ListenAndServe()
 											println(err.Error())

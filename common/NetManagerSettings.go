@@ -5,17 +5,11 @@ import (
 )
 
 type NetManagerSettings struct {
-	MaxConnections int
-	//OnCreateConnectionFactory      interface{} //func(IOnCreateConnection, err)
+	MaxConnections                 int
 	OnCreateIConnectionReactor     fx.Option //func(intf.IConnectionReactor, err)
 	FxOptionsForConnectionInstance []fx.Option
 	MoreOptions                    []fx.Option
 }
-
-//
-//func (self *NetManagerSettings) SetOnCreateConnection(factory func() (goCommsDefinitions.IOnCreateConnection, error)) {
-//	self.OnCreateConnectionFactory = factory
-//}
 
 func (self *NetManagerSettings) AddFxOptionsForConnectionInstance(options []fx.Option) {
 	self.FxOptionsForConnectionInstance = append(self.FxOptionsForConnectionInstance, options...)

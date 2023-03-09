@@ -2,6 +2,7 @@ package netBase
 
 import (
 	"context"
+	"github.com/bhbosman/goCommsDefinitions"
 	"github.com/bhbosman/goConnectionManager"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	"github.com/bhbosman/gocommon/Services/interfaces"
@@ -21,6 +22,7 @@ func NewConnNetManager(
 	proxyUrl *url.URL,
 	connectionUrl *url.URL,
 	cancelCtx context.Context,
+	CancellationContext goCommsDefinitions.ICancellationContext,
 	connectionManager goConnectionManager.IService,
 	ZapLogger *zap.Logger,
 	uniqueSessionNumber interfaces.IUniqueReferenceService,
@@ -35,6 +37,7 @@ func NewConnNetManager(
 		proxyUrl,
 		connectionUrl,
 		cancelCtx,
+		CancellationContext,
 		connectionManager,
 		ZapLogger,
 		uniqueSessionNumber,

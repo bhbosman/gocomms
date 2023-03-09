@@ -32,7 +32,7 @@ func InvokeFxLifeCyclePipeStateOutStartStop() fx.Option {
 								stackData = container.StackData
 								pipeData = container.OutPipeData
 							}
-							return localPipeStart.Start(stackData, pipeData, params.CancelCtx)
+							return localPipeStart.OnStart(stackData, pipeData, params.CancelCtx)
 						},
 						OnStop: func(_ context.Context) error {
 							var stackData interface{} = nil
@@ -41,7 +41,7 @@ func InvokeFxLifeCyclePipeStateOutStartStop() fx.Option {
 								stackData = container.StackData
 								pipeData = container.InPipeData
 							}
-							return localPipeStart.End(stackData, pipeData)
+							return localPipeStart.OnEnd(stackData, pipeData)
 						},
 					},
 				)

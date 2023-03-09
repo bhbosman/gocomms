@@ -15,7 +15,7 @@ func InvokeFxLifeCycleReadDataFromConnectionStartStop() fx.Option {
 		func(
 			params struct {
 				fx.In
-				Conn                        net.Conn
+				Conn                        net.Conn `name:"PrimaryConnection"`
 				Lifecycle                   fx.Lifecycle
 				ConnectionCancelFunc        model.ConnectionCancelFunc
 				CancelCtx                   context.Context
@@ -36,11 +36,9 @@ func InvokeFxLifeCycleReadDataFromConnectionStartStop() fx.Option {
 							"InvokeFxLifeCycleReadDataFromConnectionStartStop.ReadFromIoReader",
 							func() {
 								common.ReadFromIoReader(
-									"net.conn.read",
 									params.Conn,
 									params.CancelCtx,
 									params.CancelFunc,
-									//params.ConnectionCancelFunc,
 									params.RxNextHandlerForNetConnRead,
 								)
 							},

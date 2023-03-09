@@ -2,6 +2,7 @@ package RxHandlers
 
 import (
 	"context"
+	"github.com/bhbosman/gocommon/messages"
 	model2 "github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/goerrors"
 	"github.com/bhbosman/goprotoextra"
@@ -17,33 +18,37 @@ type RxMapHandler struct {
 
 func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface{}, error) {
 	if rws, ok := i.(goprotoextra.ReadWriterSize); ok {
-		self.RwsMessageCount++
+		self.RwsMessageCountIn++
 		self.RwsByteCountIn += int64(rws.Size())
-
 		newRws, err := self.next.MapReadWriterSize(ctx, rws)
 		if err != nil {
 			return nil, err
 		}
-		message, b, err := self.next.ReadMessage(rws)
-		if err != nil {
-			return nil, err
-		}
-		if b {
-			self.OtherMessageCount++
-			return message, nil
-		}
+		return newRws, nil
 
-		self.RwsByteCountOut += int64(newRws.Size())
-		return newRws, err
+		//message, b, err := self.next.ReadMessage(rws)
+		//if err != nil {
+		//	return nil, err
+		//}
+		//if b {
+		//	self.OtherMessageCountOut++
+		//	return message, nil
+		//}
+		//self.RwsMessageCountOut++
+		//self.RwsByteCountOut += int64(newRws.Size())
 	} else {
-		self.OtherMessageCount++
 		if self.next != nil {
 			switch v := i.(type) {
+			case *messages.EmptyQueue:
+				return i, nil
 			case *model2.PublishRxHandlerCounters:
+				self.OtherMessageCountIn++
 				counters := model2.NewRxHandlerCounter(
 					self.Name,
-					self.OtherMessageCount,
-					self.RwsMessageCount,
+					self.OtherMessageCountIn,
+					self.RwsMessageCountIn,
+					self.OtherMessageCountOut,
+					self.RwsMessageCountOut,
 					self.RwsByteCountIn,
 					self.RwsByteCountOut)
 				v.Add(counters)
@@ -51,22 +56,27 @@ func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface
 				if err != nil {
 					return nil, err
 				}
-				break
+				self.OtherMessageCountOut++
+				return i, nil
 			default:
+				self.OtherMessageCountIn++
 				message, b, err := self.next.ReadMessage(i)
 				if err != nil {
 					return nil, err
 				}
 				if rws, ok := message.(goprotoextra.ReadWriterSize); ok {
 					self.RwsByteCountOut += int64(rws.Size())
+					self.RwsMessageCountOut++
 				}
 				if b {
 					return message, nil
 				}
-				break
+				return i, nil
 			}
+		} else {
+			return i, nil
+
 		}
-		return i, nil
 	}
 }
 
@@ -74,7 +84,7 @@ func (self *RxMapHandler) FlatMapHandler(ctx context.Context) func(item rxgo.Ite
 	return func(item rxgo.Item) rxgo.Observable {
 		switch {
 		case item.V != nil:
-			result, err := self.next.FlatMapHandler(item.V)
+			result, err := self.next.FlatMapHandler(ctx, item.V)
 			if err != nil {
 				return rxgo.Just(err)()
 			}
@@ -85,6 +95,16 @@ func (self *RxMapHandler) FlatMapHandler(ctx context.Context) func(item rxgo.Ite
 				}
 				return rxgo.Just(unk)()
 			}
+			if _, ok := item.V.(goprotoextra.ReadWriterSize); ok {
+				self.RwsMessageCountIn++
+			} else {
+				self.OtherMessageCountIn++
+			}
+			self.RwsMessageCountOut += int64(result.RwsCount)
+			self.RwsMessageCountOut += int64(result.OtherCount)
+			self.RwsByteCountIn += int64(result.BytesIn)
+			self.RwsByteCountOut += int64(result.BytesOut)
+
 			return rxgo.Just(result.Items...)()
 		case item.E != nil:
 			return rxgo.Just(item.E)()
@@ -116,8 +136,10 @@ func NewRxMapHandler(
 	return &RxMapHandler{
 		BaseRxHandler: BaseRxHandler{
 			Logger:               logger,
-			RwsMessageCount:      0,
-			OtherMessageCount:    0,
+			RwsMessageCountIn:    0,
+			OtherMessageCountIn:  0,
+			RwsMessageCountOut:   0,
+			OtherMessageCountOut: 0,
 			RwsByteCountIn:       0,
 			RwsByteCountOut:      0,
 			Name:                 name,

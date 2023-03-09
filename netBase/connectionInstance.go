@@ -22,11 +22,46 @@ import (
 	"time"
 )
 
+func ProvideCancelContextWithRwc(cancelContext context.Context) fx.Option {
+	return fx.Provide(
+		fx.Annotated{
+			Target: func(
+				params struct {
+					fx.In
+					Lifecycle               fx.Lifecycle
+					Logger                  *zap.Logger
+					PrimaryConnectionCloser io.Closer `name:"PrimaryConnection"`
+				},
+			) (context.Context, context.CancelFunc, goCommsDefinitions.ICancellationContext, error) {
+				ctx, cancelFunc := context.WithCancel(cancelContext)
+				cancellationContextInstance := goCommsDefinitions.NewCancellationContext(
+					cancelFunc,
+					ctx,
+					params.Logger,
+					params.PrimaryConnectionCloser,
+				)
+				params.Lifecycle.Append(
+					fx.Hook{
+						OnStart: nil,
+						OnStop: func(ctx context.Context) error {
+							cancellationContextInstance.Cancel()
+							return nil
+						},
+					},
+				)
+				return ctx,
+					cancellationContextInstance.Cancel,
+					cancellationContextInstance,
+					nil
+			},
+		},
+	)
+}
+
 type ConnectionInstance struct {
-	ConnectionUrl       *url.URL
-	UniqueSessionNumber sss.IUniqueReferenceService
-	ConnectionManager   goConnectionManager.IService
-	//UserContext                              interface{}
+	ConnectionUrl                            *url.URL
+	UniqueSessionNumber                      sss.IUniqueReferenceService
+	ConnectionManager                        goConnectionManager.IService
 	CancelCtx                                context.Context
 	AdditionalFxOptionsForConnectionInstance func() fx.Option
 	ZapLogger                                *zap.Logger
@@ -36,16 +71,14 @@ func NewConnectionInstance(
 	connectionUrl *url.URL,
 	uniqueSessionNumber sss.IUniqueReferenceService,
 	connectionManager goConnectionManager.IService,
-	//userContext interface{},
 	cancelCtx context.Context,
 	additionalFxOptionsForConnectionInstance func() fx.Option,
 	zapLogger *zap.Logger,
 ) ConnectionInstance {
 	return ConnectionInstance{
-		ConnectionUrl:       connectionUrl,
-		UniqueSessionNumber: uniqueSessionNumber,
-		ConnectionManager:   connectionManager,
-		//UserContext:                              userContext,
+		ConnectionUrl:                            connectionUrl,
+		UniqueSessionNumber:                      uniqueSessionNumber,
+		ConnectionManager:                        connectionManager,
 		CancelCtx:                                cancelCtx,
 		AdditionalFxOptionsForConnectionInstance: additionalFxOptionsForConnectionInstance,
 		ZapLogger:                                zapLogger,
@@ -56,7 +89,7 @@ func (self ConnectionInstance) NewReaderWriterCloserInstanceOptions(
 	uniqueReference string,
 	goFunctionCounter GoFunctionCounter.IService,
 	connectionType model.ConnectionType,
-	rwc io.ReadWriteCloser,
+	conn net.Conn,
 	provideLogger fx.Option,
 	settingOptions ...INewConnectionInstanceSettingsApply,
 ) fx.Option {
@@ -78,19 +111,17 @@ func (self ConnectionInstance) NewReaderWriterCloserInstanceOptions(
 		goConnectionManager.ProvideObtainConnectionManagerInformation(),
 		goConnectionManager.ProvideRegisterToConnectionManager(),
 		goConnectionManager.ProvidePublishConnectionInformation(),
-		internal.ProvideReadWriteCloser(rwc),
+		internal.ProvideReadWriteCloser(conn),
 		internal.ProvideExtractPipeInStates("PipeInStates"),
 		internal.ProvideExtractPipeOutStates("PipeOutStates"),
 		internal.ProvideCreateStackData(),
-		//fx.Provide(fx.Annotated{Name: intf.UserContext, Target: func() interface{} { return self.UserContext }}),
 		fx.Provide(fx.Annotated{Name: intf.ConnectionId, Target: func() string { return uniqueReference }}),
 		fx.Provide(fx.Annotated{Target: func() GoFunctionCounter.IService { return goFunctionCounter }}),
-		goCommsDefinitions.ProvideCancelContextWithRwc(self.CancelCtx),
+		ProvideCancelContextWithRwc(self.CancelCtx),
 		self.AdditionalFxOptionsForConnectionInstance(),
 		internal.ProvideRxOptions(),
 		internal.ProvideCreateStackDefinition(),
 		internal.ProvideCreateStackCancelFunc(),
-		internal.ProvideCreateTransportLayer00(),
 		internal.ProvideChannel("InBoundChannel"),
 		internal.ProvideCreateTransportLayer02Step01(),
 		internal.ProvideChannel("OutBoundChannel"),
@@ -146,16 +177,16 @@ func (self ConnectionInstance) NewConnectionInstanceOptions(
 		time.Hour,
 		time.Hour,
 		rwcOptions,
-		fx.Provide(
-			fx.Annotated{
-				Target: func() (net.Conn, error) {
-					if conn == nil {
-						return nil, fmt.Errorf("connection is nil. Please resolve")
-					}
-					return conn, nil
-				},
-			},
-		),
+		//fx.Provide(
+		//	fx.Annotated{
+		//		Target: func() (net.Conn, error) {
+		//			if conn == nil {
+		//				return nil, fmt.Errorf("connection is nil. Please resolve")
+		//			}
+		//			return conn, nil
+		//		},
+		//	},
+		//),
 	)
 }
 

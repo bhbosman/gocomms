@@ -1,3 +1,3 @@
 package common
 
-type BoundResult func() (IStackBoundDefinition, error)
+type BoundResult func() (IStackBoundFactory, error)

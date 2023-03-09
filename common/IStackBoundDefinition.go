@@ -1,6 +1,6 @@
 package common
 
-type IStackBoundDefinition interface {
+type IStackBoundFactory interface {
 	GetPipeDefinition() PipeDefinition
 	GetPipeState() *PipeState
 }

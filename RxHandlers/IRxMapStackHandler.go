@@ -2,22 +2,37 @@ package RxHandlers
 
 import (
 	"context"
-	"github.com/bhbosman/goprotoextra"
 )
 
 type FlatMapHandlerResult struct {
 	UseDefaultPath bool
 	Items          []interface{}
-	MessageCount   int
+	RwsCount       int
+	OtherCount     int
+	BytesIn        int
+	BytesOut       int
 }
 
-func NewFlatMapHandlerResult(useDefaultPath bool, items []interface{}, messageCount int) FlatMapHandlerResult {
-	return FlatMapHandlerResult{UseDefaultPath: useDefaultPath, Items: items, MessageCount: messageCount}
+func NewFlatMapHandlerResult(
+	useDefaultPath bool,
+	items []interface{},
+	RwsCount int,
+	OtherCount int,
+	BytesIn int,
+	BytesOut int,
+) FlatMapHandlerResult {
+	return FlatMapHandlerResult{
+		UseDefaultPath: useDefaultPath,
+		Items:          items,
+		RwsCount:       RwsCount,
+		OtherCount:     OtherCount,
+		BytesIn:        BytesIn,
+		BytesOut:       BytesOut,
+	}
 }
 
 type IRxMapStackHandler interface {
 	IStackHandler
-	MapReadWriterSize(context.Context, goprotoextra.ReadWriterSize) (goprotoextra.ReadWriterSize, error)
-	ErrorState() error
-	FlatMapHandler(item interface{}) (FlatMapHandlerResult, error)
+	MapReadWriterSize(context.Context, interface{}) (interface{}, error)
+	FlatMapHandler(ctx context.Context, item interface{}) (FlatMapHandlerResult, error)
 }

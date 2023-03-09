@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bhbosman/goConnectionManager"
+	"github.com/bhbosman/gocommon"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/gocommon/rxOverride"
@@ -21,8 +22,8 @@ func ProvideConnReactorWrite2(name string) fx.Option {
 			Target: func(
 				params struct {
 					fx.In
-					IncomingObs                  *common.IncomingObs
-					ChannelManager               chan rxgo.Item `name:"QWERTY"`
+					IncomingObs                  gocommon.IObservable `name:"Inbound"`
+					ChannelManager               chan rxgo.Item       `name:"QWERTY"`
 					RxOptions                    []rxgo.Option
 					PublishConnectionInformation goConnectionManager.IPublishConnectionInformation
 					ConnectionCancelFunc         model.ConnectionCancelFunc
@@ -75,7 +76,7 @@ func ProvideConnReactorWrite2(name string) fx.Option {
 				_ = rxOverride.ForEach2(
 					"conn.reactor.write",
 					model.StreamDirectionInbound,
-					params.IncomingObs.InboundObservable,
+					params.IncomingObs,
 					params.Ctx,
 					params.GoFunctionCounter,
 					rxHandler,

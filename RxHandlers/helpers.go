@@ -24,7 +24,7 @@ func All2(
 	if err != nil {
 		return nil, err
 	}
-	return goCommsDefinitions.NewDefaultRxNextHandler(i, t, e, c, active), nil
+	return goCommsDefinitions.NewDefaultRxNextHandler(i, t, e, c, active)
 }
 
 func all(

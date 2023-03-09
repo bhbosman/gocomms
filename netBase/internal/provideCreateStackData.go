@@ -16,10 +16,10 @@ func ProvideCreateStackData() fx.Option {
 			params struct {
 				fx.In
 				LifeCycle         fx.Lifecycle
-				StackState        []*common.StackState
+				StackState        []common.IStackState
 				PipeInStates      []*common.PipeState `name:"PipeInStates"`
 				PipeOutStates     []*common.PipeState `name:"PipeOutStates"`
-				Conn              net.Conn
+				Conn              net.Conn            `name:"PrimaryConnection"`
 				Url               *url.URL
 				Ctx               context.Context
 				CtxCancelFunc     context.CancelFunc
@@ -40,26 +40,26 @@ func ProvideCreateStackData() fx.Option {
 			for _, iteration := range params.StackState {
 				localItem := iteration
 				var stackData interface{}
-				stackData, err = localItem.Create()
+				stackData, err = localItem.OnCreate()()
 				if err != nil {
 					return nil, err
 				}
 				if stackData == nil {
 					stackData = common.NewNoCloser()
 				}
-				if container, ok := result[localItem.Id]; ok {
+				if container, ok := result[localItem.GetId()]; ok {
 					container.StackData = stackData
 				} else {
-					result[localItem.Id] = &common.StackDataContainer{
+					result[localItem.GetId()] = &common.StackDataContainer{
 						StackData: stackData,
 					}
 				}
 				params.LifeCycle.Append(
 					fx.Hook{
 						OnStop: func(ctx context.Context) error {
-							if localItem.Destroy != nil {
-								if container, ok := result[localItem.Id]; ok {
-									return localItem.Destroy(params.ConnectionType, container.StackData)
+							if localItem.OnDestroy() != nil {
+								if container, ok := result[localItem.GetId()]; ok {
+									return localItem.OnDestroy()(params.ConnectionType, container.StackData)
 								}
 							}
 							return nil
@@ -74,7 +74,7 @@ func ProvideCreateStackData() fx.Option {
 				}
 
 				var pipeData interface{}
-				pipeData, err = localItem.Create(stackData, params.Ctx)
+				pipeData, err = localItem.OnCreate(stackData, params.Ctx)
 				if err != nil {
 					return nil, err
 				}
@@ -91,9 +91,9 @@ func ProvideCreateStackData() fx.Option {
 				params.LifeCycle.Append(
 					fx.Hook{
 						OnStop: func(ctx context.Context) error {
-							if localItem.Destroy != nil {
+							if localItem.OnDestroy != nil {
 								if container, ok := result[localItem.ID]; ok {
-									return localItem.Destroy(container.StackData, container.InPipeData)
+									return localItem.OnDestroy(container.StackData, container.InPipeData)
 								}
 							}
 							return nil
@@ -108,7 +108,7 @@ func ProvideCreateStackData() fx.Option {
 				}
 
 				var pipeData interface{}
-				pipeData, err = localItem.Create(stackData, params.Ctx)
+				pipeData, err = localItem.OnCreate(stackData, params.Ctx)
 				if err != nil {
 					return nil, err
 				}
@@ -125,9 +125,9 @@ func ProvideCreateStackData() fx.Option {
 				params.LifeCycle.Append(
 					fx.Hook{
 						OnStop: func(ctx context.Context) error {
-							if localItem.Destroy != nil {
+							if localItem.OnDestroy != nil {
 								if container, ok := result[localItem.ID]; ok {
-									return localItem.Destroy(container.StackData, container.OutPipeData)
+									return localItem.OnDestroy(container.StackData, container.OutPipeData)
 								}
 							}
 							return nil
