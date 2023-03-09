@@ -45,11 +45,11 @@ func (self *InvokeInboundTransportLayerHandler) GetAdditionalBytesSend() int {
 	return 0
 }
 
-func (self *InvokeInboundTransportLayerHandler) ReadMessage(i interface{}) (interface{}, bool, error) {
+func (self *InvokeInboundTransportLayerHandler) ReadMessage(i interface{}) error {
 	if publishRxHandlerCounters, ok := i.(*model.PublishRxHandlerCounters); ok {
-		return nil, false, self.conn.ConnectionInformationReceived(publishRxHandlerCounters)
+		return self.conn.ConnectionInformationReceived(publishRxHandlerCounters)
 	}
-	return nil, false, nil
+	return nil
 }
 
 func NewInvokeInboundTransportLayerHandler(
@@ -80,7 +80,7 @@ func (self *InvokeInboundTransportLayerHandler) Close() error {
 }
 
 func (self *InvokeInboundTransportLayerHandler) SendData(data interface{}) {
-	_, _, _ = self.ReadMessage(data)
+	_ = self.ReadMessage(data)
 	if self.sendData != nil {
 		self.sendData(data)
 	}

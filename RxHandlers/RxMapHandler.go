@@ -32,7 +32,7 @@ func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface
 			self.RwsByteCountIn,
 			self.RwsByteCountOut)
 		v.Add(counters)
-		_, _, err := self.next.ReadMessage(i)
+		err := self.next.ReadMessage(i)
 		if err != nil {
 			return nil, err
 		}
@@ -57,12 +57,9 @@ func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface
 			return v, nil
 		default:
 			self.OtherMessageCountOut++
-			message, b, err := self.next.ReadMessage(i)
+			err := self.next.ReadMessage(i)
 			if err != nil {
 				return nil, err
-			}
-			if b {
-				return message, nil
 			}
 			return i, nil
 		}
