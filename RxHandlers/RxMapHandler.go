@@ -17,7 +17,6 @@ type RxMapHandler struct {
 }
 
 func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface{}, error) {
-
 	switch v := i.(type) {
 	case *messages.EmptyQueue:
 		return i, nil
@@ -41,8 +40,8 @@ func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface
 	default:
 		switch v := i.(type) {
 		case goprotoextra.ReadWriterSize:
-			self.RwsMessageCountOut++
-			self.RwsByteCountOut += int64(v.Size())
+			self.RwsMessageCountIn++
+			self.RwsByteCountIn += int64(v.Size())
 		default:
 			self.OtherMessageCountIn++
 		}
