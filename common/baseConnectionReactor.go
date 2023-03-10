@@ -5,6 +5,7 @@ import (
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/gocommon/pubSub"
+	"github.com/bhbosman/gocomms/intf"
 	"github.com/cskr/pubsub"
 	"github.com/reactivex/rxgo/v2"
 	"go.uber.org/multierr"
@@ -28,11 +29,10 @@ type BaseConnectionReactor struct {
 }
 
 func (self *BaseConnectionReactor) Init(
-	onSendToReactor rxgo.NextFunc,
-	onSendToConnection rxgo.NextFunc,
+	params intf.IInitParams,
 ) (rxgo.NextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, error) {
-	self.OnSendToReactor = onSendToReactor
-	self.OnSendToConnection = onSendToConnection
+	self.OnSendToReactor = params.OnSendToReactor()
+	self.OnSendToConnection = params.OnSendToConnection()
 	self.OnSendToReactorPubSubBag = pubsub.NewNextFuncSubscription(self.OnSendToReactor)
 	self.OnSendToConnectionPubSubBag = pubsub.NewNextFuncSubscription(self.OnSendToConnection)
 

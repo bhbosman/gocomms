@@ -2,8 +2,6 @@ package internal
 
 import (
 	"context"
-	"fmt"
-	"github.com/bhbosman/goConnectionManager"
 	"github.com/bhbosman/gocommon"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	"github.com/bhbosman/gocommon/model"
@@ -15,31 +13,28 @@ import (
 	"go.uber.org/zap"
 )
 
-func ProvideConnReactorWrite2(name string) fx.Option {
+func ProvideConnReactorWrite2() fx.Option {
 	return fx.Provide(
 		fx.Annotated{
-			Name: name,
+			Name: "conn.reactor.write",
 			Target: func(
 				params struct {
 					fx.In
-					IncomingObs                  gocommon.IObservable `name:"Inbound"`
-					ChannelManager               chan rxgo.Item       `name:"QWERTY"`
-					RxOptions                    []rxgo.Option
-					PublishConnectionInformation goConnectionManager.IPublishConnectionInformation
-					ConnectionCancelFunc         model.ConnectionCancelFunc
-					Logger                       *zap.Logger
-					Ctx                          context.Context
-					ConnectionId                 string `name:"ConnectionId"`
-					GoFunctionCounter            GoFunctionCounter.IService
+					Observable           gocommon.IObservable `name:"Inbound"`
+					ChannelManager       chan rxgo.Item       `name:"QWERTY"`
+					RxOptions            []rxgo.Option
+					ConnectionCancelFunc model.ConnectionCancelFunc
+					Logger               *zap.Logger
+					Ctx                  context.Context
+					ConnectionId         string `name:"ConnectionId"`
+					GoFunctionCounter    GoFunctionCounter.IService
 				},
 			) (*RxHandlers.RxNextHandler, *common.InvokeInboundTransportLayerHandler, error) {
 				var handler *common.InvokeInboundTransportLayerHandler
 				var rxHandler *RxHandlers.RxNextHandler
 
 				eventHandler, err := RxHandlers.All2(
-					fmt.Sprintf(
-						"ProvideConnReactorWrite %v",
-						params.ConnectionId),
+					"Deprecated",
 					model.StreamDirectionUnknown,
 					params.ChannelManager,
 					params.Logger,
@@ -51,12 +46,8 @@ func ProvideConnReactorWrite2(name string) fx.Option {
 				}
 
 				handler, err = common.NewInvokeInboundTransportLayerHandler(
-					params.PublishConnectionInformation,
 					eventHandler.OnSendData,
 					eventHandler.OnTrySendData,
-					func(i interface{}) error {
-						return nil
-					},
 					eventHandler.OnError,
 					eventHandler.OnComplete,
 				)
@@ -65,7 +56,7 @@ func ProvideConnReactorWrite2(name string) fx.Option {
 				}
 
 				rxHandler, err = RxHandlers.NewRxNextHandler2(
-					"ConnectionReactor",
+					"Deprecated",
 					params.ConnectionCancelFunc,
 					handler,
 					handler,
@@ -74,9 +65,9 @@ func ProvideConnReactorWrite2(name string) fx.Option {
 					return nil, nil, err
 				}
 				_ = rxOverride.ForEach2(
-					"conn.reactor.write",
+					"Deprecated",
 					model.StreamDirectionInbound,
-					params.IncomingObs,
+					params.Observable,
 					params.Ctx,
 					params.GoFunctionCounter,
 					rxHandler,

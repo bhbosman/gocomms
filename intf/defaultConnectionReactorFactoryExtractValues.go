@@ -3,7 +3,7 @@ package intf
 type defaultConnectionReactorFactoryExtractValues struct {
 }
 
-func NewDefaultConnectionReactorFactoryExtractValues() *defaultConnectionReactorFactoryExtractValues {
+func NewDefaultConnectionReactorFactoryExtractValues() IConnectionReactorFactoryExtractValues {
 	return &defaultConnectionReactorFactoryExtractValues{}
 }
 

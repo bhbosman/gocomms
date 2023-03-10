@@ -23,11 +23,11 @@ func InvokeFxLifeCycleStartStopStackHeartbeat() fx.Option {
 				GoFunctionCounter       GoFunctionCounter.IService
 			},
 		) {
-			ticker := time.NewTicker(time.Hour * 24)
+			var ticker *time.Ticker
 			params.Lifecycle.Append(
 				fx.Hook{
 					OnStart: func(_ context.Context) error {
-						ticker.Reset(time.Second)
+						ticker = time.NewTicker(time.Second)
 						if params.CancelCtx.Err() != nil {
 							return params.CancelCtx.Err()
 						}
@@ -61,7 +61,9 @@ func InvokeFxLifeCycleStartStopStackHeartbeat() fx.Option {
 						)
 					},
 					OnStop: func(_ context.Context) error {
-						ticker.Stop()
+						if ticker != nil {
+							ticker.Stop()
+						}
 						return nil
 					},
 				},
