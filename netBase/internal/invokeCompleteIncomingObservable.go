@@ -72,6 +72,8 @@ func InvokeCompleteIncomingObservable() fx.Option {
 									)
 								},
 								params.ToConnectionFunc,
+								params.NextFuncOutBoundChannel,
+								params.NextFuncInBoundChannel,
 							),
 						)
 						if err != nil {
