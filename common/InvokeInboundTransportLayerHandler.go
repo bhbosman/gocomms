@@ -34,7 +34,7 @@ func (self *InvokeInboundTransportLayerHandler) GetAdditionalBytesSend() int {
 	return 0
 }
 
-func (self *InvokeInboundTransportLayerHandler) ReadMessage(interface{}) error {
+func (self *InvokeInboundTransportLayerHandler) ReadMessage(i interface{}) error {
 	return nil
 }
 
