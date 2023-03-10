@@ -6,10 +6,10 @@ import (
 	"go.uber.org/fx"
 )
 
-func ProvideCreateToReactorFunc(name string) fx.Option {
+func ProvideCreateToReactorFunc() fx.Option {
 	return fx.Provide(
 		fx.Annotated{
-			Name: name,
+			Name: "ForReactor",
 			Target: func(
 				params struct {
 					fx.In

@@ -11,10 +11,10 @@ import (
 	"go.uber.org/zap"
 )
 
-func ProvideCreateChannel(name string) fx.Option {
+func ProvideCreateChannel() fx.Option {
 	return fx.Provide(
 		fx.Annotated{
-			Name: name,
+			Name: "QWERTY",
 			Target: func(
 				params struct {
 					fx.In
@@ -34,7 +34,7 @@ func ProvideCreateChannel(name string) fx.Option {
 				ch := make(chan rxgo.Item)
 				obs := rxgo.FromChannel(ch, rxgo.WithContext(params.CancelCtx))
 
-				eventHandler, err := RxHandlers.All2(
+				ev, err := RxHandlers.All2(
 					fmt.Sprintf(
 						"ProvideCreateChannel Provider %v",
 						params.ConnectionId),
@@ -47,14 +47,7 @@ func ProvideCreateChannel(name string) fx.Option {
 				if err != nil {
 					return nil, nil, nil, nil, nil, nil, nil, err
 				}
-				return obs,
-					ch,
-					eventHandler.OnSendData,
-					eventHandler.OnTrySendData,
-					eventHandler.OnError,
-					eventHandler.OnComplete,
-					eventHandler.IsActive,
-					nil
+				return obs, ch, ev.OnSendData, ev.OnTrySendData, ev.OnError, ev.OnComplete, ev.IsActive, nil
 			},
 		},
 	)

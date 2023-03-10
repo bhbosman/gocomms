@@ -5,12 +5,31 @@ import (
 	"io"
 )
 
+type IInitParams interface {
+	OnSendToReactor() rxgo.NextFunc
+	OnSendToConnection() rxgo.NextFunc
+}
+
+type initParams struct {
+	onSendToReactor    rxgo.NextFunc
+	onSendToConnection rxgo.NextFunc
+}
+
+func NewInitParams(onSendToReactor rxgo.NextFunc, onSendToConnection rxgo.NextFunc) IInitParams {
+	return &initParams{onSendToReactor: onSendToReactor, onSendToConnection: onSendToConnection}
+}
+
+func (self *initParams) OnSendToReactor() rxgo.NextFunc {
+	return self.onSendToReactor
+}
+
+func (self *initParams) OnSendToConnection() rxgo.NextFunc {
+	return self.onSendToConnection
+}
+
 type IConnectionReactor interface {
 	io.Closer
-	Init(
-		onSendToReactor rxgo.NextFunc,
-		onSendToConnection rxgo.NextFunc,
-	) (rxgo.NextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, error)
+	Init(params IInitParams) (rxgo.NextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, error)
 	Open() error
 }
 
