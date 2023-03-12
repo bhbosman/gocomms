@@ -20,6 +20,15 @@ type BaseRxHandler struct {
 	ConnectionCancelFunc model.ConnectionCancelFunc
 }
 
+func (self *BaseRxHandler) clearCounters() {
+	self.RwsMessageCountIn = 0
+	self.OtherMessageCountIn = 0
+	self.RwsMessageCountOut = 0
+	self.OtherMessageCountOut = 0
+	self.RwsByteCountIn = 0
+	self.RwsByteCountOut = 0
+}
+
 func NewBaseRxHandler(logger *zap.Logger, connectionCancelFunc model.ConnectionCancelFunc) (BaseRxHandler, error) {
 	var errList error = nil
 	if connectionCancelFunc == nil {

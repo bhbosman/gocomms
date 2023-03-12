@@ -30,11 +30,9 @@ func ProvideConnReactorWrite2() fx.Option {
 					GoFunctionCounter    GoFunctionCounter.IService
 				},
 			) (*RxHandlers.RxNextHandler, *common.InvokeInboundTransportLayerHandler, error) {
-				var handler *common.InvokeInboundTransportLayerHandler
-				var rxHandler *RxHandlers.RxNextHandler
 
 				eventHandler, err := RxHandlers.All2(
-					"Deprecated",
+					"ConnReactorWrite",
 					model.StreamDirectionUnknown,
 					params.ChannelManager,
 					params.Logger,
@@ -45,7 +43,7 @@ func ProvideConnReactorWrite2() fx.Option {
 					return nil, nil, err
 				}
 
-				handler, err = common.NewInvokeInboundTransportLayerHandler(
+				handler, err := common.NewInvokeInboundTransportLayerHandler(
 					eventHandler.OnSendData,
 					eventHandler.OnTrySendData,
 					eventHandler.OnError,
@@ -55,8 +53,8 @@ func ProvideConnReactorWrite2() fx.Option {
 					return nil, nil, err
 				}
 
-				rxHandler, err = RxHandlers.NewRxNextHandler2(
-					"Deprecated",
+				rxHandler, err := RxHandlers.NewRxNextHandler2(
+					"ConnReactorWrite",
 					params.ConnectionCancelFunc,
 					handler,
 					handler,
@@ -65,7 +63,7 @@ func ProvideConnReactorWrite2() fx.Option {
 					return nil, nil, err
 				}
 				_ = rxOverride.ForEach2(
-					"Deprecated",
+					"ConnReactorWrite",
 					model.StreamDirectionInbound,
 					params.Observable,
 					params.Ctx,

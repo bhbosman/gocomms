@@ -17,8 +17,16 @@ type RxMapHandler struct {
 }
 
 func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface{}, error) {
-
+	// TODO: need to clean up this bit, on how read message is called and how it affect RWS, with protobuf, and clear counters. For now it is hard coded
 	switch v := i.(type) {
+	case *model2.ClearCounters:
+		self.clearCounters()
+		err := self.next.ReadMessage(i)
+		if err != nil {
+			return nil, err
+		}
+		self.OtherMessageCountOut++
+		return i, nil
 	case *messages.EmptyQueue:
 		return i, nil
 	case *model2.PublishRxHandlerCounters:
@@ -63,9 +71,7 @@ func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface
 			}
 			return i, nil
 		}
-
 	}
-
 }
 
 func (self *RxMapHandler) FlatMapHandler(ctx context.Context) func(item rxgo.Item) rxgo.Observable {

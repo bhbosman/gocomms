@@ -11,12 +11,12 @@ import (
 func All2(
 	description string,
 	direction model.StreamDirection,
-	Items chan<- rxgo.Item,
+	items chan<- rxgo.Item,
 	logger *zap.Logger,
 	ctx context.Context,
 	useCompleteCallback bool,
 ) (goCommsDefinitions.IRxNextHandler, error) {
-	i, t, e, c, active, err := all(description, direction, Items, logger, ctx)
+	i, t, e, c, active, err := all(description, direction, items, logger, ctx)
 
 	if !useCompleteCallback {
 		c = nil
@@ -30,7 +30,7 @@ func All2(
 func all(
 	description string,
 	direction model.StreamDirection,
-	Items chan<- rxgo.Item,
+	items chan<- rxgo.Item,
 	logger *zap.Logger,
 	ctx context.Context,
 ) (rxgo.NextFunc, goCommsDefinitions.TryNextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, goCommsDefinitions.IsNextActive, error) {
@@ -49,7 +49,7 @@ func all(
 			}()
 			if !isClosed {
 				item := rxgo.Of(data)
-				item.SendContext(ctx, Items)
+				item.SendContext(ctx, items)
 			}
 		},
 		func(data interface{}) bool {
@@ -65,7 +65,7 @@ func all(
 			}()
 			if !isClosed {
 				item := rxgo.Of(data)
-				return item.SendNonBlocking(Items)
+				return item.SendNonBlocking(items)
 			}
 			return false
 		},
@@ -83,7 +83,7 @@ func all(
 			}()
 			if !isClosed {
 				item := rxgo.Error(err)
-				item.SendContext(ctx, Items)
+				item.SendContext(ctx, items)
 			}
 		},
 		func() {
@@ -101,7 +101,7 @@ func all(
 			}()
 			if !isClosed {
 				isClosed = true
-				close(Items)
+				close(items)
 			}
 		},
 		func() bool {
