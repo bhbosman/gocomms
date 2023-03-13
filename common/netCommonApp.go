@@ -77,13 +77,15 @@ func ConnectionApp(
 					Lifecycle   fx.Lifecycle
 				},
 			) {
-				params.Lifecycle.Append(fx.Hook{
-					OnStart: nil,
-					OnStop: func(ctx context.Context) error {
-						err := params.NetListener.Close()
-						return err
+				params.Lifecycle.Append(
+					fx.Hook{
+						OnStart: nil,
+						OnStop: func(ctx context.Context) error {
+							err := params.NetListener.Close()
+							return err
+						},
 					},
-				})
+				)
 			},
 		),
 	)
