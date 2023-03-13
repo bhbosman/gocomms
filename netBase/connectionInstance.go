@@ -28,26 +28,18 @@ func ProvideCancelContextWithRwc(cancelContext context.Context) fx.Option {
 			Target: func(
 				params struct {
 					fx.In
-					Lifecycle               fx.Lifecycle
+					ConnectionName          string `name:"ConnectionId"`
 					Logger                  *zap.Logger
 					PrimaryConnectionCloser io.Closer `name:"PrimaryConnection"`
 				},
 			) (context.Context, context.CancelFunc, goCommsDefinitions.ICancellationContext, error) {
 				ctx, cancelFunc := context.WithCancel(cancelContext)
 				cancellationContextInstance := goCommsDefinitions.NewCancellationContext(
+					params.ConnectionName,
 					cancelFunc,
 					ctx,
 					params.Logger,
 					params.PrimaryConnectionCloser,
-				)
-				params.Lifecycle.Append(
-					fx.Hook{
-						OnStart: nil,
-						OnStop: func(ctx context.Context) error {
-							cancellationContextInstance.Cancel()
-							return nil
-						},
-					},
 				)
 				return ctx,
 					cancellationContextInstance.Cancel,
@@ -143,7 +135,7 @@ func (self ConnectionInstance) NewReaderWriterCloserInstanceOptions(
 		internal.InvokeFxLifeCycleConnectionReactorStartStop(),
 		internal.InvokeFxLifeCycleStartStopStackHeartbeat(),
 		fx.Options(settings.options...),
-		internal.InvokeContextCancelFunc(),
+		InvokeCancelContextWithRwc(),
 	)
 }
 

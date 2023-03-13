@@ -7,7 +7,7 @@ import (
 	"github.com/bhbosman/gocomms/common"
 	"go.uber.org/fx"
 	"golang.org/x/net/context"
-	"net"
+	"io"
 )
 
 func InvokeFxLifeCycleReadDataFromConnectionStartStop() fx.Option {
@@ -15,7 +15,7 @@ func InvokeFxLifeCycleReadDataFromConnectionStartStop() fx.Option {
 		func(
 			params struct {
 				fx.In
-				Conn                        net.Conn `name:"PrimaryConnection"`
+				Reader                      io.Reader `name:"PrimaryConnection"`
 				Lifecycle                   fx.Lifecycle
 				ConnectionCancelFunc        model.ConnectionCancelFunc
 				CancelCtx                   context.Context
@@ -36,16 +36,13 @@ func InvokeFxLifeCycleReadDataFromConnectionStartStop() fx.Option {
 							"InvokeFxLifeCycleReadDataFromConnectionStartStop.ReadFromIoReader",
 							func() {
 								common.ReadFromIoReader(
-									params.Conn,
+									params.Reader,
 									params.CancelCtx,
 									params.CancelFunc,
 									params.RxNextHandlerForNetConnRead,
 								)
 							},
 						)
-					},
-					OnStop: func(_ context.Context) error {
-						return params.Conn.Close()
 					},
 				},
 			)

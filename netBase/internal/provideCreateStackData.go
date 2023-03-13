@@ -6,7 +6,6 @@ import (
 	"github.com/bhbosman/gocomms/intf"
 	"go.uber.org/fx"
 	"golang.org/x/net/context"
-	"net"
 	"net/url"
 )
 
@@ -19,7 +18,6 @@ func ProvideCreateStackData() fx.Option {
 				StackState        []common.IStackState
 				PipeInStates      []*common.PipeState `name:"PipeInStates"`
 				PipeOutStates     []*common.PipeState `name:"PipeOutStates"`
-				Conn              net.Conn            `name:"PrimaryConnection"`
 				Url               *url.URL
 				Ctx               context.Context
 				CtxCancelFunc     context.CancelFunc

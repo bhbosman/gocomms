@@ -9,6 +9,8 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
+	"golang.org/x/net/context"
+	"net"
 	"time"
 )
 
@@ -66,5 +68,23 @@ func ConnectionApp(
 			},
 		),
 		fx.Options(option...),
+		goCommsDefinitions.InvokeCancelContext(),
+		fx.Invoke(
+			func(
+				params struct {
+					fx.In
+					NetListener net.Listener
+					Lifecycle   fx.Lifecycle
+				},
+			) {
+				params.Lifecycle.Append(fx.Hook{
+					OnStart: nil,
+					OnStop: func(ctx context.Context) error {
+						err := params.NetListener.Close()
+						return err
+					},
+				})
+			},
+		),
 	)
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/bhbosman/gocomms/RxHandlers"
 	"github.com/bhbosman/goprotoextra"
 	"io"
-	"net"
 )
 
 type InvokeWriterHandler struct {
@@ -97,7 +96,7 @@ func (self *InvokeWriterHandler) Complete() {
 }
 
 func NewInvokeOutBoundTransportLayerHandler(
-	writer net.Conn,
+	writer io.Writer,
 	pci goConnectionManager.IPublishConnectionInformation) *InvokeWriterHandler {
 	return &InvokeWriterHandler{
 		errorState: nil,

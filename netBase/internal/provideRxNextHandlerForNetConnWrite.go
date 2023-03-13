@@ -12,7 +12,7 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
-	"net"
+	"io"
 )
 
 func ProvideRxNextHandlerForNetConnWrite2(name string) fx.Option {
@@ -22,7 +22,7 @@ func ProvideRxNextHandlerForNetConnWrite2(name string) fx.Option {
 			Target: func(
 				params struct {
 					fx.In
-					Conn                         net.Conn             `name:"PrimaryConnection"`
+					Writer                       io.Writer            `name:"PrimaryConnection"`
 					OutgoingObs                  gocommon.IObservable `name:"Outbound"`
 					RxOptions                    []rxgo.Option
 					PublishConnectionInformation goConnectionManager.IPublishConnectionInformation
@@ -37,7 +37,10 @@ func ProvideRxNextHandlerForNetConnWrite2(name string) fx.Option {
 				var rxHandler *RxHandlers.RxNextHandler
 				var err error
 
-				handler = common.NewInvokeOutBoundTransportLayerHandler(params.Conn, params.PublishConnectionInformation)
+				handler = common.NewInvokeOutBoundTransportLayerHandler(
+					params.Writer,
+					params.PublishConnectionInformation,
+				)
 				rxHandler, err = RxHandlers.NewRxNextHandler2(
 					"net.conn.write",
 					params.ConnectionCancelFunc,
