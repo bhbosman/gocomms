@@ -2,7 +2,6 @@ package netBase
 
 import (
 	"fmt"
-	"github.com/bhbosman/goCommsDefinitions"
 	"github.com/bhbosman/goConnectionManager"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	sss "github.com/bhbosman/gocommon/Services/interfaces"
@@ -10,6 +9,7 @@ import (
 	"github.com/bhbosman/gocommon/messages"
 	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/gocommon/services/Providers"
+	"github.com/bhbosman/gocomms/common"
 	"github.com/bhbosman/gocomms/intf"
 	"github.com/bhbosman/gocomms/netBase/internal"
 	"go.uber.org/fx"
@@ -32,9 +32,9 @@ func ProvideCancelContextWithRwc(cancelContext context.Context) fx.Option {
 					Logger                  *zap.Logger
 					PrimaryConnectionCloser io.Closer `name:"PrimaryConnection"`
 				},
-			) (context.Context, context.CancelFunc, goCommsDefinitions.ICancellationContext, error) {
+			) (context.Context, context.CancelFunc, common.ICancellationContext, error) {
 				ctx, cancelFunc := context.WithCancel(cancelContext)
-				cancellationContextInstance := goCommsDefinitions.NewCancellationContext(
+				cancellationContextInstance := common.NewCancellationContext(
 					params.ConnectionName,
 					cancelFunc,
 					ctx,
@@ -190,10 +190,10 @@ func (self ConnectionInstance) NewConnectionInstanceWithStackName(
 	connectionType model.ConnectionType,
 	conn net.Conn,
 	settingOptions ...INewConnectionInstanceSettingsApply,
-) (messages.IApp, context.Context, goCommsDefinitions.ICancellationContext, error) {
+) (messages.IApp, context.Context, common.ICancellationContext, error) {
 	var resultContext context.Context
 	var resultCancelFunc context.CancelFunc
-	var cancellationContext goCommsDefinitions.ICancellationContext
+	var cancellationContext common.ICancellationContext
 	fxAppOptions := self.NewConnectionInstanceOptions(
 		uniqueReference,
 		goFunctionCounter,
@@ -231,7 +231,7 @@ func (self ConnectionInstance) NewConnectionInstance(
 	goFunctionCounter GoFunctionCounter.IService,
 	connectionType model.ConnectionType,
 	conn net.Conn,
-) (messages.IApp, context.Context, goCommsDefinitions.ICancellationContext, error) {
+) (messages.IApp, context.Context, common.ICancellationContext, error) {
 	return self.NewConnectionInstanceWithStackName(
 		uniqueReference,
 		goFunctionCounter,
