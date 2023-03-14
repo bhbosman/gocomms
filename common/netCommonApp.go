@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"github.com/bhbosman/goCommsDefinitions"
 	"github.com/bhbosman/goConnectionManager"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
@@ -9,7 +10,6 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
-	"golang.org/x/net/context"
 	"net"
 	"time"
 )

@@ -1,11 +1,11 @@
 package internal
 
 import (
+	"context"
 	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/gocomms/common"
 	"github.com/bhbosman/gocomms/intf"
 	"go.uber.org/fx"
-	"golang.org/x/net/context"
 	"net/url"
 )
 

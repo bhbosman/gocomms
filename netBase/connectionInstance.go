@@ -1,6 +1,7 @@
 package netBase
 
 import (
+	"context"
 	"fmt"
 	"github.com/bhbosman/goConnectionManager"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
@@ -15,7 +16,6 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
-	"golang.org/x/net/context"
 	"io"
 	"net"
 	"net/url"

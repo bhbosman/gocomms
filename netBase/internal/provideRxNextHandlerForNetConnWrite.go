@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"github.com/bhbosman/goConnectionManager"
 	"github.com/bhbosman/gocommon"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
@@ -11,7 +12,6 @@ import (
 	"github.com/reactivex/rxgo/v2"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	"golang.org/x/net/context"
 	"io"
 )
 
