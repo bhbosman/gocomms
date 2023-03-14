@@ -7,8 +7,10 @@ import (
 	"github.com/bhbosman/gocommon/Services/interfaces"
 	"github.com/bhbosman/gocomms/common"
 	"go.uber.org/fx"
+	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"net/url"
+	"sync"
 )
 
 type NetManager struct {
@@ -54,4 +56,35 @@ func NewNetManager(
 		AdditionalFxOptionsForConnectionInstance: additionalFxOptionsForConnectionInstance,
 		GoFunctionCounter:                        GoFunctionCounter,
 	}, nil
+}
+
+func (self *NetManager) RegisterConnectionShutdown(
+	connectionId string,
+	callback func(),
+	cancellationContext ...common.ICancellationContext,
+) error {
+	mutex := sync.Mutex{}
+	cancelCalled := false
+	cb := func() {
+		mutex.Lock()
+		b := cancelCalled
+		cancelCalled = true
+		mutex.Unlock()
+		if !b {
+			callback()
+		}
+		for _, instance := range cancellationContext {
+			_ = instance.Remove(connectionId)
+		}
+	}
+	var result error
+	for _, ctx := range cancellationContext {
+		b, err := ctx.Add(connectionId, cb)
+		result = multierr.Append(result, err)
+		if !b {
+			cb()
+			return result
+		}
+	}
+	return result
 }

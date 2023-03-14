@@ -49,8 +49,8 @@ func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface
 	default:
 		switch v := i.(type) {
 		case goprotoextra.ReadWriterSize:
-			self.RwsMessageCountOut++
-			self.RwsByteCountOut += int64(v.Size())
+			self.RwsMessageCountIn++
+			self.RwsByteCountIn += int64(v.Size())
 		default:
 			self.OtherMessageCountIn++
 		}

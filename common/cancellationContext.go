@@ -9,7 +9,7 @@ import (
 )
 
 type ICancellationContext interface {
-	Add(connectionId string, f func(ICancellationContext)) (bool, error)
+	Add(connectionId string, f func()) (bool, error)
 	Remove(connectionId string) error
 	Cancel()
 	CancelWithError(err error)
@@ -20,7 +20,7 @@ type cancellationContext struct {
 	cancelFunc    context.CancelFunc
 	cancelContext context.Context
 	logger        *zap.Logger
-	f             map[string]func(ICancellationContext)
+	f             map[string]func()
 	cancelCalled  bool
 	closer        io.Closer
 	name          string
@@ -39,18 +39,18 @@ func (self *cancellationContext) CancelWithError(err error) {
 	self.Cancel()
 }
 
-func (self *cancellationContext) Add(connectionId string, f func(ctx ICancellationContext)) (bool, error) {
+func (self *cancellationContext) Add(connectionId string, f func()) (bool, error) {
 	if !self.cancelCalled {
 		self.mutex.Lock()
 		defer self.mutex.Unlock()
 		//
 		if foundFunction, ok := self.f[connectionId]; ok {
-			foundFunction(self)
+			foundFunction()
 		}
 		self.f[connectionId] = f
 		return true, nil
 	}
-	f(self)
+	f()
 	return false, nil
 }
 
@@ -74,14 +74,14 @@ func (self *cancellationContext) Cancel() {
 			self.closer.Close()
 		}
 		self.mutex.Lock()
-		fArray := make([]func(ICancellationContext), 0, len(self.f))
+		fArray := make([]func(), 0, len(self.f))
 		for _, f := range self.f {
 			fArray = append(fArray, f)
 		}
-		self.f = make(map[string]func(ICancellationContext))
+		self.f = make(map[string]func())
 		self.mutex.Unlock()
 		for _, f := range fArray {
-			f(self)
+			f()
 		}
 	}
 }
@@ -100,6 +100,6 @@ func NewCancellationContext(
 		logger:        logger,
 		cancelCalled:  false,
 		closer:        closer,
-		f:             make(map[string]func(ICancellationContext)),
+		f:             make(map[string]func()),
 	}
 }

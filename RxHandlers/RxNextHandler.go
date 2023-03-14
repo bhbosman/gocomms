@@ -91,8 +91,10 @@ func (self *RxNextHandler) OnSendData(i interface{}) {
 		// deal with known global messages
 		switch v := i.(type) {
 		case *messages.EmptyQueue:
+			self.OtherMessageCountIn++
 			break
 		case *model2.ClearCounters:
+			self.OtherMessageCountIn++
 			self.clearCounters()
 			break
 		case *model2.PublishRxHandlerCounters:
