@@ -3,10 +3,10 @@ package RxHandlers
 import (
 	"context"
 	"github.com/bhbosman/gocommon/messages"
-	model2 "github.com/bhbosman/gocommon/model"
+	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/goerrors"
 	"github.com/bhbosman/goprotoextra"
-	"github.com/reactivex/rxgo/v2"
+	rxgo "github.com/reactivex/rxgo/v2"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 )
@@ -16,22 +16,35 @@ type RxMapHandler struct {
 	next IRxMapStackHandler
 }
 
-func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface{}, error) {
+func (self *RxMapHandler) Handler(ctx context.Context, unk interface{}) (interface{}, error) {
 	// TODO: need to clean up this bit, on how read message is called and how it affect RWS, with protobuf, and clear counters. For now it is hard coded
-	switch v := i.(type) {
-	case *model2.ClearCounters:
-		self.clearCounters()
-		err := self.next.ReadMessage(i)
+	switch v01 := unk.(type) {
+	case goprotoextra.ReadWriterSize:
+		self.RwsMessageCountIn++
+		self.RwsByteCountIn += int64(v01.Size())
+		ans, err := self.next.MapReadWriterSize(ctx, v01)
 		if err != nil {
 			return nil, err
 		}
-		self.OtherMessageCountOut++
-		return i, nil
+		switch v02 := ans.(type) {
+		case goprotoextra.ReadWriterSize:
+			self.RwsByteCountOut += int64(v02.Size())
+			self.RwsMessageCountOut++
+			return v02, nil
+		default:
+			self.OtherMessageCountOut++
+			return v02, nil
+		}
+	case *model.ClearCounters:
+		self.clearCounters()
+		self.next.ClearCounters()
+		return v01, nil
 	case *messages.EmptyQueue:
-		return i, nil
-	case *model2.PublishRxHandlerCounters:
+		self.next.EmptyQueue()
+		return v01, nil
+	case *model.PublishRxHandlerCounters:
 		self.OtherMessageCountIn++
-		counters := model2.NewRxHandlerCounter(
+		counters := model.NewRxHandlerCounter(
 			self.Name,
 			self.OtherMessageCountIn,
 			self.RwsMessageCountIn,
@@ -39,37 +52,24 @@ func (self *RxMapHandler) Handler(ctx context.Context, i interface{}) (interface
 			self.RwsMessageCountOut,
 			self.RwsByteCountIn,
 			self.RwsByteCountOut)
-		v.Add(counters)
-		err := self.next.ReadMessage(i)
-		if err != nil {
-			return nil, err
-		}
+		v01.Add(counters)
+		self.next.PublishCounters(v01)
 		self.OtherMessageCountOut++
-		return i, nil
+		return v01, nil
 	default:
-		switch v := i.(type) {
-		case goprotoextra.ReadWriterSize:
-			self.RwsMessageCountIn++
-			self.RwsByteCountIn += int64(v.Size())
-		default:
-			self.OtherMessageCountIn++
-		}
-		i, err := self.next.MapReadWriterSize(ctx, i)
+		self.OtherMessageCountIn++
+		ans, err := self.next.MapReadWriterSize(ctx, v01)
 		if err != nil {
 			return nil, err
 		}
-		switch v := i.(type) {
+		switch v02 := ans.(type) {
 		case goprotoextra.ReadWriterSize:
-			self.RwsByteCountOut += int64(v.Size())
+			self.RwsByteCountOut += int64(v02.Size())
 			self.RwsMessageCountOut++
-			return v, nil
+			return v02, nil
 		default:
 			self.OtherMessageCountOut++
-			err := self.next.ReadMessage(i)
-			if err != nil {
-				return nil, err
-			}
-			return i, nil
+			return v02, nil
 		}
 	}
 }
@@ -110,7 +110,7 @@ func (self *RxMapHandler) FlatMapHandler(ctx context.Context) func(item rxgo.Ite
 
 func NewRxMapHandler(
 	name string,
-	ConnectionCancelFunc model2.ConnectionCancelFunc,
+	ConnectionCancelFunc model.ConnectionCancelFunc,
 	logger *zap.Logger,
 	next IRxMapStackHandler) (*RxMapHandler, error) {
 

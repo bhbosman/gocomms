@@ -1,6 +1,7 @@
 package common
 
 import (
+	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/gocomms/RxHandlers"
 	"github.com/bhbosman/goprotoextra"
 )
@@ -12,6 +13,15 @@ type InvokeInboundTransportLayerHandler struct {
 	trySendData func(data interface{}) bool
 	sendError   func(err error)
 	complete    func()
+}
+
+func (self *InvokeInboundTransportLayerHandler) PublishCounters(counters *model.PublishRxHandlerCounters) {
+}
+
+func (self *InvokeInboundTransportLayerHandler) EmptyQueue() {
+}
+
+func (self *InvokeInboundTransportLayerHandler) ClearCounters() {
 }
 
 func (self *InvokeInboundTransportLayerHandler) IsActive() bool {
@@ -32,10 +42,6 @@ func (self *InvokeInboundTransportLayerHandler) GetAdditionalBytesIncoming() int
 
 func (self *InvokeInboundTransportLayerHandler) GetAdditionalBytesSend() int {
 	return 0
-}
-
-func (self *InvokeInboundTransportLayerHandler) ReadMessage(i interface{}) error {
-	return nil
 }
 
 func (self *InvokeInboundTransportLayerHandler) Close() error {

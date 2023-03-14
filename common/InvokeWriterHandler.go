@@ -14,6 +14,16 @@ type InvokeWriterHandler struct {
 	oci        goConnectionManager.IPublishConnectionInformation
 }
 
+func (self *InvokeWriterHandler) PublishCounters(counters *model.PublishRxHandlerCounters) {
+	_ = self.oci.ConnectionInformationReceived(counters)
+}
+
+func (self *InvokeWriterHandler) EmptyQueue() {
+}
+
+func (self *InvokeWriterHandler) ClearCounters() {
+}
+
 func (self *InvokeWriterHandler) IsActive() bool {
 	return true
 }
@@ -22,14 +32,14 @@ func (self *InvokeWriterHandler) OnSendData(i interface{}) {
 	if self.errorState != nil {
 		return
 	}
-	_ = self.ReadMessage(i)
+
 }
 
 func (self *InvokeWriterHandler) OnTrySendData(i interface{}) bool {
 	if self.errorState != nil {
 		return false
 	}
-	_ = self.ReadMessage(i)
+
 	return true
 }
 
@@ -42,20 +52,6 @@ func (self *InvokeWriterHandler) SendError(_ error) {
 
 func (self *InvokeWriterHandler) GetAdditionalBytesSend() int {
 	return 0
-}
-
-func (self *InvokeWriterHandler) ReadMessage(i interface{}) error {
-	if publishRxHandlerCounters, ok := i.(*model.PublishRxHandlerCounters); ok {
-		return self.oci.ConnectionInformationReceived(publishRxHandlerCounters)
-	}
-	return nil
-}
-
-func (self *InvokeWriterHandler) SendData(data interface{}) {
-	if self.errorState != nil {
-		return
-	}
-	_ = self.ReadMessage(data)
 }
 
 func (self *InvokeWriterHandler) Close() error {

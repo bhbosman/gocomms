@@ -3,10 +3,10 @@ package RxHandlers
 import (
 	"github.com/bhbosman/goCommsDefinitions"
 	"github.com/bhbosman/gocommon/messages"
-	model2 "github.com/bhbosman/gocommon/model"
+	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/goerrors"
 	"github.com/bhbosman/goprotoextra"
-	"github.com/reactivex/rxgo/v2"
+	rxgo "github.com/reactivex/rxgo/v2"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 )
@@ -62,9 +62,7 @@ func (self *RxNextHandler) OnSendData(i interface{}) {
 	if self.errorState != nil {
 		return
 	}
-	var ok bool
-	var rws goprotoextra.ReadWriterSize
-	if rws, ok = i.(goprotoextra.ReadWriterSize); ok {
+	if rws, ok := i.(goprotoextra.ReadWriterSize); ok {
 		self.RwsMessageCountIn++
 		self.RwsByteCountIn += int64(rws.Size())
 		if self.stackHandler != nil {
@@ -72,9 +70,7 @@ func (self *RxNextHandler) OnSendData(i interface{}) {
 				rws,
 				self.toNextChannelWithByteOutCount,
 				func(i interface{}) error {
-					if self.onSendData != nil {
-						self.onSendData(i)
-					}
+					self.onSendData(i)
 					return nil
 				},
 				self.updateOutByteCount)
@@ -91,14 +87,14 @@ func (self *RxNextHandler) OnSendData(i interface{}) {
 		// deal with known global messages
 		switch v := i.(type) {
 		case *messages.EmptyQueue:
-			self.OtherMessageCountIn++
-			break
-		case *model2.ClearCounters:
-			self.OtherMessageCountIn++
+			self.stackHandler.EmptyQueue()
+			return
+		case *model.ClearCounters:
 			self.clearCounters()
-			break
-		case *model2.PublishRxHandlerCounters:
-			self.OtherMessageCountIn++
+			self.stackHandler.ClearCounters()
+			self.onSendData(v)
+			return
+		case *model.PublishRxHandlerCounters:
 			byteOutCount := self.RwsByteCountOut
 			if self.stackHandler != nil {
 				byteOutCount += int64(self.stackHandler.GetAdditionalBytesSend())
@@ -107,7 +103,7 @@ func (self *RxNextHandler) OnSendData(i interface{}) {
 			if self.stackHandler != nil {
 				bytesInCount += int64(self.stackHandler.GetAdditionalBytesIncoming())
 			}
-			counter := model2.NewRxHandlerCounter(
+			counter := model.NewRxHandlerCounter(
 				self.Name,
 				self.OtherMessageCountIn,
 				self.RwsMessageCountIn,
@@ -116,24 +112,13 @@ func (self *RxNextHandler) OnSendData(i interface{}) {
 				bytesInCount,
 				byteOutCount)
 			v.Add(counter)
+			self.stackHandler.PublishCounters(v)
+			self.onSendData(v)
 			break
 		default:
 			self.OtherMessageCountIn++
-			if self.stackHandler != nil {
-			}
+			self.onSendData(v)
 			break
-		}
-		// send to stack specific
-		err := self.stackHandler.ReadMessage(i)
-		if err != nil {
-			self.errorState = err
-			self.onSendError(self.errorState)
-			return
-		}
-		// next stack
-		if self.onSendData != nil {
-			self.OtherMessageCountOut++
-			self.onSendData(i)
 		}
 	}
 }
@@ -163,9 +148,10 @@ func (self *RxNextHandler) setErrorState(err error, propagateError bool) {
 		}
 	}
 }
+
 func newRxNextHandler(
 	name string,
-	ConnectionCancelFunc model2.ConnectionCancelFunc,
+	ConnectionCancelFunc model.ConnectionCancelFunc,
 	next IRxNextStackHandler,
 	onSendData rxgo.NextFunc,
 	onTrySendData goCommsDefinitions.TryNextFunc,
@@ -218,7 +204,7 @@ func newRxNextHandler(
 
 func NewRxNextHandler2(
 	name string,
-	ConnectionCancelFunc model2.ConnectionCancelFunc,
+	ConnectionCancelFunc model.ConnectionCancelFunc,
 	next IRxNextStackHandler,
 	defaultRxNextHandler goCommsDefinitions.IRxNextHandler,
 	logger *zap.Logger,

@@ -1,5 +1,9 @@
 package RxHandlers
 
+import "github.com/bhbosman/gocommon/model"
+
 type IStackHandler interface {
-	ReadMessage(interface{}) error
+	EmptyQueue()
+	ClearCounters()
+	PublishCounters(*model.PublishRxHandlerCounters)
 }

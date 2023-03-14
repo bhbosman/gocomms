@@ -3,11 +3,11 @@ module github.com/bhbosman/gocomms
 go 1.18
 
 require (
-	github.com/bhbosman/goCommsDefinitions v0.0.0-20230308211643-24fe88b2378e
-	github.com/bhbosman/goConnectionManager v0.0.0-20230302065222-d613f6fe8f80
-	github.com/bhbosman/gocommon v0.0.0-20230308114127-b5a97171c205
+	github.com/bhbosman/goCommsDefinitions v0.0.0-20230313180751-41613a6b3173
+	github.com/bhbosman/goConnectionManager v0.0.0-20230312204225-183859f3cef5
+	github.com/bhbosman/gocommon v0.0.0-20230312205650-25cf8341f1c9
 	github.com/bhbosman/goerrors v0.0.0-20220623084908-4d7bbcd178cf
-	github.com/bhbosman/gomessageblock v0.0.0-20220617132215-32f430d7de62
+	github.com/bhbosman/gomessageblock v0.0.0-20230308173223-e8144f25444c
 	github.com/bhbosman/goprotoextra v0.0.1
 	github.com/cskr/pubsub v1.0.2
 	github.com/golang/mock v1.6.0
@@ -42,11 +42,10 @@ replace github.com/bhbosman/goCommsDefinitions => ../goCommsDefinitions
 
 replace github.com/bhbosman/goConnectionManager => ../goConnectionManager
 
-replace github.com/bhbosman/goprotoextra => ../goprotoextra
-
 replace github.com/bhbosman/gocommon => ../gocommon
 
 replace github.com/cskr/pubsub => github.com/bhbosman/pubsub v1.0.3-0.20220802200819-029949e8a8af
 
 replace github.com/reactivex/rxgo/v2 => ../goRx
+
 replace github.com/bhbosman/goprotoextra => ../goprotoextra
