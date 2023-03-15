@@ -65,10 +65,8 @@ func (self *InvokeInboundTransportLayerHandler) NextReadWriterSize(
 	if self.errorState != nil {
 		return self.errorState
 	}
-	if self.sendData != nil {
-		self.sendData(rws)
-	}
-	return self.errorState
+	self.sendData(rws)
+	return nil
 }
 
 func (self *InvokeInboundTransportLayerHandler) OnComplete() {
@@ -83,6 +81,7 @@ func NewInvokeInboundTransportLayerHandler(
 	sendError func(err error),
 	complete func(),
 ) (*InvokeInboundTransportLayerHandler, error) {
+	// TODO: check if params is not null
 	return &InvokeInboundTransportLayerHandler{
 		errorState:  nil,
 		sendData:    sendData,
