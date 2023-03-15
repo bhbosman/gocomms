@@ -158,8 +158,11 @@ func newRxNextHandler(
 	onSendError rxgo.ErrFunc,
 	onComplete rxgo.CompletedFunc,
 	isActive func() bool,
-	logger *zap.Logger) (*RxNextHandler, error) {
-
+	logger *zap.Logger,
+) (*RxNextHandler, error) {
+	if ConnectionCancelFunc == nil {
+		return nil, goerrors.InvalidParam
+	}
 	if onSendData == nil {
 		return nil, goerrors.InvalidParam
 	}
@@ -170,6 +173,12 @@ func newRxNextHandler(
 		return nil, goerrors.InvalidParam
 	}
 	if onComplete == nil {
+		return nil, goerrors.InvalidParam
+	}
+	if isActive == nil {
+		return nil, goerrors.InvalidParam
+	}
+	if next == nil {
 		return nil, goerrors.InvalidParam
 	}
 
