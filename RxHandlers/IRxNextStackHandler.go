@@ -2,10 +2,12 @@ package RxHandlers
 
 import (
 	"github.com/bhbosman/goprotoextra"
+	"io"
 )
 
 type IRxNextStackHandler interface {
 	IStackHandler
+	io.Closer
 	OnError(err error)
 	NextReadWriterSize(
 		goprotoextra.ReadWriterSize,
