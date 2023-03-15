@@ -4,7 +4,6 @@ import (
 	"github.com/bhbosman/gocomms/RxHandlers"
 	"github.com/bhbosman/gocomms/common"
 	"go.uber.org/fx"
-	"go.uber.org/multierr"
 	"golang.org/x/net/context"
 )
 
@@ -28,10 +27,8 @@ func InvokeOutBoundTransportLayer() fx.Option {
 						return nil
 					},
 					OnStop: func(_ context.Context) error {
-						var err error
-						err = multierr.Append(err, params.RxHandler.Close())
-						err = multierr.Append(err, params.Handler.Close())
-						return err
+
+						return params.RxHandler.Close()
 					},
 				},
 			)

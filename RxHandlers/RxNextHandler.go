@@ -31,6 +31,9 @@ func (self *RxNextHandler) OnTrySendData(i interface{}) bool {
 
 func (self *RxNextHandler) Close() error {
 	var err error
+	if self.stackHandler != nil {
+		err = multierr.Append(err, self.stackHandler.Close())
+	}
 	err = multierr.Append(err, self.BaseRxHandler.Close())
 	return err
 }
