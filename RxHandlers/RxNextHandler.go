@@ -87,11 +87,15 @@ func (self *RxNextHandler) OnSendData(i interface{}) {
 		// deal with known global messages
 		switch v := i.(type) {
 		case *messages.EmptyQueue:
-			self.stackHandler.EmptyQueue()
+			if self.stackHandler != nil {
+				self.stackHandler.EmptyQueue()
+			}
 			return
 		case *model.ClearCounters:
 			self.clearCounters()
-			self.stackHandler.ClearCounters()
+			if self.stackHandler != nil {
+				self.stackHandler.ClearCounters()
+			}
 			self.onSendData(v)
 			return
 		case *model.PublishRxHandlerCounters:
@@ -112,7 +116,9 @@ func (self *RxNextHandler) OnSendData(i interface{}) {
 				bytesInCount,
 				byteOutCount)
 			v.Add(counter)
-			self.stackHandler.PublishCounters(v)
+			if self.stackHandler != nil {
+				self.stackHandler.PublishCounters(v)
+			}
 			self.onSendData(v)
 			break
 		default:
