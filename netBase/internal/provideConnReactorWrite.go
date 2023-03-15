@@ -8,7 +8,7 @@ import (
 	"github.com/bhbosman/gocommon/rxOverride"
 	"github.com/bhbosman/gocomms/RxHandlers"
 	"github.com/bhbosman/gocomms/common"
-	"github.com/reactivex/rxgo/v2"
+	rxgo "github.com/reactivex/rxgo/v2"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
