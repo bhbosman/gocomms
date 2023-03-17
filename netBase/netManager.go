@@ -58,7 +58,7 @@ func NewNetManager(
 	}, nil
 }
 
-func (self *NetManager) RegisterConnectionShutdown(
+func RegisterConnectionShutdown(
 	connectionId string,
 	callback func(),
 	cancellationContext ...goConn.ICancellationContext,
