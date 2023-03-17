@@ -19,7 +19,7 @@ func InvokeCancelContextWithRwc() fx.Option {
 				fx.Hook{
 					OnStart: nil,
 					OnStop: func(ctx context.Context) error {
-						params.CancellationContext.Cancel()
+						params.CancellationContext.Cancel("InvokeCancelContextWithRwc")
 						return nil
 					},
 				},

@@ -18,7 +18,7 @@ func ProvideCreateStackCancelFunc() fx.Option {
 		) (model.ConnectionCancelFunc, error) {
 			return func(context string, inbound bool, err error) {
 				params.Logger.Error(context, zap.Error(err))
-				params.CancellationContext.CancelWithError(err)
+				params.CancellationContext.CancelWithError("ProvideCreateStackCancelFunc", err)
 			}, nil
 		},
 	)

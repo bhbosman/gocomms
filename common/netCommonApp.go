@@ -84,7 +84,7 @@ func InvokeCancelContext() fx.Option {
 				fx.Hook{
 					OnStart: nil,
 					OnStop: func(ctx context.Context) error {
-						params.CancellationContext.Cancel()
+						params.CancellationContext.Cancel("InvokeCancelContext")
 						return nil
 					},
 				},
@@ -128,7 +128,11 @@ func ProvideCancelContext(cancelContext context.Context) fx.Option {
 			) (context.Context, context.CancelFunc, ICancellationContext, error) {
 				ctx, cancelFunc := context.WithCancel(cancelContext)
 				cancelInstance := NewCancellationContext(params.ConnectionName, cancelFunc, ctx, params.Logger, nil)
-				return ctx, cancelInstance.Cancel, cancelInstance, nil
+				return ctx,
+					func() {
+						//todo: move out of callback
+						cancelInstance.Cancel("Move out of Callback")
+					}, cancelInstance, nil
 			},
 		},
 	)

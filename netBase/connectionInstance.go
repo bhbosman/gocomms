@@ -42,7 +42,10 @@ func ProvideCancelContextWithRwc(cancelContext context.Context) fx.Option {
 					params.PrimaryConnectionCloser,
 				)
 				return ctx,
-					cancellationContextInstance.Cancel,
+					func() {
+						// todo : fix
+						cancellationContextInstance.Cancel("ProvideCancelContextWithRwc")
+					},
 					cancellationContextInstance,
 					nil
 			},

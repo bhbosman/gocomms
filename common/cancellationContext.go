@@ -28,8 +28,8 @@ func (self *cancellationContext) Remove(connectionId string) error {
 	return nil
 }
 
-func (self *cancellationContext) CancelWithError(err error) {
-	self.Cancel()
+func (self *cancellationContext) CancelWithError(s string, err error) {
+	self.Cancel(s)
 }
 
 func (self *cancellationContext) Add(connectionId string, f func()) (bool, error) {
@@ -52,10 +52,14 @@ func (self *cancellationContext) CancelContext() context.Context {
 }
 
 func (self *cancellationContext) CancelFunc() context.CancelFunc {
-	return self.Cancel
+	return func() {
+		// todo: fix
+		self.Cancel("")
+	}
+
 }
 
-func (self *cancellationContext) Cancel() {
+func (self *cancellationContext) Cancel(s string) {
 	self.mutex.Lock()
 	b := self.cancelCalled
 	self.cancelCalled = true
