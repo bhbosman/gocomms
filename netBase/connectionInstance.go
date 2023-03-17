@@ -3,6 +3,7 @@ package netBase
 import (
 	"context"
 	"fmt"
+	"github.com/bhbosman/goConn"
 	"github.com/bhbosman/goConnectionManager"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	sss "github.com/bhbosman/gocommon/Services/interfaces"
@@ -32,7 +33,7 @@ func ProvideCancelContextWithRwc(cancelContext context.Context) fx.Option {
 					Logger                  *zap.Logger
 					PrimaryConnectionCloser io.Closer `name:"PrimaryConnection"`
 				},
-			) (context.Context, context.CancelFunc, common.ICancellationContext, error) {
+			) (context.Context, context.CancelFunc, goConn.ICancellationContext, error) {
 				ctx, cancelFunc := context.WithCancel(cancelContext)
 				cancellationContextInstance := common.NewCancellationContext(
 					params.ConnectionName,
@@ -193,10 +194,10 @@ func (self ConnectionInstance) NewConnectionInstanceWithStackName(
 	connectionType model.ConnectionType,
 	conn net.Conn,
 	settingOptions ...INewConnectionInstanceSettingsApply,
-) (messages.IApp, context.Context, common.ICancellationContext, error) {
+) (messages.IApp, context.Context, goConn.ICancellationContext, error) {
 	var resultContext context.Context
 	var resultCancelFunc context.CancelFunc
-	var cancellationContext common.ICancellationContext
+	var cancellationContext goConn.ICancellationContext
 	fxAppOptions := self.NewConnectionInstanceOptions(
 		uniqueReference,
 		goFunctionCounter,
@@ -234,7 +235,7 @@ func (self ConnectionInstance) NewConnectionInstance(
 	goFunctionCounter GoFunctionCounter.IService,
 	connectionType model.ConnectionType,
 	conn net.Conn,
-) (messages.IApp, context.Context, common.ICancellationContext, error) {
+) (messages.IApp, context.Context, goConn.ICancellationContext, error) {
 	return self.NewConnectionInstanceWithStackName(
 		uniqueReference,
 		goFunctionCounter,

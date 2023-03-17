@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"github.com/bhbosman/goConn"
 	"go.uber.org/zap"
 	"io"
 	"sync"
@@ -89,7 +90,7 @@ func NewCancellationContext(
 	cancelContext context.Context,
 	logger *zap.Logger,
 	closer io.Closer,
-) ICancellationContext {
+) goConn.ICancellationContext {
 	return &cancellationContext{
 		name:          name,
 		cancelFunc:    cancelFunc,

@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"github.com/bhbosman/goCommsDefinitions"
+	"github.com/bhbosman/goConn"
 	"github.com/bhbosman/goConnectionManager"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	"github.com/bhbosman/gocommon/Services/interfaces"
@@ -77,7 +78,7 @@ func InvokeCancelContext() fx.Option {
 			params struct {
 				fx.In
 				Lifecycle           fx.Lifecycle
-				CancellationContext ICancellationContext
+				CancellationContext goConn.ICancellationContext
 			},
 		) error {
 			params.Lifecycle.Append(
@@ -125,7 +126,7 @@ func ProvideCancelContext(cancelContext context.Context) fx.Option {
 					Logger         *zap.Logger
 					ConnectionName string `name:"ConnectionName"`
 				},
-			) (context.Context, context.CancelFunc, ICancellationContext, error) {
+			) (context.Context, context.CancelFunc, goConn.ICancellationContext, error) {
 				ctx, cancelFunc := context.WithCancel(cancelContext)
 				cancelInstance := NewCancellationContext(params.ConnectionName, cancelFunc, ctx, params.Logger, nil)
 				return ctx,

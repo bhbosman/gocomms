@@ -2,10 +2,10 @@ package netBase
 
 import (
 	"context"
+	"github.com/bhbosman/goConn"
 	"github.com/bhbosman/goConnectionManager"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	"github.com/bhbosman/gocommon/Services/interfaces"
-	"github.com/bhbosman/gocomms/common"
 	"go.uber.org/fx"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
@@ -14,7 +14,7 @@ import (
 )
 
 type NetManager struct {
-	CancellationContext                      common.ICancellationContext
+	CancellationContext                      goConn.ICancellationContext
 	CancelCtx                                context.Context
 	ZapLogger                                *zap.Logger
 	ConnectionManager                        goConnectionManager.IService
@@ -35,7 +35,7 @@ func NewNetManager(
 	proxyUrl *url.URL,
 	connectionUrl *url.URL,
 	cancelCtx context.Context,
-	CancellationContext common.ICancellationContext,
+	CancellationContext goConn.ICancellationContext,
 	connectionManager goConnectionManager.IService,
 	ZapLogger *zap.Logger,
 	uniqueSessionNumber interfaces.IUniqueReferenceService,
@@ -61,7 +61,7 @@ func NewNetManager(
 func (self *NetManager) RegisterConnectionShutdown(
 	connectionId string,
 	callback func(),
-	cancellationContext ...common.ICancellationContext,
+	cancellationContext ...goConn.ICancellationContext,
 ) error {
 	mutex := sync.Mutex{}
 	cancelCalled := false
