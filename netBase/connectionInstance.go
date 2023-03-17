@@ -11,7 +11,6 @@ import (
 	"github.com/bhbosman/gocommon/messages"
 	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/gocommon/services/Providers"
-	"github.com/bhbosman/gocomms/common"
 	"github.com/bhbosman/gocomms/intf"
 	"github.com/bhbosman/gocomms/netBase/internal"
 	"go.uber.org/fx"
@@ -35,7 +34,7 @@ func ProvideCancelContextWithRwc(cancelContext context.Context) fx.Option {
 				},
 			) (context.Context, context.CancelFunc, goConn.ICancellationContext, error) {
 				ctx, cancelFunc := context.WithCancel(cancelContext)
-				cancellationContextInstance := common.NewCancellationContext(
+				cancellationContextInstance := goConn.NewCancellationContext(
 					params.ConnectionName,
 					cancelFunc,
 					ctx,

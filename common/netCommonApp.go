@@ -128,7 +128,7 @@ func ProvideCancelContext(cancelContext context.Context) fx.Option {
 				},
 			) (context.Context, context.CancelFunc, goConn.ICancellationContext, error) {
 				ctx, cancelFunc := context.WithCancel(cancelContext)
-				cancelInstance := NewCancellationContext(params.ConnectionName, cancelFunc, ctx, params.Logger, nil)
+				cancelInstance := goConn.NewCancellationContext(params.ConnectionName, cancelFunc, ctx, params.Logger, nil)
 				return ctx,
 					func() {
 						//todo: move out of callback
