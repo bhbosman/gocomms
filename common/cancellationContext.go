@@ -8,13 +8,6 @@ import (
 	"sync"
 )
 
-type ICancellationContext interface {
-	Add(connectionId string, f func()) (bool, error)
-	Remove(connectionId string) error
-	Cancel()
-	CancelWithError(err error)
-}
-
 type cancellationContext struct {
 	mutex         sync.Mutex
 	cancelFunc    context.CancelFunc
