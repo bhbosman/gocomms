@@ -184,9 +184,9 @@ func newRxNextHandler(
 	if onComplete == nil {
 		return nil, goerrors.InvalidParam
 	}
-	//if isActive == nil {
-	//	return nil, goerrors.InvalidParam
-	//}
+	if isActive == nil {
+		return nil, goerrors.InvalidParam
+	}
 
 	// TODO: Fix this. This causes a massive memory leak. In essence: Fx.App is the wrong tool :(
 	//if next == nil {

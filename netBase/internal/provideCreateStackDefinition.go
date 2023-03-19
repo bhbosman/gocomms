@@ -15,8 +15,8 @@ import (
 type CreateStackDefinition struct {
 	fx.Out
 	StackState             []common.IStackState
-	InboundPipeDefinition  common.IPipeDefinition `name:"Inbound"`
-	OutboundPipeDefinition common.IPipeDefinition `name:"Outbound"`
+	InboundPipeDefinition  common.IPipeDefinition `name:"InBoundChannel"`
+	OutboundPipeDefinition common.IPipeDefinition `name:"OutBoundChannel"`
 }
 
 func ProvideCreateStackDefinition() fx.Option {

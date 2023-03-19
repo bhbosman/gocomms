@@ -14,7 +14,6 @@ import (
 	"github.com/bhbosman/gocomms/intf"
 	"github.com/bhbosman/gocomms/netBase/internal"
 	"go.uber.org/fx"
-	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"io"
 	"net"
@@ -22,7 +21,7 @@ import (
 	"time"
 )
 
-func ProvideCancelContextWithRwc(cancelContext context.Context) fx.Option {
+func ProvideCancelContextWithRwc(cancelContext goConn.ICancellationContext) fx.Option {
 	return fx.Provide(
 		fx.Annotated{
 			Target: func(
@@ -33,21 +32,7 @@ func ProvideCancelContextWithRwc(cancelContext context.Context) fx.Option {
 					PrimaryConnectionCloser io.Closer `name:"PrimaryConnection"`
 				},
 			) (context.Context, context.CancelFunc, goConn.ICancellationContext, error) {
-				ctx, cancelFunc := context.WithCancel(cancelContext)
-				cancellationContextInstance := goConn.NewCancellationContext(
-					params.ConnectionName,
-					cancelFunc,
-					ctx,
-					params.Logger,
-					params.PrimaryConnectionCloser,
-				)
-				return ctx,
-					func() {
-						// todo : fix
-						cancellationContextInstance.Cancel("ProvideCancelContextWithRwc")
-					},
-					cancellationContextInstance,
-					nil
+				return cancelContext.CancelContext(), cancelContext.CancelFunc(), cancelContext, nil
 			},
 		},
 	)
@@ -57,7 +42,7 @@ type ConnectionInstance struct {
 	ConnectionUrl                            *url.URL
 	UniqueSessionNumber                      sss.IUniqueReferenceService
 	ConnectionManager                        goConnectionManager.IService
-	CancelCtx                                context.Context
+	CancelCtx                                goConn.ICancellationContext
 	AdditionalFxOptionsForConnectionInstance func() fx.Option
 	ZapLogger                                *zap.Logger
 }
@@ -66,7 +51,7 @@ func NewConnectionInstance(
 	connectionUrl *url.URL,
 	uniqueSessionNumber sss.IUniqueReferenceService,
 	connectionManager goConnectionManager.IService,
-	cancelCtx context.Context,
+	cancelCtx goConn.ICancellationContext,
 	additionalFxOptionsForConnectionInstance func() fx.Option,
 	zapLogger *zap.Logger,
 ) ConnectionInstance {
@@ -118,9 +103,7 @@ func (self ConnectionInstance) NewReaderWriterCloserInstanceOptions(
 		internal.ProvideCreateStackDefinition(),
 		internal.ProvideCreateStackCancelFunc(),
 		internal.ProvideChannel("InBoundChannel"),
-		internal.ProvideCreateTransportLayer02Step01(),
 		internal.ProvideChannel("OutBoundChannel"),
-		internal.ProvideCreateTransportLayer02Step02(),
 		internal.ProvideCreateToReactorFunc(),
 		internal.ProvideCreateToConnectionFunc("ToConnectionFunc"),
 		internal.ProvideCreateChannel(),
@@ -193,39 +176,31 @@ func (self ConnectionInstance) NewConnectionInstanceWithStackName(
 	connectionType model.ConnectionType,
 	conn net.Conn,
 	settingOptions ...INewConnectionInstanceSettingsApply,
-) (messages.IApp, context.Context, goConn.ICancellationContext, error) {
-	var resultContext context.Context
-	var resultCancelFunc context.CancelFunc
-	var cancellationContext goConn.ICancellationContext
+) (messages.IApp, error) {
 	fxAppOptions := self.NewConnectionInstanceOptions(
 		uniqueReference,
 		goFunctionCounter,
 		connectionType,
 		conn,
-		NewAddFxOptions(fx.Populate(&resultContext)),
-		NewAddFxOptions(fx.Populate(&resultCancelFunc, &cancellationContext)),
 		newAddSettings(settingOptions...),
 	)
 	fxApp := fx.New(fxAppOptions)
 	err := fxApp.Err()
 	if err != nil {
-		if resultCancelFunc != nil {
-			resultCancelFunc()
-		}
-		if conn != nil {
-			// this is required, when providers fail, and the Conn.Close() invoker has not been added to the
-			//fx.App lifecycle stack for destruction
-			// this error can be ignored
-			err = multierr.Append(err, conn.Close())
-		}
-		if err != nil {
-			self.ZapLogger.Error(
-				"On a presumed error in the providers, the connection may double close",
-				zap.Error(err))
-		}
-		return nil, nil, nil, err
+		self.CancelCtx.CancelWithError("ddddd", err)
+		//if conn != nil {
+		//	// this is required, when providers fail, and the Conn.Close() invoker has not been added to the
+		//	//fx.App lifecycle stack for destruction
+		//	// this error can be ignored
+		//	err = multierr.Append(err, conn.Close())
+		//}
+		self.ZapLogger.Error(
+			"On a presumed error in the providers, the connection may double close",
+			zap.Error(err))
+
+		return nil, err
 	}
-	return fxApp, resultContext, cancellationContext, nil
+	return fxApp, nil
 }
 
 // NewConnectionInstance is the default behaviour, which will use the StackName the connection was assigned with.
@@ -234,7 +209,7 @@ func (self ConnectionInstance) NewConnectionInstance(
 	goFunctionCounter GoFunctionCounter.IService,
 	connectionType model.ConnectionType,
 	conn net.Conn,
-) (messages.IApp, context.Context, goConn.ICancellationContext, error) {
+) (messages.IApp, error) {
 	return self.NewConnectionInstanceWithStackName(
 		uniqueReference,
 		goFunctionCounter,

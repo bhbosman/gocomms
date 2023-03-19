@@ -1,53 +1,88 @@
 package internal
 
 import (
-	"context"
 	"fmt"
+	"github.com/bhbosman/goConn"
+	"github.com/bhbosman/gocommon"
 	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/gocomms/RxHandlers"
+	"github.com/bhbosman/gocomms/common"
 	"github.com/reactivex/rxgo/v2"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"golang.org/x/net/context"
 )
 
 func ProvideChannel(name string) fx.Option {
 	return fx.Provide(
-		fx.Annotated{
-			Name: name,
-			Target: func(
-				params struct {
-					fx.In
-					Lifecycle    fx.Lifecycle
-					Logger       *zap.Logger
-					Ctx          context.Context
-					ConnectionId string `name:"ConnectionId"`
-				},
-			) (chan rxgo.Item, rxgo.NextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, error) {
-				result := make(chan rxgo.Item)
-				params.Lifecycle.Append(fx.Hook{
-					OnStart: func(_ context.Context) error {
-						return nil
-					},
-					OnStop: func(_ context.Context) error {
-						close(result)
-						return nil
-					},
-				})
+		fx.Annotate(
+			func(
+				_ fx.Lifecycle,
+				pipeDefinition common.IPipeDefinition,
+				stackData map[string]*common.StackDataContainer,
+				cancelCtx context.Context,
+				connectionId string,
+				cancellationContext goConn.ICancellationContext,
+			) (chan rxgo.Item, gocommon.IObservable, error) {
+				ch := make(chan rxgo.Item)
+				result, err := pipeDefinition.BuildObs(ch, stackData, cancelCtx)
+				cancellationContext.Add(
+					fmt.Sprintf("%v_%v", connectionId, name),
+					func(ch chan rxgo.Item) func() {
+						return func() {
+							close(ch)
+						}
+					}(ch))
+				if err != nil {
+					close(ch)
+					return nil, nil, err
+				}
+				return ch, result, nil
+			},
+			fx.ParamTags(
+				``,
+				fmt.Sprintf(`name:"%v"`, name),
+				``,
+				``,
+				`name:"ConnectionId"`,
+				``,
+			),
+			fx.ResultTags(
+				fmt.Sprintf(`name:"%v"`, name),
+				fmt.Sprintf(`name:"%v"`, name),
+			),
+		),
+		fx.Annotate(
+			func(
+				ch chan rxgo.Item,
+				logger *zap.Logger,
+				ctx context.Context,
+				connectionId string,
+			) (rxgo.NextFunc, rxgo.ErrFunc, rxgo.CompletedFunc, error) {
 				handler, err := RxHandlers.All2(
-					fmt.Sprintf(
-						"ProvideChannel %v",
-						params.ConnectionId),
+					fmt.Sprintf("ProvideChannel %v", connectionId),
 					model.StreamDirectionUnknown,
-					result,
-					params.Logger,
-					params.Ctx,
+					ch,
+					logger,
+					ctx,
 					true,
 				)
 				if err != nil {
-					return nil, nil, nil, nil, err
+					return nil, nil, nil, err
 				}
-				return result, handler.OnSendData, handler.OnError, handler.OnComplete, nil
+				return handler.OnSendData, handler.OnError, handler.OnComplete, nil
 			},
-		},
+			fx.ParamTags(
+				fmt.Sprintf(`name:"%v"`, name),
+				``,
+				``,
+				`name:"ConnectionId"`,
+			),
+			fx.ResultTags(
+				fmt.Sprintf(`name:"%v"`, name),
+				fmt.Sprintf(`name:"%v"`, name),
+				fmt.Sprintf(`name:"%v"`, name),
+			),
+		),
 	)
 }

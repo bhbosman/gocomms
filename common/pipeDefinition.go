@@ -18,13 +18,10 @@ func (self *pipeDefinition) BuildObs(
 	stackDataMap map[string]*StackDataContainer,
 	cancelCtx context.Context,
 ) (gocommon.IObservable, error) {
-	var err error
-	var obsOut gocommon.IObservable
-	obsOut, err = self.buildBoundObservables(stackDataMap, outBoundChannel, rxgo.WithContext(cancelCtx))
+	obsOut, err := self.buildBoundObservables(stackDataMap, outBoundChannel, rxgo.WithContext(cancelCtx))
 	if err != nil {
 		return nil, err
 	}
-
 	return obsOut, nil
 }
 

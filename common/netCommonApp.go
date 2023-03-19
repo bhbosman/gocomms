@@ -21,12 +21,26 @@ func ConnectionApp(
 	connectionName string,
 	connectionInstancePrefix string,
 	params NetAppFuncInParams,
+	cancellationContext goConn.ICancellationContext,
+	namedLogger *zap.Logger,
 	additionalFxOptionsForConnectionInstance func() fx.Option,
 	option ...fx.Option,
 ) fx.Option {
 	return fx2.NewFxApplicationOptions(
 		startTimeOut,
 		stopTimeOut,
+		fx.Provide(
+			fx.Annotated{
+				Target: func() (context.Context, context.CancelFunc, goConn.ICancellationContext, error) {
+					return cancellationContext.CancelContext(),
+						func() {
+							//todo: move out of callback
+							cancellationContext.Cancel("Move out of Callback")
+						},
+						cancellationContext, nil
+				},
+			},
+		),
 		fx.Provide(
 			fx.Annotated{
 				Target: func() (GoFunctionCounter.IService, error) {
@@ -36,7 +50,7 @@ func ConnectionApp(
 		),
 		fx.Provide(
 			func() (*zap.Logger, error) {
-				return params.ZapLogger.Named(connectionName), nil
+				return namedLogger, nil
 			},
 		),
 		fx.WithLogger(
@@ -60,7 +74,6 @@ func ConnectionApp(
 		goConnectionManager.ProvideObtainConnectionManagerInformation(),
 		goConnectionManager.ProvideRegisterToConnectionManager(),
 		goConnectionManager.ProvidePublishConnectionInformation(),
-		ProvideCancelContext(params.ParentContext),
 		fx.Provide(
 			fx.Annotated{
 				Target: func() func() fx.Option {
@@ -117,24 +130,24 @@ func InvokeListenerClose() fx.Option {
 	)
 }
 
-func ProvideCancelContext(cancelContext context.Context) fx.Option {
-	return fx.Provide(
-		fx.Annotated{
-			Target: func(
-				params struct {
-					fx.In
-					Logger         *zap.Logger
-					ConnectionName string `name:"ConnectionName"`
-				},
-			) (context.Context, context.CancelFunc, goConn.ICancellationContext, error) {
-				ctx, cancelFunc := context.WithCancel(cancelContext)
-				cancelInstance := goConn.NewCancellationContext(params.ConnectionName, cancelFunc, ctx, params.Logger, nil)
-				return ctx,
-					func() {
-						//todo: move out of callback
-						cancelInstance.Cancel("Move out of Callback")
-					}, cancelInstance, nil
-			},
-		},
-	)
-}
+//func ProvideCancelContext(cancelContext context.Context) fx.Option {
+//	return fx.Provide(
+//		fx.Annotated{
+//			Target: func(
+//				params struct {
+//				fx.In
+//				Logger         *zap.Logger
+//				ConnectionName string `name:"ConnectionName"`
+//			},
+//			) (context.Context, context.CancelFunc, goConn.ICancellationContext, error) {
+//				ctx, cancelFunc := context.WithCancel(cancelContext)
+//				cancelInstance := goConn.NewCancellationContext(params.ConnectionName, cancelFunc, ctx, params.Logger, nil)
+//				return ctx,
+//					func() {
+//						//todo: move out of callback
+//						cancelInstance.Cancel("Move out of Callback")
+//					}, cancelInstance, nil
+//			},
+//		},
+//	)
+//}

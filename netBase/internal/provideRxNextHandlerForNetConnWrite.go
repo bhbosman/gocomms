@@ -23,7 +23,7 @@ func ProvideRxNextHandlerForNetConnWrite2(name string) fx.Option {
 				params struct {
 					fx.In
 					Writer                       io.Writer            `name:"PrimaryConnection"`
-					OutgoingObs                  gocommon.IObservable `name:"Outbound"`
+					OutgoingObs                  gocommon.IObservable `name:"OutBoundChannel"`
 					RxOptions                    []rxgo.Option
 					PublishConnectionInformation goConnectionManager.IPublishConnectionInformation
 					ConnectionCancelFunc         model.ConnectionCancelFunc

@@ -17,7 +17,7 @@ require (
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/fx v1.19.2
 	go.uber.org/multierr v1.10.0
-	go.uber.org/zap v1.23.0
+	go.uber.org/zap v1.24.0
 	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f
 )
 

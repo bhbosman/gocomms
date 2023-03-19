@@ -13,7 +13,7 @@ func ProvideExtractPipeInStates(name string) fx.Option {
 				params struct {
 					fx.In
 					LifeCycle      fx.Lifecycle
-					PipeDefinition common.IPipeDefinition `name:"Inbound"`
+					PipeDefinition common.IPipeDefinition `name:"InBoundChannel"`
 				},
 			) ([]*common.PipeState, error) {
 				return params.PipeDefinition.BuildPipeStates()

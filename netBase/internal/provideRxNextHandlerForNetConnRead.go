@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"github.com/bhbosman/goConn"
 	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/gocomms/RxHandlers"
 	"github.com/reactivex/rxgo/v2"
@@ -22,6 +23,7 @@ func ProvideRxNextHandlerForNetConnRead22(name string) fx.Option {
 					InBoundChannel       chan rxgo.Item `name:"InBoundChannel"`
 					Logger               *zap.Logger
 					ConnectionId         string `name:"ConnectionId"`
+					CancellationContext  goConn.ICancellationContext
 				},
 			) (*RxHandlers.RxNextHandler, error) {
 
