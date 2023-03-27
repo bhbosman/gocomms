@@ -5,7 +5,7 @@ import (
 	"github.com/bhbosman/goConn"
 	"github.com/bhbosman/goConnectionManager"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
-	"github.com/bhbosman/gocommon/Services/interfaces"
+	"github.com/bhbosman/gocommon/services/interfaces"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"net/url"
