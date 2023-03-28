@@ -6,7 +6,7 @@ require (
 	github.com/bhbosman/goCommsDefinitions v0.0.0-20230313180751-41613a6b3173
 	github.com/bhbosman/goConn v0.0.0-20230327111455-7a39299fb0aa
 	github.com/bhbosman/goConnectionManager v0.0.0-20230312204225-183859f3cef5
-	github.com/bhbosman/gocommon v0.0.0-20230328190055-dffeb142435d
+	github.com/bhbosman/gocommon v0.0.0-20230328205958-d21444a729d1
 	github.com/bhbosman/goerrors v0.0.0-20220623084908-4d7bbcd178cf
 	github.com/bhbosman/gomessageblock v0.0.0-20230308173223-e8144f25444c
 	github.com/bhbosman/goprotoextra v0.0.2
