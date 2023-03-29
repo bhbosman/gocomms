@@ -8,6 +8,8 @@ github.com/bhbosman/goCommsDefinitions v0.0.0-20230320101758-971a50fdbf8c h1:Ky8
 github.com/bhbosman/goCommsDefinitions v0.0.0-20230320101758-971a50fdbf8c/go.mod h1:vbCOElN9jFdYC0z8KZXGvrVWDRmcPZYwhDLoMfkvD9A=
 github.com/bhbosman/goConn v0.0.0-20230328145648-e6bab0984275 h1:mb8udNg6G36PPdwH7R2XM1cdIo+cy7l59wMURJPXrSQ=
 github.com/bhbosman/goConn v0.0.0-20230328145648-e6bab0984275/go.mod h1:IqnusjHk+667VfU4wKbfTTf0RDInttgjpkuN02P0C4U=
+github.com/bhbosman/goConnectionManager v0.0.0-20230328221032-2e48eb2721d0 h1:JgFkHqqe4A053Gi7Zkcu0B6Hs8Zj1pwKjed2MXhwmaY=
+github.com/bhbosman/goConnectionManager v0.0.0-20230328221032-2e48eb2721d0/go.mod h1:Gm7Jj1TTD18FvkICm3qMgenc0DLrt7RBxnU5jcN5qb8=
 github.com/bhbosman/gocommon v0.0.0-20230328230250-805500c476ac h1:wPP2+c8Uarq25r827KQpAYjmI1fJ/cL6rUz/Cbmzvpk=
 github.com/bhbosman/gocommon v0.0.0-20230328230250-805500c476ac/go.mod h1:9Ry2YCYcx5uCfWmzDNKtzWb4Tobz0jDrTSqnRd1XqWA=
 github.com/bhbosman/goerrors v0.0.0-20220623084908-4d7bbcd178cf h1:uI7bP2Ue0pjjB8j2zWY+nRbjQgeTfmOW6VR7WvVGK1I=
