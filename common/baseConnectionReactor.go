@@ -12,8 +12,6 @@ import (
 	"go.uber.org/zap"
 )
 
-//ABC
-
 type BaseConnectionReactor struct {
 	// CancelCtx is the cancellation context associated with the connection. This can be used to check if the connection
 	// have not been closed
