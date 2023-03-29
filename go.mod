@@ -3,10 +3,10 @@ module github.com/bhbosman/gocomms
 go 1.18
 
 require (
-	github.com/bhbosman/goCommsDefinitions v0.0.0-20230313180751-41613a6b3173
-	github.com/bhbosman/goConn v0.0.0-20230327111455-7a39299fb0aa
-	github.com/bhbosman/goConnectionManager v0.0.0-20230312204225-183859f3cef5
-	github.com/bhbosman/gocommon v0.0.0-20230328220050-dafaab862dd2
+	github.com/bhbosman/goCommsDefinitions v0.0.0-20230320101758-971a50fdbf8c
+	github.com/bhbosman/goConn v0.0.0-20230328145648-e6bab0984275
+	github.com/bhbosman/goConnectionManager v0.0.0-20230328221032-2e48eb2721d0
+	github.com/bhbosman/gocommon v0.0.0-20230328230250-805500c476ac
 	github.com/bhbosman/goerrors v0.0.0-20220623084908-4d7bbcd178cf
 	github.com/bhbosman/gomessageblock v0.0.0-20230308173223-e8144f25444c
 	github.com/bhbosman/goprotoextra v0.0.2
