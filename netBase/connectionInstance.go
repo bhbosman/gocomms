@@ -7,7 +7,6 @@ import (
 	"github.com/bhbosman/goConnectionManager"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	fx2 "github.com/bhbosman/gocommon/fx"
-	"github.com/bhbosman/gocommon/messages"
 	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/gocommon/services/Providers"
 	sss "github.com/bhbosman/gocommon/services/interfaces"
@@ -176,7 +175,7 @@ func (self ConnectionInstance) NewConnectionInstanceWithStackName(
 	connectionType model.ConnectionType,
 	conn net.Conn,
 	settingOptions ...INewConnectionInstanceSettingsApply,
-) (messages.IApp, error) {
+) (goConn.IApp, error) {
 	fxAppOptions := self.NewConnectionInstanceOptions(
 		uniqueReference,
 		goFunctionCounter,
@@ -209,7 +208,7 @@ func (self ConnectionInstance) NewConnectionInstance(
 	goFunctionCounter GoFunctionCounter.IService,
 	connectionType model.ConnectionType,
 	conn net.Conn,
-) (messages.IApp, error) {
+) (goConn.IApp, error) {
 	return self.NewConnectionInstanceWithStackName(
 		uniqueReference,
 		goFunctionCounter,
