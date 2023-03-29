@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/bhbosman/goCommsDefinitions v0.0.0-20230320101758-971a50fdbf8c
-	github.com/bhbosman/goConn v0.0.0-20230328145648-e6bab0984275
 	github.com/bhbosman/goConnectionManager v0.0.0-20230328221032-2e48eb2721d0
 	github.com/bhbosman/gocommon v0.0.0-20230328230250-805500c476ac
 	github.com/bhbosman/goerrors v0.0.0-20220623084908-4d7bbcd178cf
@@ -49,7 +48,6 @@ replace (
 	github.com/bhbosman/goCommsNetDialer => ../goCommsNetDialer
 	github.com/bhbosman/goCommsNetListener => ../goCommsNetListener
 	github.com/bhbosman/goCommsStacks => ../goCommsStacks
-	github.com/bhbosman/goConn => ../goConn
 	github.com/bhbosman/goFxApp => ../goFxApp
 	github.com/bhbosman/goFxAppManager => ../goFxAppManager
 	github.com/bhbosman/goMessages => ../goMessages
