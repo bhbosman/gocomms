@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"github.com/bhbosman/goConn"
 	"github.com/bhbosman/gocommon"
 	"github.com/bhbosman/gocommon/model"
 	"github.com/bhbosman/gocomms/RxHandlers"
@@ -22,7 +21,7 @@ func ProvideChannel(name string) fx.Option {
 				stackData map[string]*common.StackDataContainer,
 				cancelCtx context.Context,
 				connectionId string,
-				cancellationContext goConn.ICancellationContext,
+				cancellationContext gocommon.ICancellationContext,
 			) (chan rxgo.Item, gocommon.IObservable, error) {
 				ch := make(chan rxgo.Item)
 				result, err := pipeDefinition.BuildObs(ch, stackData, cancelCtx)

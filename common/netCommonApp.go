@@ -3,8 +3,8 @@ package common
 import (
 	"context"
 	"github.com/bhbosman/goCommsDefinitions"
-	"github.com/bhbosman/goConn"
 	"github.com/bhbosman/goConnectionManager"
+	"github.com/bhbosman/gocommon"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	fx2 "github.com/bhbosman/gocommon/fx"
 	"github.com/bhbosman/gocommon/services/interfaces"
@@ -21,7 +21,7 @@ func ConnectionApp(
 	connectionName string,
 	connectionInstancePrefix string,
 	params NetAppFuncInParams,
-	cancellationContext goConn.ICancellationContext,
+	cancellationContext gocommon.ICancellationContext,
 	namedLogger *zap.Logger,
 	additionalFxOptionsForConnectionInstance func() fx.Option,
 	option ...fx.Option,
@@ -31,7 +31,7 @@ func ConnectionApp(
 		stopTimeOut,
 		fx.Provide(
 			fx.Annotated{
-				Target: func() (context.Context, context.CancelFunc, goConn.ICancellationContext, error) {
+				Target: func() (context.Context, context.CancelFunc, gocommon.ICancellationContext, error) {
 					return cancellationContext.CancelContext(),
 						func() {
 							//todo: move out of callback
@@ -91,7 +91,7 @@ func InvokeCancelContext() fx.Option {
 			params struct {
 				fx.In
 				Lifecycle           fx.Lifecycle
-				CancellationContext goConn.ICancellationContext
+				CancellationContext gocommon.ICancellationContext
 			},
 		) error {
 			params.Lifecycle.Append(

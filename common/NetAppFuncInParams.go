@@ -2,8 +2,8 @@ package common
 
 import (
 	"context"
-	"github.com/bhbosman/goConn"
 	"github.com/bhbosman/goConnectionManager"
+	"github.com/bhbosman/gocommon"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	"github.com/bhbosman/gocommon/services/interfaces"
 	"go.uber.org/fx"
@@ -35,4 +35,4 @@ func NewNetAppFuncInParams(
 	}
 }
 
-type NetAppFuncInParamsCallback func(params NetAppFuncInParams) goConn.CreateAppCallback
+type NetAppFuncInParamsCallback func(params NetAppFuncInParams) gocommon.CreateAppCallback

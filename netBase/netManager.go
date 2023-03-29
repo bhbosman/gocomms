@@ -2,8 +2,8 @@ package netBase
 
 import (
 	"context"
-	"github.com/bhbosman/goConn"
 	"github.com/bhbosman/goConnectionManager"
+	"github.com/bhbosman/gocommon"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	"github.com/bhbosman/gocommon/services/interfaces"
 	"go.uber.org/fx"
@@ -12,7 +12,7 @@ import (
 )
 
 type NetManager struct {
-	CancellationContext                      goConn.ICancellationContext
+	CancellationContext                      gocommon.ICancellationContext
 	CancelCtx                                context.Context
 	ZapLogger                                *zap.Logger
 	ConnectionManager                        goConnectionManager.IService
@@ -33,7 +33,7 @@ func NewNetManager(
 	proxyUrl *url.URL,
 	connectionUrl *url.URL,
 	cancelCtx context.Context,
-	CancellationContext goConn.ICancellationContext,
+	CancellationContext gocommon.ICancellationContext,
 	connectionManager goConnectionManager.IService,
 	ZapLogger *zap.Logger,
 	uniqueSessionNumber interfaces.IUniqueReferenceService,

@@ -3,8 +3,8 @@ package netBase
 import (
 	"context"
 	"fmt"
-	"github.com/bhbosman/goConn"
 	"github.com/bhbosman/goConnectionManager"
+	"github.com/bhbosman/gocommon"
 	"github.com/bhbosman/gocommon/GoFunctionCounter"
 	fx2 "github.com/bhbosman/gocommon/fx"
 	"github.com/bhbosman/gocommon/model"
@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-func ProvideCancelContextWithRwc(cancelContext goConn.ICancellationContext) fx.Option {
+func ProvideCancelContextWithRwc(cancelContext gocommon.ICancellationContext) fx.Option {
 	return fx.Provide(
 		fx.Annotated{
 			Target: func(
@@ -30,7 +30,7 @@ func ProvideCancelContextWithRwc(cancelContext goConn.ICancellationContext) fx.O
 					Logger                  *zap.Logger
 					PrimaryConnectionCloser io.Closer `name:"PrimaryConnection"`
 				},
-			) (context.Context, context.CancelFunc, goConn.ICancellationContext, error) {
+			) (context.Context, context.CancelFunc, gocommon.ICancellationContext, error) {
 				return cancelContext.CancelContext(), cancelContext.CancelFunc(), cancelContext, nil
 			},
 		},
@@ -41,7 +41,7 @@ type ConnectionInstance struct {
 	ConnectionUrl                            *url.URL
 	UniqueSessionNumber                      sss.IUniqueReferenceService
 	ConnectionManager                        goConnectionManager.IService
-	CancelCtx                                goConn.ICancellationContext
+	CancelCtx                                gocommon.ICancellationContext
 	AdditionalFxOptionsForConnectionInstance func() fx.Option
 	ZapLogger                                *zap.Logger
 }
@@ -50,7 +50,7 @@ func NewConnectionInstance(
 	connectionUrl *url.URL,
 	uniqueSessionNumber sss.IUniqueReferenceService,
 	connectionManager goConnectionManager.IService,
-	cancelCtx goConn.ICancellationContext,
+	cancelCtx gocommon.ICancellationContext,
 	additionalFxOptionsForConnectionInstance func() fx.Option,
 	zapLogger *zap.Logger,
 ) ConnectionInstance {
@@ -175,7 +175,7 @@ func (self ConnectionInstance) NewConnectionInstanceWithStackName(
 	connectionType model.ConnectionType,
 	conn net.Conn,
 	settingOptions ...INewConnectionInstanceSettingsApply,
-) (goConn.IApp, error) {
+) (gocommon.IApp, error) {
 	fxAppOptions := self.NewConnectionInstanceOptions(
 		uniqueReference,
 		goFunctionCounter,
@@ -208,7 +208,7 @@ func (self ConnectionInstance) NewConnectionInstance(
 	goFunctionCounter GoFunctionCounter.IService,
 	connectionType model.ConnectionType,
 	conn net.Conn,
-) (goConn.IApp, error) {
+) (gocommon.IApp, error) {
 	return self.NewConnectionInstanceWithStackName(
 		uniqueReference,
 		goFunctionCounter,

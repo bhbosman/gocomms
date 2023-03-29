@@ -2,7 +2,7 @@ package netBase
 
 import (
 	"context"
-	"github.com/bhbosman/goConn"
+	"github.com/bhbosman/gocommon"
 	"go.uber.org/fx"
 )
 
@@ -12,7 +12,7 @@ func InvokeCancelContextWithRwc() fx.Option {
 			params struct {
 				fx.In
 				Lifecycle           fx.Lifecycle
-				CancellationContext goConn.ICancellationContext
+				CancellationContext gocommon.ICancellationContext
 			},
 		) error {
 			params.Lifecycle.Append(

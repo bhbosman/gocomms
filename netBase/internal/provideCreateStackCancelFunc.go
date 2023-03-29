@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"github.com/bhbosman/goConn"
+	"github.com/bhbosman/gocommon"
 	"github.com/bhbosman/gocommon/model"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -12,7 +12,7 @@ func ProvideCreateStackCancelFunc() fx.Option {
 		func(
 			params struct {
 				fx.In
-				CancellationContext goConn.ICancellationContext
+				CancellationContext gocommon.ICancellationContext
 				Logger              *zap.Logger
 			},
 		) (model.ConnectionCancelFunc, error) {
