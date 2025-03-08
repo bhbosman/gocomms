@@ -1,36 +1,38 @@
 module github.com/bhbosman/gocomms
 
-go 1.18
+go 1.23.0
+
+toolchain go1.24.0
 
 require (
-	github.com/bhbosman/goCommsDefinitions v0.0.0-20230320101758-971a50fdbf8c
-	github.com/bhbosman/goConnectionManager v0.0.0-20230328221032-2e48eb2721d0
-	github.com/bhbosman/gocommon v0.0.0-20230329101749-40db0f52d859
-	github.com/bhbosman/goerrors v0.0.0-20220623084908-4d7bbcd178cf
-	github.com/bhbosman/gomessageblock v0.0.0-20230308173223-e8144f25444c
+	github.com/bhbosman/goCommsDefinitions v0.0.0-20230730212737-00ad0cf16194
+	github.com/bhbosman/goConnectionManager v0.0.0-20250307224538-a79ceb218fd0
+	github.com/bhbosman/gocommon v0.0.0-20230507180205-b30f653fb84c
+	github.com/bhbosman/goerrors v0.0.0-20250307194237-312d070c8e38
+	github.com/bhbosman/gomessageblock v0.0.0-20250307141417-ab783e8e2eba
 	github.com/bhbosman/goprotoextra v0.0.2
 	github.com/cskr/pubsub v1.0.2
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.8.0
 	github.com/reactivex/rxgo/v2 v2.5.0
-	github.com/stretchr/testify v1.8.0
-	go.uber.org/fx v1.19.2
-	go.uber.org/multierr v1.10.0
-	go.uber.org/zap v1.24.0
-	golang.org/x/net v0.0.0-20211019232329-c6ed85c7a12d
+	github.com/stretchr/testify v1.10.0
+	go.uber.org/fx v1.23.0
+	go.uber.org/multierr v1.11.0
+	go.uber.org/zap v1.27.0
+	golang.org/x/net v0.37.0
 )
 
 require (
-	github.com/cenkalti/backoff/v4 v4.1.1 // indirect
+	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/emirpasic/gods v1.12.0 // indirect
-	github.com/icza/gox v0.0.0-20230330130131-23e1aaac139e // indirect
+	github.com/emirpasic/gods v1.18.1 // indirect
+	github.com/icza/gox v0.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stretchr/objx v0.4.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/teivah/onecontext v1.3.0 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/dig v1.17.0 // indirect
-	golang.org/x/sys v0.10.0 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
+	go.uber.org/dig v1.18.1 // indirect
+	golang.org/x/sys v0.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
