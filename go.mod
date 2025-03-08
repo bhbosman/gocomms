@@ -3,7 +3,7 @@ module github.com/bhbosman/gocomms
 go 1.24.0
 
 require (
-	github.com/bhbosman/goCommsDefinitions v0.0.0-20250308074916-3e7c0d32b971
+	github.com/bhbosman/goCommsDefinitions v0.0.0-20250308144130-64993b60920c
 	github.com/bhbosman/goConnectionManager v0.0.0-20250308133907-06eddcd798f6
 	github.com/bhbosman/gocommon v0.0.0-20250308131803-28622f55deb1
 	github.com/bhbosman/goerrors v0.0.0-20250307194237-312d070c8e38
@@ -32,13 +32,9 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-require (
-	github.com/cskr/pubsub v1.0.2
-	github.com/golang/mock v1.6.0
-)
+require github.com/cskr/pubsub v1.0.2
 
 replace (
 	github.com/cskr/pubsub => github.com/bhbosman/pubsub v1.0.3-0.20250308124829-e5731aa33222
 	github.com/golang/mock => github.com/bhbosman/gomock v1.6.1-0.20250308071159-4cf72f668c72
 )
-
