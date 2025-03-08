@@ -4,12 +4,12 @@ go 1.24.0
 
 require (
 	github.com/bhbosman/goCommsDefinitions v0.0.0-20250308074916-3e7c0d32b971
-	github.com/bhbosman/goConnectionManager v0.0.0-20250308122653-53a96fe357f2
+	github.com/bhbosman/goConnectionManager v0.0.0-20250308133907-06eddcd798f6
 	github.com/bhbosman/gocommon v0.0.0-20250308131803-28622f55deb1
 	github.com/bhbosman/goerrors v0.0.0-20250307194237-312d070c8e38
 	github.com/bhbosman/gomessageblock v0.0.0-20250308073733-0b3daca12e3a
 	github.com/bhbosman/goprotoextra v0.0.2
-	github.com/cskr/pubsub v1.0.2
+
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/reactivex/rxgo/v2 v2.5.0
@@ -33,25 +33,13 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace (
-	github.com/cskr/pubsub => github.com/bhbosman/pubsub v1.0.3-0.20250308124829-e5731aa33222
-	github.com/gdamore/tcell/v2 => github.com/bhbosman/tcell/v2 v2.5.2-0.20250308093601-f0942a296aa0
-	github.com/golang/mock => github.com/bhbosman/gomock v1.6.1-0.20250308071159-4cf72f668c72
-	github.com/rivo/tview => github.com/bhbosman/tview v0.0.0-20250308051327-a656c1bc9cfa
+require (
+	github.com/cskr/pubsub v1.0.2
+	github.com/golang/mock v1.6.0
 )
 
-//
-//replace (
-//	github.com/bhbosman/goCommonMarketData => ../goCommonMarketData
-//	github.com/bhbosman/goCommsDefinitions => ../goCommsDefinitions
-//	github.com/bhbosman/goCommsMultiDialer => ../goCommsMultiDialer
-//	github.com/bhbosman/goCommsNetDialer => ../goCommsNetDialer
-//	github.com/bhbosman/goCommsNetListener => ../goCommsNetListener
-//	github.com/bhbosman/goCommsStacks => ../goCommsStacks
-//	github.com/bhbosman/goFxApp => ../goFxApp
-//	github.com/bhbosman/goFxAppManager => ../goFxAppManager
-//	github.com/bhbosman/goMessages => ../goMessages
-//	github.com/bhbosman/gocommon => ../gocommon
-//	github.com/bhbosman/gocomms => ../gocomms
-//	github.com/bhbosman/gomessageblock => ../gomessageblock
-//)
+replace (
+	github.com/cskr/pubsub => github.com/bhbosman/pubsub v1.0.3-0.20250308124829-e5731aa33222
+	github.com/golang/mock => github.com/bhbosman/gomock v1.6.1-0.20250308071159-4cf72f668c72
+)
+
