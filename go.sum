@@ -15,6 +15,8 @@ github.com/bhbosman/goConnectionManager v0.0.0-20250308150558-5d463bc5c9e3 h1:JF
 github.com/bhbosman/goConnectionManager v0.0.0-20250308150558-5d463bc5c9e3/go.mod h1:5lspf2JKYL4tq5nNWCTVKg3LRwgHjCMvGz/HmAz3QY8=
 github.com/bhbosman/goConnectionManager v0.0.0-20250308162041-c3d88e4a7878 h1:Avn18zjUDlgnDKpAkhcS/LwAazlfaZCSbK/Ms8Ks+A8=
 github.com/bhbosman/goConnectionManager v0.0.0-20250308162041-c3d88e4a7878/go.mod h1:rTgsXwIqcz2lmeksaTaDhkY692AJTrfZ+2/1h5o+N84=
+github.com/bhbosman/goConnectionManager v0.0.0-20250308194756-b3c21d488492 h1:DPlP+NR2dn33vRUpT1fyoLBMp3s73qBfrc7gijFR6zs=
+github.com/bhbosman/goConnectionManager v0.0.0-20250308194756-b3c21d488492/go.mod h1:iFbggy9oqgzG5lBZ+P8/rVflhcPHn0GaAi3yCunMyvg=
 github.com/bhbosman/gocommon v0.0.0-20250308131803-28622f55deb1 h1:H6xBDuvTUHP3HWOcY6VdO4GBW5bqk0jM1dn8f2SYwD0=
 github.com/bhbosman/gocommon v0.0.0-20250308131803-28622f55deb1/go.mod h1:7lml5lQFGVyrvj3awVTQ0SdaqW3WdcKEC8hhcmNGOHE=
 github.com/bhbosman/gocommon v0.0.0-20250308150148-56b7e6e14bff h1:lDqy+h+pbnVXRxXnYyTDLhUA1qWsbFiUTox+30EHfwU=
