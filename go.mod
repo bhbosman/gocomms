@@ -35,6 +35,6 @@ require (
 require github.com/cskr/pubsub v1.0.2
 
 replace (
-	github.com/cskr/pubsub => github.com/bhbosman/pubsub v1.0.3-0.20250308162024-50f212a35484
+	github.com/cskr/pubsub => github.com/bhbosman/pubsub v1.0.3-0.20250308211253-e47ee222bb15
 	github.com/golang/mock => github.com/bhbosman/gomock v1.6.1-0.20250308071159-4cf72f668c72
 )
